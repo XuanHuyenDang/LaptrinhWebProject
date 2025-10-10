@@ -51,7 +51,7 @@ Hệ thống hỗ trợ **Admin** trong việc quản lý sản phẩm, khách h
 | 🧩 **Backend** | Spring Boot, Spring MVC, Spring Data JPA |
 | 🔐 **Security** | Spring Security |
 | 🎨 **Frontend** | Thymeleaf, HTML5, CSS3, Bootstrap 5 |
-| 🗄️ **Database** | MySQL |
+| 🗄️ **Database** | SQL Server |
 | ⚙️ **Build Tool** | Maven |
 | 🧠 **IDE** | IntelliJ IDEA / Eclipse / STS |
 | ☕ **Language** | Java 17+ |
