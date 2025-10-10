@@ -7,7 +7,6 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Spring_Boot-3.0-green?style=for-the-badge&logo=springboot" alt="Spring Boot">
   <img src="https://img.shields.io/badge/Thymeleaf-HTML_Template-green?style=for-the-badge&logo=thymeleaf">
-  <img src="https://img.shields.io/badge/MySQL-Database-blue?style=for-the-badge&logo=mysql">
   <img src="https://img.shields.io/badge/Java-17-orange?style=for-the-badge&logo=coffeescript">
 </p>
 
