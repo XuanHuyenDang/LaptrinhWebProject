@@ -18,7 +18,7 @@
 > 💐 *"Hoa là lời nói của trái tim, và đây là nơi để những lời nói ấy nở rộ!"* 🌷  
 
 **Flower Shop Management System** là website bán hoa trực tuyến, cho phép người dùng **đặt hoa, xem giỏ hàng, thanh toán** và **quản lý đơn hàng**.  
-Hệ thống hỗ trợ **Admin** trong việc quản lý sản phẩm, khách hàng, thống kê doanh thu — tất cả được xây dựng bằng **Spring Boot** kết hợp **Thymeleaf** và **MySQL**.  
+Hệ thống hỗ trợ **Admin** trong việc quản lý sản phẩm, khách hàng, thống kê doanh thu — tất cả được xây dựng bằng **Spring Boot** kết hợp **Thymeleaf** và **SQL Server**.  
 
 🌼 Với giao diện nhẹ nhàng – thanh thoát – ngập tràn sắc hoa 🌸  
 🌹 Với cấu trúc chuẩn – dễ mở rộng – bảo mật cao 🌷  
