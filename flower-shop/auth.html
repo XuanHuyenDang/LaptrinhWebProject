@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Đăng nhập / Đăng ký - Cửa hàng Hoa Xuân</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(to right, #f9ecec, #ffeaea);
+      min-height: 100vh;
+    }
+    .auth-card {
+      max-width: 400px;
+      margin: 50px auto;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 30px;
+    }
+    .toggle-btn {
+      cursor: pointer;
+      color: #d63384;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="auth-card">
+    <h3 class="text-center mb-3" id="formTitle">Đăng nhập</h3>
+
+    <!-- Form Đăng nhập -->
+    <form id="loginForm">
+      <div class="mb-3">
+        <label>Email</label>
+        <input type="email" class="form-control" id="loginEmail" required>
+      </div>
+      <div class="mb-3">
+        <label>Mật khẩu</label>
+        <input type="password" class="form-control" id="loginPassword" required>
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
+      <p class="text-center mt-3">Chưa có tài khoản?
+        <span class="toggle-btn" id="showRegister">Đăng ký</span>
+      </p>
+    </form>
+
+    <!-- Form Đăng ký -->
+    <form id="registerForm" class="d-none">
+      <div class="mb-3">
+        <label>Họ và tên</label>
+        <input type="text" class="form-control" id="registerName" required>
+      </div>
+      <div class="mb-3">
+        <label>Email</label>
+        <input type="email" class="form-control" id="registerEmail" required>
+      </div>
+      <div class="mb-3">
+        <label>Mật khẩu</label>
+        <input type="password" class="form-control" id="registerPassword" required>
+      </div>
+      <button type="submit" class="btn btn-success w-100">Đăng ký</button>
+      <p class="text-center mt-3">Đã có tài khoản?
+        <span class="toggle-btn" id="showLogin">Đăng nhập</span>
+      </p>
+    </form>
+  </div>
+
+  <script>
+    // Chuyển đổi form
+    const loginForm = document.getElementById("loginForm");
+    const registerForm = document.getElementById("registerForm");
+    const formTitle = document.getElementById("formTitle");
+
+    document.getElementById("showRegister").addEventListener("click", () => {
+      loginForm.classList.add("d-none");
+      registerForm.classList.remove("d-none");
+      formTitle.innerText = "Đăng ký";
+    });
+
+    document.getElementById("showLogin").addEventListener("click", () => {
+      registerForm.classList.add("d-none");
+      loginForm.classList.remove("d-none");
+      formTitle.innerText = "Đăng nhập";
+    });
+
+    // Demo xử lý fetch POST (có thể thay bằng backend thực tế)
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const data = {
+        email: loginForm.loginEmail.value,
+        password: loginForm.loginPassword.value
+      };
+      console.log("Gửi request login:", data);
+      // await fetch("/api/auth/login", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(data)});
+      alert("Đăng nhập thành công (demo)");
+    });
+
+    registerForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const data = {
+        name: registerForm.registerName.value,
+        email: registerForm.registerEmail.value,
+        password: registerForm.registerPassword.value
+      };
+      console.log("Gửi request register:", data);
+      // await fetch("/api/auth/register", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(data)});
+      alert("Đăng ký thành công (demo)");
+    });
+  </script>
+
+</body>
+</html>
