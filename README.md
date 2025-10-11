@@ -7,7 +7,6 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Spring_Boot-3.0-green?style=for-the-badge&logo=springboot" alt="Spring Boot">
   <img src="https://img.shields.io/badge/Thymeleaf-HTML_Template-green?style=for-the-badge&logo=thymeleaf">
-  <img src="https://img.shields.io/badge/MySQL-Database-blue?style=for-the-badge&logo=mysql">
   <img src="https://img.shields.io/badge/Java-17-orange?style=for-the-badge&logo=coffeescript">
 </p>
 
@@ -18,7 +17,7 @@
 > 💐 *"Hoa là lời nói của trái tim, và đây là nơi để những lời nói ấy nở rộ!"* 🌷  
 
 **Flower Shop Management System** là website bán hoa trực tuyến, cho phép người dùng **đặt hoa, xem giỏ hàng, thanh toán** và **quản lý đơn hàng**.  
-Hệ thống hỗ trợ **Admin** trong việc quản lý sản phẩm, khách hàng, thống kê doanh thu — tất cả được xây dựng bằng **Spring Boot** kết hợp **Thymeleaf** và **MySQL**.  
+Hệ thống hỗ trợ **Admin** trong việc quản lý sản phẩm, khách hàng, thống kê doanh thu — tất cả được xây dựng bằng **Spring Boot** kết hợp **Thymeleaf** và **SQL Server**.  
 
 🌼 Với giao diện nhẹ nhàng – thanh thoát – ngập tràn sắc hoa 🌸  
 🌹 Với cấu trúc chuẩn – dễ mở rộng – bảo mật cao 🌷  
@@ -51,7 +50,7 @@ Hệ thống hỗ trợ **Admin** trong việc quản lý sản phẩm, khách h
 | 🧩 **Backend** | Spring Boot, Spring MVC, Spring Data JPA |
 | 🔐 **Security** | Spring Security |
 | 🎨 **Frontend** | Thymeleaf, HTML5, CSS3, Bootstrap 5 |
-| 🗄️ **Database** | MySQL |
+| 🗄️ **Database** | SQL Server |
 | ⚙️ **Build Tool** | Maven |
 | 🧠 **IDE** | IntelliJ IDEA / Eclipse / STS |
 | ☕ **Language** | Java 17+ |
