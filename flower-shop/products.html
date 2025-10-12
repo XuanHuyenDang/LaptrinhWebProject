@@ -8,7 +8,66 @@
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css">
+
+  <style>
+    body {
+      background-color: #fff7fa;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    h6.card-title {
+      color: #6b184e;
+      font-weight: 600;
+    }
+
+    .card {
+      border: none;
+      border-radius: 15px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 15px rgba(201, 70, 125, 0.2);
+    }
+
+    .btn-primary {
+      background-color: #c9467d;
+      border-color: #c9467d;
+    }
+
+    .btn-primary:hover {
+      background-color: #b53567;
+      border-color: #b53567;
+    }
+
+    .btn-outline-primary {
+      color: #c9467d;
+      border-color: #c9467d;
+    }
+
+    .btn-outline-primary:hover {
+      background-color: #c9467d;
+      color: white;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: #c9467d;
+      box-shadow: 0 0 0 0.2rem rgba(201, 70, 125, 0.25);
+    }
+
+    .card-body p.text-danger {
+      color: #b53567 !important;
+    }
+
+    .card.shadow-sm.mb-4 {
+      border-left: 5px solid #c9467d;
+    }
+
+    .text-muted {
+      color: #999 !important;
+    }
+  </style>
 </head>
 
 <body>
@@ -62,7 +121,6 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    // Danh sách sản phẩm
     const products = [
       // --- BÓ HOA ---
       {id: 1, name: "Bó Hoa Hồng Đỏ", price: 350000, category: "bohoa", img: "rose1.jpg", tag: "banchay"},
@@ -88,7 +146,6 @@
 
     const productList = document.getElementById("productList");
 
-    // Hàm render sản phẩm
     function renderProducts(list) {
       productList.innerHTML = "";
       if (list.length === 0) {
@@ -119,13 +176,11 @@
         productList.insertAdjacentHTML("beforeend", card);
       });
 
-      // Kích hoạt lại sự kiện thêm giỏ hàng
       document.querySelectorAll(".add-to-cart").forEach(btn => {
         btn.addEventListener("click", addToCart);
       });
     }
 
-    // Hàm thêm vào giỏ hàng
     function addToCart(e) {
       const btn = e.currentTarget;
       const id = btn.dataset.id;
@@ -141,7 +196,6 @@
       alert(`🛒 Đã thêm "${name}" vào giỏ hàng!`);
     }
 
-    // Hàm lọc sản phẩm
     function filterProducts() {
       let name = document.getElementById("searchName").value.toLowerCase();
       let category = document.getElementById("categoryFilter").value;
@@ -165,14 +219,11 @@
       renderProducts(filtered);
     }
 
-    // Gán sự kiện lọc
     document.querySelectorAll("#searchName, #categoryFilter, #minPrice, #maxPrice, #sortOption")
       .forEach(el => el.addEventListener("input", filterProducts));
 
-    // Hiển thị ban đầu
     renderProducts(products);
 
-    // Load header & footer
     async function loadHTML(id, file) {
       try {
         const res = await fetch(file);
