@@ -113,8 +113,6 @@ CREATE TABLE Reviews (
     Rating INT NOT NULL CHECK (Rating >= 1 AND Rating <= 5),
     Comment NVARCHAR(MAX),
     CreatedAt DATETIME DEFAULT GETDATE(),
-    -- Trạng thái bình luận: 'Chưa duyệt', 'Đã duyệt'
-    Status NVARCHAR(50) NOT NULL DEFAULT N'Chưa duyệt',
     FOREIGN KEY (ProductId) REFERENCES Products(Id),
     FOREIGN KEY (AccountId) REFERENCES Accounts(Id)
 );
@@ -297,16 +295,16 @@ GO
 -- 6. Thêm đánh giá mẫu (Cập nhật ProductId cho khớp)
 --------------------------------------------------------------------------------
 PRINT 'Inserting sample reviews...';
-INSERT INTO Reviews (ProductId, AccountId, Rating, Comment, Status) VALUES
-(1, 2, 5, N'Hoa rất đẹp, giao đúng giờ. Bạn gái mình rất thích!', N'Đã duyệt'),
-(12, 3, 5, N'Giỏ hoa sang trọng, shop tư vấn nhiệt tình. Sẽ ủng hộ lần sau.', N'Đã duyệt'),
-(19, 4, 4, N'Hoa tươi, nhiều nụ. Tuy nhiên shipper giao hơi trễ so với dự kiến.', N'Chưa duyệt'),
-(7, 2, 5, N'Bó hoa hướng dương rực rỡ y như hình, rất hài lòng.', N'Đã duyệt'),
-(21, 4, 4, N'Chậu lan đẹp, nhưng giá hơi cao một chút.', N'Đã duyệt'),
-(14, 2, 3, N'Giỏ hoa lan hồ điệp bị dập mất một vài bông, hơi buồn.', N'Chưa duyệt'),
-(24, 3, 5, N'Sen đá mini siêu cưng, để bàn làm việc hợp lý.', N'Đã duyệt'),
-(10, 4, 5, N'Hoa đẹp, tươi lâu, màu sắc hài hòa.', N'Đã duyệt'),
-(3, 2, 4, N'Bó hoa tulip hồng có vài lá bị úa, còn lại thì ổn.', N'Chưa duyệt');
+INSERT INTO Reviews (ProductId, AccountId, Rating, Comment) VALUES
+(1, 2, 5, N'Hoa rất đẹp, giao đúng giờ. Bạn gái mình rất thích!'),
+(12, 3, 5, N'Giỏ hoa sang trọng, shop tư vấn nhiệt tình. Sẽ ủng hộ lần sau.'),
+(19, 4, 4, N'Hoa tươi, nhiều nụ. Tuy nhiên shipper giao hơi trễ so với dự kiến.'),
+(7, 2, 5, N'Bó hoa hướng dương rực rỡ y như hình, rất hài lòng.'),
+(21, 4, 4, N'Chậu lan đẹp, nhưng giá hơi cao một chút.'),
+(14, 2, 3, N'Giỏ hoa lan hồ điệp bị dập mất một vài bông, hơi buồn.'),
+(24, 3, 5, N'Sen đá mini siêu cưng, để bàn làm việc hợp lý.'),
+(10, 4, 5, N'Hoa đẹp, tươi lâu, màu sắc hài hòa.'),
+(3, 2, 4, N'Bó hoa tulip hồng có vài lá bị úa, còn lại thì ổn.');
 GO
 
 PRINT 'Database script executed successfully!';
