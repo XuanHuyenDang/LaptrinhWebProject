@@ -10,17 +10,37 @@
     body { background-color: #f8f9fa; }
     main { padding: 20px; max-width: 1200px; margin: 0 auto; }
     .btn-custom { margin-right: 5px; }
+
+    .btn-dashboard {
+      background-color: #e83e8c; /* Hồng chính */
+      color: white;
+      border: none;
+      transition: all 0.2s ease-in-out;
+    }
+    .btn-dashboard:hover {
+      background-color: #d63384; /* Hồng đậm hơn khi hover */
+      color: white;
+      transform: scale(1.03);
+    }
   </style>
 </head>
 <body>
 
 <main>
-  <h3 class="mb-4"><i class="bi bi-box-seam me-2"></i>Quản lý sản phẩm</h3>
 
+  <h3 class="mb-4"><i class="bi bi-box-seam me-2"></i>Quản lý sản phẩm</h3>
   <div class="mb-3 d-flex justify-content-between align-items-center">
-    <div>
-      <a href="admin-add-product.html" class="btn btn-success btn-sm"><i class="bi bi-plus-circle"></i> Thêm sản phẩm</a>
+    <div class="d-flex align-items-center">
+
+      <a href="admin-dashboard.html" class="btn btn-dashboard btn-sm me-2">
+        <i class="bi bi-house-door-fill me-1"></i> Trở về Dashboard
+      </a>
+
+      <a href="admin-add-product.html" class="btn btn-success btn-sm">
+        <i class="bi bi-plus-circle"></i> Thêm sản phẩm
+      </a>
     </div>
+
     <div style="width: 250px;">
       <input type="text" class="form-control form-control-sm" placeholder="Tìm theo tên...">
     </div>
