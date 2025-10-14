@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Giỏ hàng | Tiệm Hoa Tươi Xuân Hạ</title>
+  <title>Giỏ hàng | Florio Flower Shop</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
       background-color: #fafafa;
+      font-family: "Segoe UI", sans-serif;
     }
     .cart-table img {
       width: 70px;
@@ -25,16 +26,16 @@
       border-radius: 20px;
       font-size: 0.9rem;
     }
+    .text-danger {
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
-
-
   <!-- Tiêu đề trang -->
   <div class="container mt-4">
-    <h3 class="text-center mb-4">🛒 Giỏ hàng của bạn</h3>
+    <h3 class="text-center mb-4 text-success">🛒 Giỏ hàng của bạn</h3>
 
     <div class="row">
       <!-- Bảng giỏ hàng -->
@@ -50,7 +51,7 @@
                 <th></th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="cart-body">
               <tr>
                 <td>
                   <div class="d-flex align-items-center">
@@ -61,10 +62,10 @@
                     </div>
                   </div>
                 </td>
-                <td>390.000đ</td>
-                <td><input type="number" value="1" class="form-control form-control-sm w-50"></td>
-                <td>390.000đ</td>
-                <td><a href="#" class="text-danger text-decoration-none">🗑️</a></td>
+                <td class="price" data-price="390000">390.000đ</td>
+                <td><input type="number" value="1" min="1" class="form-control form-control-sm w-50 quantity"></td>
+                <td class="subtotal">390.000đ</td>
+                <td class="text-danger delete-item">🗑️</td>
               </tr>
 
               <tr>
@@ -77,10 +78,10 @@
                     </div>
                   </div>
                 </td>
-                <td>250.000đ</td>
-                <td><input type="number" value="2" class="form-control form-control-sm w-50"></td>
-                <td>500.000đ</td>
-                <td><a href="#" class="text-danger text-decoration-none">🗑️</a></td>
+                <td class="price" data-price="250000">250.000đ</td>
+                <td><input type="number" value="2" min="1" class="form-control form-control-sm w-50 quantity"></td>
+                <td class="subtotal">500.000đ</td>
+                <td class="text-danger delete-item">🗑️</td>
               </tr>
 
               <tr>
@@ -93,10 +94,10 @@
                     </div>
                   </div>
                 </td>
-                <td>220.000đ</td>
-                <td><input type="number" value="1" class="form-control form-control-sm w-50"></td>
-                <td>220.000đ</td>
-                <td><a href="#" class="text-danger text-decoration-none">🗑️</a></td>
+                <td class="price" data-price="220000">220.000đ</td>
+                <td><input type="number" value="1" min="1" class="form-control form-control-sm w-50 quantity"></td>
+                <td class="subtotal">220.000đ</td>
+                <td class="text-danger delete-item">🗑️</td>
               </tr>
             </tbody>
           </table>
@@ -111,15 +112,15 @@
           <h5 class="mb-3 text-success">Tóm tắt đơn hàng</h5>
           <div class="d-flex justify-content-between mb-2">
             <span>Tạm tính:</span>
-            <strong>1.110.000đ</strong>
+            <strong id="subtotal">1.110.000đ</strong>
           </div>
           <div class="d-flex justify-content-between mb-2">
             <span>Phí vận chuyển:</span>
-            <strong>30.000đ</strong>
+            <strong id="shipping">30.000đ</strong>
           </div>
           <div class="d-flex justify-content-between border-top pt-2 mb-3">
             <span>Tổng cộng:</span>
-            <strong class="text-danger fs-5">1.140.000đ</strong>
+            <strong class="text-danger fs-5" id="total">1.140.000đ</strong>
           </div>
 
           <a href="checkout.html" class="btn btn-success w-100 btn-custom">Thanh toán</a>
@@ -128,8 +129,42 @@
     </div>
   </div>
 
-  <!-- Footer -->
+  <script>
+    function formatCurrency(value) {
+      return value.toLocaleString('vi-VN') + 'đ';
+    }
 
+    function updateCartTotals() {
+      let subtotal = 0;
+      document.querySelectorAll('#cart-body tr').forEach(row => {
+        const price = parseInt(row.querySelector('.price').dataset.price);
+        const quantity = parseInt(row.querySelector('.quantity').value);
+        const total = price * quantity;
+        row.querySelector('.subtotal').textContent = formatCurrency(total);
+        subtotal += total;
+      });
+
+      const shipping = 30000;
+      document.getElementById('subtotal').textContent = formatCurrency(subtotal);
+      document.getElementById('total').textContent = formatCurrency(subtotal + shipping);
+    }
+
+    // Khi thay đổi số lượng
+    document.querySelectorAll('.quantity').forEach(input => {
+      input.addEventListener('input', updateCartTotals);
+    });
+
+    // Xóa sản phẩm
+    document.querySelectorAll('.delete-item').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.target.closest('tr').remove();
+        updateCartTotals();
+      });
+    });
+
+    // Cập nhật lần đầu khi tải trang
+    updateCartTotals();
+  </script>
 
 </body>
 </html>

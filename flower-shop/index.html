@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Florio Flower Shop - Trang chủ</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Florio Flower Shop - Trang chủ</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet">
+    <style>
     body {
       background-color: #fff8f9; /* cùng tông với trang giới thiệu */
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -29,15 +31,17 @@
       scroll-behavior: smooth;
     }
 
-    .product-card {
-      flex: 0 0 18%;
-      min-width: 220px;
-      border-radius: 12px;
-      background-color: #fff;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-    }
-
+   .product-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 0 0 18%;
+  min-width: 220px;
+  border-radius: 12px;
+  background-color: #fff;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
     .product-card:hover {
       transform: translateY(-5px);
       box-shadow: 0 8px 18px rgba(0,0,0,0.15);
@@ -57,28 +61,45 @@
       color: #c2185b;
     }
 
-    .card-body {
-      text-align: center;
-      padding: 15px;
-    }
+   /* Cố định chiều cao card-body để các nút đều hàng */
+.card-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 160px; /* bạn có thể tăng giảm tùy số dòng tên sản phẩm */
+  text-align: center;
+  padding: 15px;
+}
 
-    .card-body h6 {
-      font-weight: 600;
-      color: #d946ef;
-    }
+    /* Giới hạn chiều cao tên sản phẩm để đồng đều */
+.card-body h6 {
+  min-height: 40px; /* Giữ khoảng không cố định cho tên */
+  overflow: hidden;
+  font-weight: 600;
+  color: #d946ef;
+  margin-bottom: 8px;
+}
 
-    .btn-custom {
-      font-size: 13px;
-      width: 48%;
-      border-radius: 8px;
-      transition: 0.3s;
-    }
+/* Giữ giá gần nút */
+.card-body p {
+  margin-bottom: 10px;
+}
 
-    .btn-container {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 8px;
-    }
+  
+/* Nút căn đều nhau */
+.btn-custom {
+  font-size: 13px;
+  width: 48%;
+  border-radius: 8px;
+  transition: 0.3s;
+}
+
+    /* Nút hiển thị ngang hàng */
+.btn-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: auto;
+}
 
     /* Màu nút tùy chỉnh */
     .btn-outline-primary {
@@ -116,228 +137,281 @@
       background-color: #ec4899;
     }
   </style>
-</head>
-<body>
+  </head>
+  <body>
 
-  <!-- Header -->
-  <div id="header"></div>
+    <!-- Header -->
+    <div id="header"></div>
 
-  <div class="container mt-4">
+    <div class="container mt-4">
 
-    <!-- ===== SLIDER ===== -->
-    <div id="mainSlider" class="carousel slide mb-5" data-bs-ride="carousel">
-      <div class="carousel-inner">
-        <div class="carousel-item active">
-          <img src="slider/slider1.png" class="d-block w-100" alt="Slider 1">
+      <!-- ===== SLIDER ===== -->
+      <div id="mainSlider" class="carousel slide mb-5" data-bs-ride="carousel">
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <img src="slider/slider1.png" class="d-block w-100" alt="Slider 1">
+          </div>
+          <div class="carousel-item">
+            <img src="slider/slider2.png" class="d-block w-100" alt="Slider 2">
+          </div>
+          <div class="carousel-item">
+            <img src="slider/slider3.png" class="d-block w-100" alt="Slider 3">
+          </div>
+          <div class="carousel-item">
+            <img src="slider/slider4.png" class="d-block w-100" alt="Slider 4">
+          </div>
+          <div class="carousel-item">
+            <img src="slider/slider5.png" class="d-block w-100" alt="Slider 5">
+          </div>
         </div>
-        <div class="carousel-item">
-          <img src="slider/slider2.png" class="d-block w-100" alt="Slider 2">
+        <button class="carousel-control-prev" type="button"
+          data-bs-target="#mainSlider" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon"></span>
+        </button>
+        <button class="carousel-control-next" type="button"
+          data-bs-target="#mainSlider" data-bs-slide="next">
+          <span class="carousel-control-next-icon"></span>
+        </button>
+      </div>
+
+      <!-- ===== SẢN PHẨM BÁN CHẠY ===== -->
+      <h2 class="section-title">🌸 Sản phẩm bán chạy</h2>
+      <div class="product-row">
+        <div class="card product-card">
+          <img src="assets/images/Bohoa/BohoaHongdo.png" alt="Hoa 1">
+          <div class="card-body">
+            <h6>Bó hoa hồng đỏ cổ điển</h6>
+            <p class="text-danger fw-bold">250.000đ</p>
+            <div class="btn-container">
+              <a href="product-retail.html"
+                class="btn btn-outline-primary btn-sm btn-custom">Xem chi
+                tiết</a>
+              <button class="btn btn-success btn-sm btn-custom">Thêm vào
+                giỏ</button>
+            </div>
+          </div>
         </div>
-        <div class="carousel-item">
-          <img src="slider/slider3.png" class="d-block w-100" alt="Slider 3">
+        <div class="card product-card">
+          <img src="assets/images/Bohoa/BohoaHongtrang.png" alt="Hoa 2">
+          <div class="card-body">
+            <h6>Bó hoa hồng trắng</h6>
+            <p class="text-danger fw-bold">420.000đ</p>
+            <div class="btn-container">
+              <a href="product-retail.html"
+                class="btn btn-outline-primary btn-sm btn-custom">Xem chi
+                tiết</a>
+              <button class="btn btn-success btn-sm btn-custom">Thêm vào
+                giỏ</button>
+            </div>
+          </div>
         </div>
-        <div class="carousel-item">
-          <img src="slider/slider4.png" class="d-block w-100" alt="Slider 4">
+        <div class="card product-card">
+          <img src="assets/images/Giohoa/GiohoaHuongduong.png" alt="Hoa 3">
+          <div class="card-body">
+            <h6>Chậu hoa hướng dương năng lượng</h6>
+            <p class="text-danger fw-bold">380.000đ</p>
+            <div class="btn-container">
+              <a href="product-retail.html"
+                class="btn btn-outline-primary btn-sm btn-custom">Xem chi
+                tiết</a>
+              <button class="btn btn-success btn-sm btn-custom">Thêm vào
+                giỏ</button>
+            </div>
+          </div>
         </div>
-        <div class="carousel-item">
-          <img src="slider/slider5.png" class="d-block w-100" alt="Slider 5">
+        <div class="card product-card">
+          <img src="assets/images/Bohoa/BohoaTuliphong.png" alt="Hoa 4">
+          <div class="card-body">
+            <h6>Bó tulip hồng nhẹ nhàng</h6>
+            <p class="text-danger fw-bold">310.000đ</p>
+            <div class="btn-container">
+              <a href="product-retail.html"
+                class="btn btn-outline-primary btn-sm btn-custom">Xem chi
+                tiết</a>
+              <button class="btn btn-success btn-sm btn-custom">Thêm vào
+                giỏ</button>
+            </div>
+          </div>
+        </div>
+        <div class="card product-card">
+          <img src="assets/images/Giohoa/GiohoaMixmuaxuan.png" alt="Hoa 5">
+          <div class="card-body">
+            <h6>Giỏ hoa baby trắng tinh khôi</h6>
+            <p class="text-danger fw-bold">340.000đ</p>
+            <div class="btn-container">
+              <a href="product-retail.html"
+                class="btn btn-outline-primary btn-sm btn-custom">Xem chi
+                tiết</a>
+              <button class="btn btn-success btn-sm btn-custom">Thêm vào
+                giỏ</button>
+            </div>
+          </div>
         </div>
       </div>
-      <button class="carousel-control-prev" type="button" data-bs-target="#mainSlider" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon"></span>
-      </button>
-      <button class="carousel-control-next" type="button" data-bs-target="#mainSlider" data-bs-slide="next">
-        <span class="carousel-control-next-icon"></span>
-      </button>
+
+      <!-- ===== SẢN PHẨM MỚI ===== -->
+      <h2 class="section-title">🌼 Sản phẩm mới</h2>
+      <div class="product-row">
+        <div class="card product-card">
+          <img src="assets/images/Chauhoa/ChauDayenthao.png" alt="Hoa 6">
+          <div class="card-body">
+            <h6>Chậu hoa dạ yến thảo</h6>
+            <p class="text-danger fw-bold">270.000đ</p>
+            <div class="btn-container">
+              <a href="product-retail.html"
+                class="btn btn-outline-primary btn-sm btn-custom">Xem chi
+                tiết</a>
+              <button class="btn btn-success btn-sm btn-custom">Thêm vào
+                giỏ</button>
+            </div>
+          </div>
+        </div>
+        <div class="card product-card">
+          <img src="https://picsum.photos/200/200?7" alt="Hoa 7">
+          <div class="card-body">
+            <h6>Bó hoa hồng pastel nhẹ nhàng</h6>
+            <p class="text-danger fw-bold">290.000đ</p>
+            <div class="btn-container">
+              <a href="product-retail.html"
+                class="btn btn-outline-primary btn-sm btn-custom">Xem chi
+                tiết</a>
+              <button class="btn btn-success btn-sm btn-custom">Thêm vào
+                giỏ</button>
+            </div>
+          </div>
+        </div>
+        <div class="card product-card">
+          <img src="https://picsum.photos/200/200?8" alt="Hoa 8">
+          <div class="card-body">
+            <h6>Giỏ hoa ly hồng sang trọng</h6>
+            <p class="text-danger fw-bold">400.000đ</p>
+            <div class="btn-container">
+              <a href="product-retail.html"
+                class="btn btn-outline-primary btn-sm btn-custom">Xem chi
+                tiết</a>
+              <button class="btn btn-success btn-sm btn-custom">Thêm vào
+                giỏ</button>
+            </div>
+          </div>
+        </div>
+        <div class="card product-card">
+          <img src="https://picsum.photos/200/200?9" alt="Hoa 9">
+          <div class="card-body">
+            <h6>Chậu lan tím quý phái</h6>
+            <p class="text-danger fw-bold">550.000đ</p>
+            <div class="btn-container">
+              <a href="product-retail.html"
+                class="btn btn-outline-primary btn-sm btn-custom">Xem chi
+                tiết</a>
+              <button class="btn btn-success btn-sm btn-custom">Thêm vào
+                giỏ</button>
+            </div>
+          </div>
+        </div>
+        <div class="card product-card">
+          <img src="https://picsum.photos/200/200?10" alt="Hoa 10">
+          <div class="card-body">
+            <h6>Bó hoa dã quỳ tươi sáng</h6>
+            <p class="text-danger fw-bold">250.000đ</p>
+            <div class="btn-container">
+              <a href="product-retail.html"
+                class="btn btn-outline-primary btn-sm btn-custom">Xem chi
+                tiết</a>
+              <button class="btn btn-success btn-sm btn-custom">Thêm vào
+                giỏ</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== SẢN PHẨM KHUYẾN MÃI ===== -->
+      <h2 class="section-title">🌺 Sản phẩm khuyến mãi</h2>
+      <div class="product-row">
+        <div class="card product-card">
+          <img src="https://picsum.photos/200/200?11" alt="Hoa 11">
+          <div class="card-body">
+            <h6>Bó hoa lavender tím mộng mơ</h6>
+            <p><del>350.000đ</del> <span
+                class="text-danger fw-bold">290.000đ</span></p>
+            <div class="btn-container">
+              <a href="product-retail.html"
+                class="btn btn-outline-primary btn-sm btn-custom">Xem chi
+                tiết</a>
+              <button class="btn btn-success btn-sm btn-custom">Thêm vào
+                giỏ</button>
+            </div>
+          </div>
+        </div>
+        <div class="card product-card">
+          <img src="https://picsum.photos/200/200?12" alt="Hoa 12">
+          <div class="card-body">
+            <h6>Giỏ hoa sen trắng thuần khiết</h6>
+            <p><del>300.000đ</del> <span
+                class="text-danger fw-bold">250.000đ</span></p>
+            <div class="btn-container">
+              <a href="product-retail.html"
+                class="btn btn-outline-primary btn-sm btn-custom">Xem chi
+                tiết</a>
+              <button class="btn btn-success btn-sm btn-custom">Thêm vào
+                giỏ</button>
+            </div>
+          </div>
+        </div>
+        <div class="card product-card">
+          <img src="https://picsum.photos/200/200?13" alt="Hoa 13">
+          <div class="card-body">
+            <h6>Chậu hoa lan hồ điệp trắng</h6>
+            <p><del>600.000đ</del> <span
+                class="text-danger fw-bold">480.000đ</span></p>
+            <div class="btn-container">
+              <a href="product-retail.html"
+                class="btn btn-outline-primary btn-sm btn-custom">Xem chi
+                tiết</a>
+              <button class="btn btn-success btn-sm btn-custom">Thêm vào
+                giỏ</button>
+            </div>
+          </div>
+        </div>
+        <div class="card product-card">
+          <img src="https://picsum.photos/200/200?14" alt="Hoa 14">
+          <div class="card-body">
+            <h6>Bó hoa ly vàng tươi</h6>
+            <p><del>280.000đ</del> <span
+                class="text-danger fw-bold">230.000đ</span></p>
+            <div class="btn-container">
+              <a href="product-retail.html"
+                class="btn btn-outline-primary btn-sm btn-custom">Xem chi
+                tiết</a>
+              <button class="btn btn-success btn-sm btn-custom">Thêm vào
+                giỏ</button>
+            </div>
+          </div>
+        </div>
+        <div class="card product-card">
+          <img src="https://picsum.photos/200/200?15" alt="Hoa 15">
+          <div class="card-body">
+            <h6>Giỏ hoa đồng tiền rực rỡ</h6>
+            <p><del>350.000đ</del> <span
+                class="text-danger fw-bold">290.000đ</span></p>
+            <div class="btn-container">
+              <a href="product-retail.html"
+                class="btn btn-outline-primary btn-sm btn-custom">Xem chi
+                tiết</a>
+              <button class="btn btn-success btn-sm btn-custom">Thêm vào
+                giỏ</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
-    <!-- ===== SẢN PHẨM BÁN CHẠY ===== -->
-    <h2 class="section-title">🌸 Sản phẩm bán chạy</h2>
-    <div class="product-row">
-      <div class="card product-card">
-        <img src="assets/images/Bohoa/BohoaHongdo.png" alt="Hoa 1">
-        <div class="card-body">
-          <h6>Bó hoa hồng đỏ cổ điển</h6>
-          <p class="text-danger fw-bold">250.000đ</p>
-          <div class="btn-container">
-            <a href="product-retail.html" class="btn btn-outline-primary btn-sm btn-custom">Xem chi tiết</a>
-            <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-          </div>
-        </div>
-      </div>
-      <div class="card product-card">
-        <img src="assets/images/Bohoa/BohoaHongtrang.png" alt="Hoa 2">
-        <div class="card-body">
-          <h6>Bó hoa hồng trắng</h6>
-          <p class="text-danger fw-bold">420.000đ</p>
-          <div class="btn-container">
-            <a href="product-retail.html" class="btn btn-outline-primary btn-sm btn-custom">Xem chi tiết</a>
-            <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-          </div>
-        </div>
-      </div>
-      <div class="card product-card">
-        <img src="assets/images/Giohoa/GiohoaHuongduong.png" alt="Hoa 3">
-        <div class="card-body">
-          <h6>Chậu hoa hướng dương năng lượng</h6>
-          <p class="text-danger fw-bold">380.000đ</p>
-          <div class="btn-container">
-            <a href="product-retail.html" class="btn btn-outline-primary btn-sm btn-custom">Xem chi tiết</a>
-            <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-          </div>
-        </div>
-      </div>
-      <div class="card product-card">
-        <img src="assets/images/Bohoa/BohoaTuliphong.png" alt="Hoa 4">
-        <div class="card-body">
-          <h6>Bó tulip hồng nhẹ nhàng</h6>
-          <p class="text-danger fw-bold">310.000đ</p>
-          <div class="btn-container">
-            <a href="product-retail.html" class="btn btn-outline-primary btn-sm btn-custom">Xem chi tiết</a>
-            <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-          </div>
-        </div>
-      </div>
-      <div class="card product-card">
-        <img src="assets/images/Giohoa/GiohoaMixmuaxuan.png" alt="Hoa 5">
-        <div class="card-body">
-          <h6>Giỏ hoa baby trắng tinh khôi</h6>
-          <p class="text-danger fw-bold">340.000đ</p>
-          <div class="btn-container">
-            <a href="product-retail.html" class="btn btn-outline-primary btn-sm btn-custom">Xem chi tiết</a>
-            <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- Footer -->
+    <div id="footer"></div>
 
-    <!-- ===== SẢN PHẨM MỚI ===== -->
-    <h2 class="section-title">🌼 Sản phẩm mới</h2>
-    <div class="product-row">
-      <div class="card product-card">
-        <img src="assets/images/Chauhoa/ChauDayenthao.png" alt="Hoa 6">
-        <div class="card-body">
-          <h6>Chậu hoa dạ yến thảo</h6>
-          <p class="text-danger fw-bold">270.000đ</p>
-          <div class="btn-container">
-            <a href="product-retail.html" class="btn btn-outline-primary btn-sm btn-custom">Xem chi tiết</a>
-            <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-          </div>
-        </div>
-      </div>
-      <div class="card product-card">
-        <img src="https://picsum.photos/200/200?7" alt="Hoa 7">
-        <div class="card-body">
-          <h6>Bó hoa hồng pastel nhẹ nhàng</h6>
-          <p class="text-danger fw-bold">290.000đ</p>
-          <div class="btn-container">
-            <a href="product-retail.html" class="btn btn-outline-primary btn-sm btn-custom">Xem chi tiết</a>
-            <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-          </div>
-        </div>
-      </div>
-      <div class="card product-card">
-        <img src="https://picsum.photos/200/200?8" alt="Hoa 8">
-        <div class="card-body">
-          <h6>Giỏ hoa ly hồng sang trọng</h6>
-          <p class="text-danger fw-bold">400.000đ</p>
-          <div class="btn-container">
-            <a href="product-retail.html" class="btn btn-outline-primary btn-sm btn-custom">Xem chi tiết</a>
-            <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-          </div>
-        </div>
-      </div>
-      <div class="card product-card">
-        <img src="https://picsum.photos/200/200?9" alt="Hoa 9">
-        <div class="card-body">
-          <h6>Chậu lan tím quý phái</h6>
-          <p class="text-danger fw-bold">550.000đ</p>
-          <div class="btn-container">
-            <a href="product-retail.html" class="btn btn-outline-primary btn-sm btn-custom">Xem chi tiết</a>
-            <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-          </div>
-        </div>
-      </div>
-      <div class="card product-card">
-        <img src="https://picsum.photos/200/200?10" alt="Hoa 10">
-        <div class="card-body">
-          <h6>Bó hoa dã quỳ tươi sáng</h6>
-          <p class="text-danger fw-bold">250.000đ</p>
-          <div class="btn-container">
-            <a href="product-retail.html" class="btn btn-outline-primary btn-sm btn-custom">Xem chi tiết</a>
-            <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== SẢN PHẨM KHUYẾN MÃI ===== -->
-    <h2 class="section-title">🌺 Sản phẩm khuyến mãi</h2>
-    <div class="product-row">
-      <div class="card product-card">
-        <img src="https://picsum.photos/200/200?11" alt="Hoa 11">
-        <div class="card-body">
-          <h6>Bó hoa lavender tím mộng mơ</h6>
-          <p><del>350.000đ</del> <span class="text-danger fw-bold">290.000đ</span></p>
-          <div class="btn-container">
-            <a href="product-retail.html" class="btn btn-outline-primary btn-sm btn-custom">Xem chi tiết</a>
-            <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-          </div>
-        </div>
-      </div>
-      <div class="card product-card">
-        <img src="https://picsum.photos/200/200?12" alt="Hoa 12">
-        <div class="card-body">
-          <h6>Giỏ hoa sen trắng thuần khiết</h6>
-          <p><del>300.000đ</del> <span class="text-danger fw-bold">250.000đ</span></p>
-          <div class="btn-container">
-            <a href="product-retail.html" class="btn btn-outline-primary btn-sm btn-custom">Xem chi tiết</a>
-            <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-          </div>
-        </div>
-      </div>
-      <div class="card product-card">
-        <img src="https://picsum.photos/200/200?13" alt="Hoa 13">
-        <div class="card-body">
-          <h6>Chậu hoa lan hồ điệp trắng</h6>
-          <p><del>600.000đ</del> <span class="text-danger fw-bold">480.000đ</span></p>
-          <div class="btn-container">
-            <a href="product-retail.html" class="btn btn-outline-primary btn-sm btn-custom">Xem chi tiết</a>
-            <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-          </div>
-        </div>
-      </div>
-      <div class="card product-card">
-        <img src="https://picsum.photos/200/200?14" alt="Hoa 14">
-        <div class="card-body">
-          <h6>Bó hoa ly vàng tươi</h6>
-          <p><del>280.000đ</del> <span class="text-danger fw-bold">230.000đ</span></p>
-          <div class="btn-container">
-            <a href="product-retail.html" class="btn btn-outline-primary btn-sm btn-custom">Xem chi tiết</a>
-            <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-          </div>
-        </div>
-      </div>
-      <div class="card product-card">
-        <img src="https://picsum.photos/200/200?15" alt="Hoa 15">
-        <div class="card-body">
-          <h6>Giỏ hoa đồng tiền rực rỡ</h6>
-          <p><del>350.000đ</del> <span class="text-danger fw-bold">290.000đ</span></p>
-          <div class="btn-container">
-            <a href="product-retail.html" class="btn btn-outline-primary btn-sm btn-custom">Xem chi tiết</a>
-            <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- Footer -->
-  <div id="footer"></div>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
     async function loadHTML(id, file) {
       const res = await fetch(file);
       const html = await res.text();
@@ -346,5 +420,5 @@
     loadHTML("header", "header.html");
     loadHTML("footer", "footer.html");
   </script>
-</body>
+  </body>
 </html>
