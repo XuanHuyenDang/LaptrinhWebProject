@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -14,40 +15,49 @@
       background: linear-gradient(135deg, #fce4ec, #f8bbd0);
       font-family: "Segoe UI", sans-serif;
     }
+
     .register-card {
       max-width: 480px;
       margin: 70px auto;
       border-radius: 15px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
+
     .register-header {
       text-align: center;
       padding: 20px 0 10px;
     }
+
     .register-header h4 {
       font-weight: 700;
       color: #d81b60;
     }
+
     .btn-primary {
       background-color: #d81b60;
       border: none;
     }
+
     .btn-primary:hover {
       background-color: #ad1457;
     }
+
     .form-control:focus {
       box-shadow: none;
       border-color: #d81b60;
     }
+
     a {
       text-decoration: none;
       color: #d81b60;
     }
+
     a:hover {
       text-decoration: underline;
     }
   </style>
 </head>
+
 <body>
 
   <!-- Header -->
@@ -62,7 +72,7 @@
         <p class="text-muted small">Tạo tài khoản để bắt đầu mua sắm 💐</p>
       </div>
 
-      <form>
+      <form id="registerForm">
         <div class="mb-3">
           <label for="fullname" class="form-label">Họ và tên</label>
           <input type="text" class="form-control" id="fullname" placeholder="Nhập họ tên của bạn" required>
@@ -105,6 +115,51 @@
         </div>
       </form>
 
+       
+      <script>
+        document.getElementById("registerForm").addEventListener("submit", function (e) {
+          e.preventDefault(); // Ngăn form gửi đi theo cách truyền thống
+
+          const email = document.getElementById("email").value.trim();
+          const fullname = document.getElementById("fullname").value.trim();
+          const password = document.getElementById("password").value.trim();
+          const confirm = document.getElementById("confirm-password").value.trim();
+
+          // Kiểm tra các trường có trống không
+          if (!email || !fullname || !password || !confirm) {
+            alert("Vui lòng điền đầy đủ thông tin!");
+            return;
+          }
+
+          // Kiểm tra mật khẩu có khớp không
+          if (password !== confirm) {
+            alert("Mật khẩu xác nhận không khớp!");
+            return;
+          }
+
+          // Giả lập tạo mã OTP ngẫu nhiên gồm 6 chữ số
+          const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+          // Lưu thông tin người dùng đang chờ xác thực và mã OTP vào localStorage
+          const pendingUserData = {
+            fullname: fullname,
+            email: email,
+            password: password, // Trong thực tế, bạn nên mã hóa mật khẩu trước khi gửi đi
+            otp: otp
+          };
+          localStorage.setItem("pendingUser", JSON.stringify(pendingUserData));
+
+          // Xóa thông tin reset password cũ nếu có để tránh xung đột
+          localStorage.removeItem("resetEmail");
+
+          // Thông báo cho người dùng (trong thực tế, backend sẽ gửi email thật)
+          alert("Mã OTP đã được gửi đến email: " + email + "\n(Mã OTP của bạn là: " + otp + ")");
+
+          // Chuyển hướng sang trang nhập OTP
+          window.location.href = "otp.html";
+        });
+      </script>
+
       <hr>
 
       <p class="text-center small">
@@ -117,4 +172,5 @@
   <div id="footer-placeholder"></div>
 
 </body>
+
 </html>

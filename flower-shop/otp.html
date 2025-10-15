@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác thực OTP - Florio Flower Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: linear-gradient(120deg, #ffdee9 0%, #b5fffc 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .otp-card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 420px;
+            padding: 35px;
+            text-align: center;
+        }
+
+        .otp-card img {
+            width: 80px;
+            margin-bottom: 15px;
+        }
+
+        .otp-card h4 {
+            color: #d63384;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .otp-input {
+            letter-spacing: 8px;
+            text-align: center;
+            font-size: 1.4rem;
+        }
+
+        .btn-custom {
+            background-color: #d63384;
+            color: white;
+            border: none;
+            transition: 0.3s;
+        }
+
+        .btn-custom:hover {
+            background-color: #b32d70;
+        }
+
+        .form-control:focus {
+            border-color: #d63384;
+            box-shadow: 0 0 0 0.2rem rgba(214, 51, 132, 0.25);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="otp-card">
+        <img src="assets/images/Florio.png" alt="logo">
+        <h4>Xác thực mã OTP</h4>
+        <p class="text-muted">Nhập mã OTP vừa được gửi đến email của bạn</p>
+
+        <form id="otpForm">
+            <div class="mb-3">
+                <input type="text" id="otp" class="form-control otp-input" maxlength="6" placeholder="••••••" required>
+            </div>
+
+            <button type="submit" class="btn btn-custom w-100 mb-3">Xác nhận</button>
+
+            <div>
+                <a href="reset.html" class="text-decoration-none text-secondary">
+                    <i class="bi bi-arrow-left"></i> Quay lại nhập email
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- <script>
+    document.getElementById('otpForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const otp = document.getElementById('otp').value.trim();
+
+      if (otp.length !== 6) {
+        alert("Vui lòng nhập đủ 6 ký tự OTP!");
+        return;
+      }
+
+      // Giả lập kiểm tra OTP
+      if (otp === "123456") {
+        alert("Mã OTP chính xác! Vui lòng đặt lại mật khẩu mới.");
+        window.location.href = "newpassword.html";
+      } else {
+        alert("Mã OTP không hợp lệ, vui lòng thử lại!");
+      }
+    });
+  </script> -->
+     
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const pendingUserStr = localStorage.getItem('pendingUser');
+            const resetEmail = localStorage.getItem('resetEmail');
+            const emailDisplayEl = document.getElementById('emailDisplay');
+            const backLinkEl = document.getElementById('backLink');
+
+            if (pendingUserStr) {
+                // Trường hợp Đăng ký
+                const pendingUser = JSON.parse(pendingUserStr);
+                emailDisplayEl.textContent = pendingUser.email;
+                backLinkEl.href = "register.html";
+                backLinkEl.innerHTML = '<i class="bi bi-arrow-left"></i> Quay lại trang đăng ký';
+            } else if (resetEmail) {
+                // Trường hợp Đặt lại mật khẩu
+                emailDisplayEl.textContent = resetEmail;
+                backLinkEl.href = "reset.html";
+                backLinkEl.innerHTML = '<i class="bi bi-arrow-left"></i> Quay lại nhập email';
+            } else {
+                // Không có thông tin -> về trang đăng nhập
+                alert("Phiên không hợp lệ, vui lòng thử lại.");
+                window.location.href = "login.html";
+            }
+        });
+
+        document.getElementById('otpForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const enteredOtp = document.getElementById('otp').value.trim();
+            const pendingUserStr = localStorage.getItem('pendingUser');
+            const resetEmail = localStorage.getItem('resetEmail');
+
+            if (enteredOtp.length !== 6) {
+                alert("Vui lòng nhập đủ 6 ký tự OTP!");
+                return;
+            }
+
+            // --- XỬ LÝ LUỒNG ĐĂNG KÝ ---
+            if (pendingUserStr) {
+                const pendingUser = JSON.parse(pendingUserStr);
+                if (enteredOtp === pendingUser.otp) {
+                    alert("Xác thực thành công! Tài khoản của bạn đã được tạo.");
+                    // Ở đây, bạn sẽ gọi API để lưu thông tin người dùng vào database
+                    // Sau khi xong, xóa thông tin tạm
+                    localStorage.removeItem('pendingUser');
+                    window.location.href = "login.html";
+                } else {
+                    alert("Mã OTP không chính xác. Vui lòng thử lại!");
+                }
+                return; // Dừng tại đây
+            }
+
+            // --- XỬ LÝ LUỒNG ĐẶT LẠI MẬT KHẨU ---
+            if (resetEmail) {
+                // Giả lập kiểm tra OTP cho việc reset password
+                // Bạn có thể tạo OTP ngẫu nhiên ở bước reset.html và lưu vào localStorage nếu muốn
+                if (enteredOtp === "123456") { // Mã OTP giả lập cho reset
+                    alert("Xác thực thành công! Vui lòng đặt lại mật khẩu mới.");
+                    localStorage.removeItem('resetEmail'); // Xóa email sau khi xác thực
+                    window.location.href = "newpassword.html";
+                } else {
+                    alert("Mã OTP không hợp lệ, vui lòng thử lại!");
+                }
+                return; // Dừng tại đây
+            }
+        });
+    </script><!--  -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
