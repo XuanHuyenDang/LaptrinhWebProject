@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin Dashboard - Florio Flower Shop</title>
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+	rel="stylesheet">
+<style>
+body {
+	background-color: #fffafc;
+	font-family: "Segoe UI", sans-serif;
+}
+
+/* Sidebar */
+.sidebar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: 100vh;
+	width: 250px;
+	background: linear-gradient(180deg, #ffb6c1 0%, #ffe5ec 100%);
+	color: #4a4a4a;
+	padding-top: 1rem;
+	box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar h5 {
+	font-weight: bold;
+	color: #c2185b;
+}
+
+.sidebar a {
+	color: #5a5a5a;
+	text-decoration: none;
+	display: block;
+	padding: 10px 20px;
+	border-radius: 8px;
+	margin: 3px 10px;
+	transition: all 0.3s ease;
+	font-weight: 500;
+}
+
+.sidebar a:hover, .sidebar a.active {
+	background: #fff;
+	color: #c2185b;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+	transform: translateX(3px);
+}
+
+.sidebar i {
+	color: #c2185b;
+}
+
+main {
+	margin-left: 270px;
+	padding: 30px;
+}
+
+/* Cards */
+.card {
+	border-radius: 15px;
+	border: none;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+	transition: transform 0.2s ease;
+}
+
+.card:hover {
+	transform: translateY(-4px);
+}
+
+.card i {
+	font-size: 2rem;
+	margin-bottom: 10px;
+}
+
+.table {
+	border-radius: 10px;
+	overflow: hidden;
+}
+
+h3 {
+	color: #c2185b;
+	font-weight: 700;
+}
+
+.badge {
+	font-size: 0.85rem;
+}
+</style>
+</head>
+<body>
+
+	<!-- Sidebar -->
+	<nav class="sidebar">
+		<h5 class="text-center">
+			<i class="bi bi-flower1 me-1"></i> Florio Admin
+		</h5>
+		<hr class="text-muted">
+		<a href="#" class="active"><i class="bi bi-speedometer2 me-2"></i>
+			Tổng quan</a> <a href="admin-categories.html"><i
+			class="bi bi-list-ul me-2"></i> Danh mục</a> <a href="admin-orders.html"><i
+			class="bi bi-cart4 me-2"></i> Đơn hàng</a> <a href="admin-customers.html"><i
+			class="bi bi-people me-2"></i> Khách hàng</a> <a
+			href="admin-comments.html"><i class="bi bi-chat-left-text me-2"></i>
+			Bình luận</a>
+		<hr class="text-muted">
+		<form th:action="@{/auth/logout}" method="post">
+			<button type="submit" class="btn btn-outline-danger">
+				<i class="bi bi-box-arrow-right"></i> Đăng xuất
+			</button>
+		</form>
+
+	</nav>
+
+	<!-- Main -->
+	<main>
+		<h3 class="mb-4">
+			<i class="bi bi-speedometer2 me-2"></i>Tổng quan
+		</h3>
+
+		<div class="row g-4">
+			<div class="col-md-4">
+				<div class="card text-center p-3 bg-light">
+					<i class="bi bi-cart4 text-danger"></i>
+					<h5 class="mt-2 text-dark">Đơn hàng</h5>
+					<p class="fw-bold fs-5 text-danger mb-0">8</p>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="card text-center p-3 bg-light">
+					<i class="bi bi-people text-success"></i>
+					<h5 class="mt-2 text-dark">Khách hàng</h5>
+					<p class="fw-bold fs-5 text-success mb-0">25</p>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="card text-center p-3 bg-light">
+					<i class="bi bi-chat-left-text text-info"></i>
+					<h5 class="mt-2 text-dark">Bình luận</h5>
+					<p class="fw-bold fs-5 text-info mb-0">18</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="mt-5">
+			<h5 class="fw-bold text-secondary mb-3">
+				<i class="bi bi-basket2 me-2"></i>Đơn hàng mới
+			</h5>
+			<table class="table table-bordered bg-white align-middle">
+				<thead class="table-pink text-center">
+					<tr class="table-light">
+						<th>Mã đơn</th>
+						<th>Khách hàng</th>
+						<th>Sản phẩm</th>
+						<th>Tổng tiền</th>
+						<th>Trạng thái</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>#001</td>
+						<td>Nguyễn Văn A</td>
+						<td>Bó hoa hồng đỏ</td>
+						<td>350.000 ₫</td>
+						<td><span class="badge bg-success">Hoàn tất</span></td>
+					</tr>
+					<tr>
+						<td>#002</td>
+						<td>Trần Thị B</td>
+						<td>Giỏ hoa lan tím</td>
+						<td>420.000 ₫</td>
+						<td><span class="badge bg-warning text-dark">Đang xử
+								lý</span></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</main>
+
+</body>
+</html>

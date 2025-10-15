@@ -1,70 +1,22 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Footer - FlowerShop</title>
-
-  <!-- Bootstrap CSS -->
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-    rel="stylesheet">
-
-  <!-- Bootstrap Icons -->
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-    rel="stylesheet">
-
-  <style>
-    body {
-      background-color: #f8f9fa;
-    }
-
-    footer a {
-      transition: color 0.2s ease-in-out;
-    }
-
-    footer a:hover {
-      color: #ff7f7f !important;
-      text-decoration: underline;
-    }
-
-    footer {
-      background: #212529;
-      color: #f8f9fa;
-    }
-
-    footer h5 {
-      letter-spacing: 0.5px;
-    }
-
-    footer img {
-      max-height: 120px;
-      object-fit: cover;
-    }
-  </style>
-</head>
-
-<body>
-  <!-- Footer -->
-  <footer class="bg-dark text-light mt-5 pt-5 pb-3">
+<!-- templates/fragments/footer.html -->
+<footer th:fragment="footer">
+  <div class="bg-dark text-light mt-5 pt-5 pb-3">
     <div class="container">
       <div class="row gy-4">
         <!-- Giới thiệu -->
         <div class="col-md-4">
-          <h5 class="text-uppercase fw-bold mb-3 text-danger"> Florio Flower Shop</h5>
+          <h5 class="text-uppercase fw-bold mb-3 text-danger">Florio Flower Shop</h5>
           <p class="small">
             Cửa hàng hoa tươi chuyên cung cấp những bó hoa đẹp, sang trọng và ý nghĩa cho mọi dịp đặc biệt.
             Chúng tôi cam kết mang đến cho bạn sản phẩm chất lượng và dịch vụ tận tâm.
           </p>
-          
         </div>
 
         <!-- Liên hệ -->
         <div class="col-md-4">
           <h5 class="text-uppercase fw-bold mb-3 text-danger">📞 Liên hệ</h5>
           <ul class="list-unstyled small">
-            <li><i class="bi bi-geo-alt-fill text-danger me-2"></i>Số 1, Võ Văn Ngân, Phường Thủ Đức, TP. Hồ Chí Minh</li>
+            <li><i class="bi bi-geo-alt-fill text-danger me-2"></i>Số 1, Võ Văn Ngân, Thủ Đức, TP. Hồ Chí Minh</li>
             <li><i class="bi bi-envelope-fill text-danger me-2"></i>support@flowershop.vn</li>
             <li><i class="bi bi-telephone-fill text-danger me-2"></i>0909 888 999</li>
           </ul>
@@ -92,9 +44,5 @@
         &copy; 2025 <span class="text-danger fw-semibold">Florio Flower Shop</span>. All rights reserved.
       </p>
     </div>
-  </footer>
-
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+  </div>
+</footer>
