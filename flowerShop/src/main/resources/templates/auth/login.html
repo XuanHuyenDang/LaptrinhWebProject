@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -15,49 +14,40 @@
       background: linear-gradient(135deg, #fce4ec, #f8bbd0);
       font-family: "Segoe UI", sans-serif;
     }
-
     .login-card {
       max-width: 420px;
       margin: 80px auto;
       border-radius: 15px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
-
     .login-header {
       text-align: center;
       padding: 20px 0 10px;
     }
-
     .login-header h4 {
       font-weight: 700;
       color: #d81b60;
     }
-
     .btn-primary {
       background-color: #d81b60;
       border: none;
     }
-
     .btn-primary:hover {
       background-color: #ad1457;
     }
-
     .form-control:focus {
       box-shadow: none;
       border-color: #d81b60;
     }
-
     a {
       text-decoration: none;
       color: #d81b60;
     }
-
     a:hover {
       text-decoration: underline;
     }
   </style>
 </head>
-
 <body>
 
   <!-- Header -->
@@ -72,7 +62,7 @@
         <p class="text-muted small">Chào mừng bạn quay lại 💐</p>
       </div>
 
-      <form id="loginForm">
+      <form>
         <div class="mb-3">
           <label for="email" class="form-label">Địa chỉ email</label>
           <input type="email" class="form-control" id="email" placeholder="Nhập email của bạn" required>
@@ -106,35 +96,6 @@
 
   <!-- Footer -->
   <div id="footer-placeholder"></div>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const form = document.getElementById("loginForm");
 
-      form.addEventListener("submit", function (e) {
-        e.preventDefault(); // Ngăn reload trang
-
-        const email = document.getElementById("email").value.trim();
-        const password = document.getElementById("password").value.trim();
-
-        // Kiểm tra dữ liệu mẫu (có thể thay bằng dữ liệu thật sau)
-        if (email === "" && password === "123456") {
-          const user = {
-            name: "",
-            id: "",
-            email: email
-          };
-
-          // Lưu vào localStorage
-          localStorage.setItem("user", JSON.stringify(user));
-
-          // Chuyển hướng về trang chủ
-          window.location.href = "index.html";
-        } else {
-          alert("Email hoặc mật khẩu không đúng. Vui lòng thử lại!");
-        }
-      });
-    });
-  </script>
 </body>
-
 </html>
