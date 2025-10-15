@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 public class Product {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "Id")
   private Integer id;
 
   @Column(name = "ProductName", nullable = false, length = 255)
@@ -26,10 +27,9 @@ public class Product {
   private BigDecimal salePrice;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "CategoryId")
+  @JoinColumn(name = "CategoryId", referencedColumnName = "Id")
   private Category category;
 
-  // getters/setters
   public Integer getId(){ return id; }
   public void setId(Integer id){ this.id = id; }
   public String getProductName(){ return productName; }
