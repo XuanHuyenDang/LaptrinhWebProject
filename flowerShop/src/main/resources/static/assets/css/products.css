@@ -1,0 +1,57 @@
+body {
+      background-color: #fff7fa;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    h6.card-title {
+      color: #6b184e;
+      font-weight: 600;
+    }
+
+    .card {
+      border: none;
+      border-radius: 15px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 15px rgba(201, 70, 125, 0.2);
+    }
+
+    .btn-primary {
+      background-color: #c9467d;
+      border-color: #c9467d;
+    }
+
+    .btn-primary:hover {
+      background-color: #b53567;
+      border-color: #b53567;
+    }
+
+    .btn-outline-primary {
+      color: #c9467d;
+      border-color: #c9467d;
+    }
+
+    .btn-outline-primary:hover {
+      background-color: #c9467d;
+      color: white;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: #c9467d;
+      box-shadow: 0 0 0 0.2rem rgba(201, 70, 125, 0.25);
+    }
+
+    .card-body p.text-danger {
+      color: #b53567 !important;
+    }
+
+    .card.shadow-sm.mb-4 {
+      border-left: 5px solid #c9467d;
+    }
+
+    .text-muted {
+      color: #999 !important;
+    }

@@ -1,4 +1,4 @@
-package vn.flower.controllers;
+package vn.flower.controllers.user;
 
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Controller;
@@ -43,12 +43,12 @@ public class ProductsController {
     model.addAttribute("min", min);
     model.addAttribute("max", max);
     model.addAttribute("sort", sort);
-    return "products";            // --> templates/products.html
+    return "user/products";            // --> templates/products.html
   }
 
   @GetMapping("/products/{id}")
   public String detail(@PathVariable Integer id, Model model) {
     model.addAttribute("product", productService.getById(id));
-    return "product-detail";      // --> templates/product-detail.html
+    return "user/product-detail";      // --> templates/product-detail.html
   }
 }

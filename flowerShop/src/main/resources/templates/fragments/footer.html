@@ -1,6 +1,10 @@
-<!-- templates/fragments/footer.html -->
-<footer th:fragment="footer">
-  <div class="bg-dark text-light mt-5 pt-5 pb-3">
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+  <!-- FOOTER FRAGMENT -->
+  <div th:fragment="footer"
+          class="bg-dark text-light mt-5 pt-5 pb-3">
     <div class="container">
       <div class="row gy-4">
         <!-- Giới thiệu -->
@@ -16,7 +20,7 @@
         <div class="col-md-4">
           <h5 class="text-uppercase fw-bold mb-3 text-danger">📞 Liên hệ</h5>
           <ul class="list-unstyled small">
-            <li><i class="bi bi-geo-alt-fill text-danger me-2"></i>Số 1, Võ Văn Ngân, Thủ Đức, TP. Hồ Chí Minh</li>
+            <li><i class="bi bi-geo-alt-fill text-danger me-2"></i>Số 1, Võ Văn Ngân, Phường Thủ Đức, TP. Hồ Chí Minh</li>
             <li><i class="bi bi-envelope-fill text-danger me-2"></i>support@flowershop.vn</li>
             <li><i class="bi bi-telephone-fill text-danger me-2"></i>0909 888 999</li>
           </ul>
@@ -45,4 +49,6 @@
       </p>
     </div>
   </div>
-</footer>
+
+</body>
+</html>

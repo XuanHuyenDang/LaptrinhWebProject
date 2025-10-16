@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${product.productName} + ' - Florio Flower Shop'">Chi tiết sản phẩm - Florio Flower Shop</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- CSS nội bộ -->
+  <link th:href="@{/assets/css/product-detail.css}" rel="stylesheet">
+  <link th:href="@{/assets/css/header.css}" rel="stylesheet">
+  <link th:href="@{/assets/css/footer.css}" rel="stylesheet">
+
+  <style>
+    body { background-color: #fff8f9; font-family: "Segoe UI", sans-serif; }
+    .product-image img { width: 100%; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
+    .product-info h3 { color: #d81b60; font-weight: bold; }
+    .price { font-size: 1.3rem; color: #d81b60; font-weight: 600; }
+    .old-price { text-decoration: line-through; color: gray; font-size: 0.95rem; }
+    .btn-pink { background-color: #d81b60; border: none; }
+    .btn-pink:hover { background-color: #ad1457; }
+    .section-title { border-left: 5px solid #ff7eb3; padding-left: 10px; margin: 40px 0 20px; font-weight: bold; font-size: 1.5rem; color: #ff4081; }
+    .related-products .card { border: none; transition: transform 0.2s; }
+    .related-products .card:hover { transform: translateY(-5px); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+    .rating i { color: #fbc02d; font-size: 1.3rem; margin-right: 2px; }
+  </style>
+</head>
+
+<body>
+
+  <!-- Header -->
+   <div th:replace="fragments/navbar :: navbar"></div>
+
+  <div class="container my-5">
+    <div class="row g-4">
+      <!-- Hình ảnh sản phẩm -->
+      <div class="col-md-5 product-image">
+        <img th:src="${product.imageUrl} ?: @{/assets/images/placeholder.png}"
+             th:alt="${product.productName}">
+      </div>
+
+      <!-- Thông tin sản phẩm -->
+      <div class="col-md-7 product-info">
+        <h3 th:text="${product.productName}">Tên sản phẩm</h3>
+
+        <!-- Giá (ưu tiên salePrice nếu có) -->
+        <p class="price">
+          <span th:if="${product.salePrice != null}"
+                th:text="${#numbers.formatDecimal(product.salePrice,0,'POINT',0,'POINT')} + 'đ'">0đ</span>
+          <span class="old-price ms-2" th:if="${product.salePrice != null}"
+                th:text="${#numbers.formatDecimal(product.price,0,'POINT',0,'POINT')} + 'đ'">0đ</span>
+          <span th:if="${product.salePrice == null}"
+                th:text="${#numbers.formatDecimal(product.price,0,'POINT',0,'POINT')} + 'đ'">0đ</span>
+        </p>
+
+        <!-- Mô tả ngắn -->
+        <p th:text="${product.productDescription}">Mô tả ngắn…</p>
+
+        <div class="mb-3">
+          <label for="quantity" class="form-label">Số lượng:</label>
+          <input type="number" id="quantity" class="form-control w-25" value="1" min="1">
+        </div>
+
+        <div class="d-flex gap-3">
+          <button class="btn btn-success"
+                  th:attr="data-id=${product.id},
+                           data-name=${product.productName},
+                           data-price=${product.salePrice != null ? product.salePrice : product.price}">
+            <i class="bi bi-cart-plus"></i> Thêm vào giỏ
+          </button>
+          <a class="btn btn-pink text-white"
+             th:href="@{/checkout(productId=${product.id}, qty=${1})}">
+            <i class="bi bi-bag-heart"></i> Mua ngay
+          </a>
+        </div>
+
+        <hr>
+
+        <!-- Thông tin thêm: hiện danh mục nếu có -->
+        <ul class="mb-0">
+          <li th:if="${product.category != null}"
+              th:text="'Danh mục: ' + ${product.category.categoryName}">Danh mục</li>
+          <!-- Nếu sau này có thêm Origin/Size/Preservation thì bind tương tự -->
+        </ul>
+      </div>
+    </div>
+
+    <!-- Mô tả chi tiết (dùng lại ProductDescription cho đến khi có field riêng) -->
+    <div class="mt-5">
+      <h4 class="section-title">🌸 Mô tả chi tiết sản phẩm</h4>
+      <p th:text="${product.productDescription}">Mô tả chi tiết…</p>
+    </div>
+
+    <!-- Đánh giá & bình luận (tạm thời tĩnh, có thể nối DB sau) -->
+    <div class="mt-5">
+      <h4 class="section-title">⭐ Đánh giá sản phẩm</h4>
+      <div class="rating mb-3">
+        <i class="bi bi-star-fill"></i>
+        <i class="bi bi-star-fill"></i>
+        <i class="bi bi-star-fill"></i>
+        <i class="bi bi-star-fill"></i>
+        <i class="bi bi-star"></i>
+        <span class="ms-2">(4.0 / 5 từ 12 đánh giá)</span>
+      </div>
+
+      <form>
+        <div class="mb-3">
+          <label for="comment" class="form-label">Viết bình luận của bạn (tối thiểu 50 ký tự):</label>
+          <textarea id="comment" class="form-control" rows="4" placeholder="Chia sẻ cảm nhận về sản phẩm..." minlength="50" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-pink text-white"><i class="bi bi-send"></i> Gửi bình luận</button>
+      </form>
+
+      <hr class="my-4">
+
+      <div class="mt-3">
+        <h6 class="fw-bold">💬 Bình luận gần đây:</h6>
+        <div class="border rounded p-3 mb-2 bg-light">
+          <strong>Nguyễn Minh:</strong> Giỏ hoa rất đẹp, giao hàng nhanh và đúng mẫu. Mùi hoa thơm dễ chịu, mình rất hài lòng!
+        </div>
+        <div class="border rounded p-3 mb-2 bg-light">
+          <strong>Phạm Lan:</strong> Hoa tươi, gói đẹp và cắm khéo. Sẽ ủng hộ thêm các sản phẩm khác trong thời gian tới!
+        </div>
+      </div>
+    </div>
+
+    <!-- Sản phẩm liên quan (nếu controller truyền 'related') -->
+    <div class="related-products mt-5" th:if="${related != null and !#lists.isEmpty(related)}">
+      <h4 class="section-title">🌼 Sản phẩm liên quan</h4>
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
+        <div class="col" th:each="r : ${related}">
+          <div class="card">
+            <img class="card-img-top"
+                 th:src="${r.imageUrl} ?: @{/assets/images/placeholder.png}"
+                 th:alt="${r.productName}">
+            <div class="card-body text-center">
+              <h6 th:text="${r.productName}">Tên</h6>
+              <p class="text-danger fw-bold"
+                 th:text="${#numbers.formatDecimal(r.salePrice!=null?r.salePrice:r.price,0,'POINT',0,'POINT')} + 'đ'">0đ</p>
+              <a class="btn btn-outline-primary btn-sm" th:href="@{|/products/${r.id}|}">Xem chi tiết</a>
+              <button class="btn btn-success btn-sm"
+                      th:attr="data-id=${r.id},data-name=${r.productName},data-price=${r.salePrice != null ? r.salePrice : r.price}">
+                Thêm vào giỏ
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div th:replace="fragments/footer :: footer"></div>
+
+  <!-- Nếu có JS layout/giỏ hàng riêng, nạp bằng th:src -->
+  <!-- <script th:src="@{/assets/js/layout.js}"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

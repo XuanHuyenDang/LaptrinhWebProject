@@ -1,0 +1,77 @@
+<!-- templates/fragments/navbar.html -->
+<nav id="mainNav"
+     class="navbar navbar-expand-lg navbar-light navbar-overlay sticky-top shadow-sm"
+     th:fragment="navbar"
+     xmlns:th="http://www.thymeleaf.org"
+     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+  <div class="container-fluid px-5">
+    <a class="navbar-brand fw-bold text-danger d-flex align-items-center ms-1" th:href="@{/}">
+      <img th:src="@{/assets/images/Florio.png}" alt="logo" style="height:40px" class="me-2">
+      Florio Flower Shop
+    </a>
+
+    <button class="navbar-toggler" type="button"
+            data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <!-- Menu trái -->
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link text-dark fw-semibold" th:href="@{/}">Trang chủ</a></li>
+        <li class="nav-item"><a class="nav-link text-dark fw-semibold" th:href="@{/products}">Sản phẩm</a></li>
+        <li class="nav-item"><a class="nav-link text-dark fw-semibold" th:href="@{/about}">Giới thiệu</a></li>
+        <li class="nav-item"><a class="nav-link text-dark fw-semibold" th:href="@{/chat}">Chat với cửa hàng</a></li>
+      </ul>
+
+      <!-- Tìm kiếm: giới hạn chiều rộng để không chiếm chỗ -->
+      <form class="d-none d-lg-flex me-3 search-wrap" th:action="@{/search}" method="get">
+        <input class="form-control me-2" type="search" name="q" placeholder="Tìm kiếm hoa..." aria-label="Search">
+        <button class="btn btn-outline-danger" type="submit">
+          <i class="bi bi-search"></i>
+        </button>
+      </form>
+
+      <!-- Nhóm phải: không cho wrap -->
+      <div class="d-flex align-items-center gap-2 ms-lg-0 flex-nowrap">
+        <!-- Giỏ hàng -->
+        <a th:href="@{/cart}" class="btn btn-outline-danger btn-sm text-nowrap">
+          <i class="bi bi-cart4"></i> Giỏ hàng
+        </a>
+
+        <!-- Chưa đăng nhập -->
+        <a sec:authorize="isAnonymous()" th:href="@{/auth/login}" class="btn btn-danger btn-sm text-nowrap">
+          <i class="bi bi-person-circle"></i> Đăng nhập
+        </a>
+
+        <!-- Đã đăng nhập: dùng dropdown để gọn -->
+        <div class="dropdown" sec:authorize="isAuthenticated()">
+          <button class="btn btn-light btn-sm dropdown-toggle d-flex align-items-center text-nowrap"
+                  type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-person-circle me-2"></i>
+            <span class="d-none d-md-inline text-truncate user-label" style="max-width: 180px;">
+              <strong sec:authentication="name">User</strong>
+            </span>
+          </button>
+
+          <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
+            <li><a class="dropdown-item" th:href="@{/account}"><i class="bi bi-person"></i> Tài khoản của tôi</a></li>
+            <li><a class="dropdown-item" th:href="@{/orders}"><i class="bi bi-bag"></i> Đơn hàng của tôi</a></li>
+            <li><a class="dropdown-item" th:href="@{/wishlist}"><i class="bi bi-heart"></i> Yêu thích</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <form th:action="@{/auth/logout}" method="post" class="px-3 py-1">
+                <input type="hidden" th:if="${_csrf != null}"
+                       th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button type="submit" class="btn btn-outline-danger w-100 btn-sm text-nowrap">
+                  <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                </button>
+              </form>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</nav>
