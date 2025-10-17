@@ -14,4 +14,7 @@ public interface ProductRepository
     List<Product> findByCategory_Id(Long categoryId);
     List<Product> findByProductNameContainingIgnoreCase(String keyword);
     List<Product> findByCategory_IdAndProductNameContainingIgnoreCase(Long categoryId, String keyword);
+    List<Product> findTop10ByStatusTrueOrderBySoldDescIdDesc();
+    List<Product> findTop5ByStatusTrueOrderByIdDesc();
+    List<Product> findTop10ByStatusTrueAndSalePriceIsNotNullOrderByIdDesc();
 }

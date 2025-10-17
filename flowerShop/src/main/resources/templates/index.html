@@ -17,13 +17,12 @@
   <body>
 
     <!-- Header -->
-    <div th:replace="fragments/navbar :: navbar"></div>
-    <div th:replace="fragments/banner :: banner"></div>
-
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+    <div th:replace="~{fragments/banner :: banner}"></div>
 
     <div class="container mt-4">
       <!-- ===== SLIDER ===== -->
-      <div id="mainSlider" class="carousel slide mb-5" data-bs-ride="carousel">
+      <div id="mainSlider" class="carousel slide mb-5" data-bs-ride="carousel" data-bs-interval="4000" data-bs-wrap="true">
         <div class="carousel-inner">
           <div class="carousel-item active">
             <img th:src="@{/slider/slider1.png}" class="d-block w-100" alt="Slider 1">
@@ -49,190 +48,144 @@
         </button>
       </div>
 
-      <!-- ===== SẢN PHẨM BÁN CHẠY ===== -->
+      <!-- ===== SẢN PHẨM BÁN CHẠY (TOP 10 — STRIP 5-SP, SHIFT 1s) ===== -->
       <h2 class="section-title">🌸 Sản phẩm bán chạy</h2>
-      <div class="product-row">
-        <div class="card product-card">
-          <img th:src="@{/assets/images/Bohoa/BohoaHongdo.png}" alt="Hoa 1">
-          <div class="card-body">
-            <h6>Bó hoa hồng đỏ cổ điển</h6>
-            <p class="text-danger fw-bold">250.000đ</p>
-            <div class="btn-container">
-              <a class="btn btn-outline-primary btn-sm btn-custom" th:href="@{/product-retail}">Xem chi tiết</a>
-              <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-            </div>
-          </div>
-        </div>
 
-        <div class="card product-card">
-          <img th:src="@{/assets/images/Bohoa/BohoaHongtrang.png}" alt="Hoa 2">
-          <div class="card-body">
-            <h6>Bó hoa hồng trắng</h6>
-            <p class="text-danger fw-bold">420.000đ</p>
-            <div class="btn-container">
-              <a class="btn btn-outline-primary btn-sm btn-custom" th:href="@{/product-retail}">Xem chi tiết</a>
-              <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-            </div>
-          </div>
-        </div>
+      <!-- Có dữ liệu -->
+      <div id="bestSellerStrip" class="strip mb-4"
+           th:if="${topSoldProducts != null and !#lists.isEmpty(topSoldProducts)}">
 
-        <div class="card product-card">
-          <img th:src="@{/assets/images/Giohoa/GiohoaHuongduong.png}" alt="Hoa 3">
-          <div class="card-body">
-            <h6>Chậu hoa hướng dương năng lượng</h6>
-            <p class="text-danger fw-bold">380.000đ</p>
-            <div class="btn-container">
-              <a class="btn btn-outline-primary btn-sm btn-custom" th:href="@{/product-retail}">Xem chi tiết</a>
-              <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-            </div>
-          </div>
-        </div>
+        <div class="strip-viewport">
+          <ul class="strip-track" role="list">
+            <!-- Mỗi item là 1 sản phẩm; luôn thấy 5 item (20% mỗi item) -->
+            <li class="strip-item" th:each="prod : ${topSoldProducts}">
+              <div class="card product-card h-100">
+                <img class="card-img-top"
+                     th:src="${#strings.isEmpty(prod.imageUrl)} ? @{/assets/images/placeholder.png} : @{${prod.imageUrl}}"
+                     th:alt="${prod.productName}">
+                <div class="card-body d-flex flex-column">
+                  <h6 class="mb-2 text-center" th:text="${prod.productName}">Tên sản phẩm</h6>
 
-        <div class="card product-card">
-          <img th:src="@{/assets/images/Bohoa/BohoaTuliphong.png}" alt="Hoa 4">
-          <div class="card-body">
-            <h6>Bó tulip hồng nhẹ nhàng</h6>
-            <p class="text-danger fw-bold">310.000đ</p>
-            <div class="btn-container">
-              <a class="btn btn-outline-primary btn-sm btn-custom" th:href="@{/product-retail}">Xem chi tiết</a>
-              <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-            </div>
-          </div>
-        </div>
+                  <!-- Giá -->
+                  <p class="mb-1 text-center" th:if="${prod.salePrice != null}">
+                    <del th:text="${#numbers.formatDecimal(prod.price,0,'COMMA',0,'POINT')} + 'đ'">0đ</del>
+                    <span class="text-danger fw-bold ms-2"
+                          th:text="${#numbers.formatDecimal(prod.salePrice,0,'COMMA',0,'POINT')} + 'đ'">0đ</span>
+                  </p>
+                  <p class="mb-1 text-center" th:if="${prod.salePrice == null}">
+                    <span class="text-danger fw-bold"
+                          th:text="${#numbers.formatDecimal(prod.price,0,'COMMA',0,'POINT')} + 'đ'">0đ</span>
+                  </p>
 
-        <div class="card product-card">
-          <img th:src="@{/assets/images/Giohoa/GiohoaMixmuaxuan.png}" alt="Hoa 5">
-          <div class="card-body">
-            <h6>Giỏ hoa baby trắng tinh khôi</h6>
-            <p class="text-danger fw-bold">340.000đ</p>
-            <div class="btn-container">
-              <a class="btn btn-outline-primary btn-sm btn-custom" th:href="@{/product-retail}">Xem chi tiết</a>
-              <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-            </div>
-          </div>
-        </div>
+                  <div class="small text-muted text-center mb-3"
+                       th:text="'Đã bán: ' + ${prod.sold}">Đã bán: 0</div>
+
+                  <div class="mt-auto d-flex justify-content-center gap-2">
+                    <a class="btn btn-outline-primary btn-sm btn-custom"
+                       th:href="@{/products/{id}(id=${prod.id})}">Xem chi tiết</a>
+                    <button type="button" class="btn btn-success btn-sm btn-custom"
+                            th:attr="data-id=${prod.id}">Thêm vào giỏ</button>
+                  </div>
+                </div>
+              </div>
+            </li><!-- /strip-item -->
+          </ul><!-- /strip-track -->
+        </div><!-- /strip-viewport -->
       </div>
 
-      <!-- ===== SẢN PHẨM MỚI ===== -->
+      <!-- Không có dữ liệu -->
+      <div class="text-center text-muted"
+           th:if="${topSoldProducts == null or #lists.isEmpty(topSoldProducts)}">
+        Chưa có sản phẩm bán chạy để hiển thị.
+      </div>
+
+      <!-- ===== SẢN PHẨM MỚI (5 sp id lớn nhất) ===== -->
       <h2 class="section-title">🌼 Sản phẩm mới</h2>
-      <div class="product-row">
-        <div class="card product-card">
-          <img th:src="@{/assets/images/Chauhoa/ChauDayenthao.png}" alt="Hoa 6">
-          <div class="card-body">
-            <h6>Chậu hoa dạ yến thảo</h6>
-            <p class="text-danger fw-bold">270.000đ</p>
-            <div class="btn-container">
-              <a class="btn btn-outline-primary btn-sm btn-custom" th:href="@{/product-retail}">Xem chi tiết</a>
-              <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-            </div>
-          </div>
-        </div>
 
-        <!-- 3 item còn lại dùng ảnh CDN nên không cần th:src -->
-        <div class="card product-card">
-          <img src="https://picsum.photos/200/200?7" alt="Hoa 7">
-          <div class="card-body">
-            <h6>Bó hoa hồng pastel nhẹ nhàng</h6>
-            <p class="text-danger fw-bold">290.000đ</p>
-            <div class="btn-container">
-              <a class="btn btn-outline-primary btn-sm btn-custom" th:href="@{/product-retail}">Xem chi tiết</a>
-              <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-            </div>
-          </div>
-        </div>
+      <div class="product-row"
+           th:if="${latestProducts != null and !#lists.isEmpty(latestProducts)}">
 
-        <div class="card product-card">
-          <img src="https://picsum.photos/200/200?8" alt="Hoa 8">
-          <div class="card-body">
-            <h6>Giỏ hoa ly hồng sang trọng</h6>
-            <p class="text-danger fw-bold">400.000đ</p>
-            <div class="btn-container">
-              <a class="btn btn-outline-primary btn-sm btn-custom" th:href="@{/product-retail}">Xem chi tiết</a>
-              <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-            </div>
-          </div>
-        </div>
+        <div class="card product-card" th:each="prod : ${latestProducts}">
+          <img class="card-img-top"
+               th:src="${#strings.isEmpty(prod.imageUrl)} ? @{/assets/images/placeholder.png} : @{${prod.imageUrl}}"
+               th:alt="${prod.productName}">
+          <div class="card-body d-flex flex-column">
+            <h6 class="mb-2" th:text="${prod.productName}">Tên sản phẩm</h6>
 
-        <div class="card product-card">
-          <img src="https://picsum.photos/200/200?9" alt="Hoa 9">
-          <div class="card-body">
-            <h6>Chậu lan tím quý phái</h6>
-            <p class="text-danger fw-bold">550.000đ</p>
-            <div class="btn-container">
-              <a class="btn btn-outline-primary btn-sm btn-custom" th:href="@{/product-retail}">Xem chi tiết</a>
-              <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
+            <!-- Giá -->
+            <p class="mb-1" th:if="${prod.salePrice != null}">
+              <del th:text="${#numbers.formatDecimal(prod.price,0,'COMMA',0,'POINT')} + 'đ'">0đ</del>
+              <span class="text-danger fw-bold ms-2"
+                    th:text="${#numbers.formatDecimal(prod.salePrice,0,'COMMA',0,'POINT')} + 'đ'">0đ</span>
+            </p>
+            <p class="mb-1" th:if="${prod.salePrice == null}">
+              <span class="text-danger fw-bold"
+                    th:text="${#numbers.formatDecimal(prod.price,0,'COMMA',0,'POINT')} + 'đ'">0đ</span>
+            </p>
+
+            <div class="small text-muted mb-3" th:text="'Đã bán: ' + ${prod.sold}">Đã bán: 0</div>
+
+            <div class="mt-auto btn-container d-flex gap-2">
+              <a class="btn btn-outline-primary btn-sm btn-custom"
+                 th:href="@{/products/{id}(id=${prod.id})}">Xem chi tiết</a>
+              <button type="button" class="btn btn-success btn-sm btn-custom"
+                      th:attr="data-id=${prod.id}">Thêm vào giỏ</button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- ===== SẢN PHẨM KHUYẾN MÃI ===== -->
+      <div class="text-center text-muted"
+           th:if="${latestProducts == null or #lists.isEmpty(latestProducts)}">
+        Chưa có sản phẩm mới để hiển thị.
+      </div>
+
+      <!-- ===== SẢN PHẨM KHUYẾN MÃI (ticker như bán chạy) ===== -->
       <h2 class="section-title">🌺 Sản phẩm khuyến mãi</h2>
-      <div class="product-row">
-        <div class="card product-card">
-          <img src="https://picsum.photos/200/200?11" alt="Hoa 11">
-          <div class="card-body">
-            <h6>Bó hoa lavender tím mộng mơ</h6>
-            <p><del>350.000đ</del> <span class="text-danger fw-bold">290.000đ</span></p>
-            <div class="btn-container">
-              <a class="btn btn-outline-primary btn-sm btn-custom" th:href="@{/product-retail}">Xem chi tiết</a>
-              <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-            </div>
-          </div>
-        </div>
 
-        <div class="card product-card">
-          <img src="https://picsum.photos/200/200?12" alt="Hoa 12">
-          <div class="card-body">
-            <h6>Giỏ hoa sen trắng thuần khiết</h6>
-            <p><del>300.000đ</del> <span class="text-danger fw-bold">250.000đ</span></p>
-            <div class="btn-container">
-              <a class="btn btn-outline-primary btn-sm btn-custom" th:href="@{/product-retail}">Xem chi tiết</a>
-              <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-            </div>
-          </div>
-        </div>
+      <div id="saleStrip" class="strip mb-4"
+           th:if="${saleProducts != null and !#lists.isEmpty(saleProducts)}">
+        <div class="strip-viewport">
+          <ul class="strip-track" role="list">
+            <li class="strip-item" th:each="prod : ${saleProducts}">
+              <div class="card product-card h-100">
+                <img class="card-img-top"
+                     th:src="${#strings.isEmpty(prod.imageUrl)} ? @{/assets/images/placeholder.png} : @{${prod.imageUrl}}"
+                     th:alt="${prod.productName}">
+                <div class="card-body d-flex flex-column">
+                  <h6 class="mb-2 text-center" th:text="${prod.productName}">Tên sản phẩm</h6>
 
-        <div class="card product-card">
-          <img src="https://picsum.photos/200/200?13" alt="Hoa 13">
-          <div class="card-body">
-            <h6>Chậu hoa lan hồ điệp trắng</h6>
-            <p><del>600.000đ</del> <span class="text-danger fw-bold">480.000đ</span></p>
-            <div class="btn-container">
-              <a class="btn btn-outline-primary btn-sm btn-custom" th:href="@{/product-retail}">Xem chi tiết</a>
-              <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-            </div>
-          </div>
-        </div>
+                  <!-- Giá gốc + giá sale -->
+                  <p class="mb-1 text-center">
+                    <del th:text="${#numbers.formatDecimal(prod.price,0,'COMMA',0,'POINT')} + 'đ'">0đ</del>
+                    <span class="text-danger fw-bold ms-2"
+                          th:text="${#numbers.formatDecimal(prod.salePrice,0,'COMMA',0,'POINT')} + 'đ'">0đ</span>
+                  </p>
 
-        <div class="card product-card">
-          <img src="https://picsum.photos/200/200?14" alt="Hoa 14">
-          <div class="card-body">
-            <h6>Bó hoa ly vàng tươi</h6>
-            <p><del>280.000đ</del> <span class="text-danger fw-bold">230.000đ</span></p>
-            <div class="btn-container">
-              <a class="btn btn-outline-primary btn-sm btn-custom" th:href="@{/product-retail}">Xem chi tiết</a>
-              <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-            </div>
-          </div>
-        </div>
+                  <div class="small text-muted text-center mb-3"
+                       th:text="'Đã bán: ' + ${prod.sold}">Đã bán: 0</div>
 
-        <div class="card product-card">
-          <img src="https://picsum.photos/200/200?15" alt="Hoa 15">
-          <div class="card-body">
-            <h6>Giỏ hoa đồng tiền rực rỡ</h6>
-            <p><del>350.000đ</del> <span class="text-danger fw-bold">290.000đ</span></p>
-            <div class="btn-container">
-              <a class="btn btn-outline-primary btn-sm btn-custom" th:href="@{/product-retail}">Xem chi tiết</a>
-              <button class="btn btn-success btn-sm btn-custom">Thêm vào giỏ</button>
-            </div>
-          </div>
+                  <div class="mt-auto d-flex justify-content-center gap-2">
+                    <a class="btn btn-outline-primary btn-sm btn-custom"
+                       th:href="@{/products/{id}(id=${prod.id})}">Xem chi tiết</a>
+                    <button type="button" class="btn btn-success btn-sm btn-custom"
+                            th:attr="data-id=${prod.id}">Thêm vào giỏ</button>
+                  </div>
+                </div>
+              </div>
+            </li>
+          </ul>
         </div>
+      </div>
+
+      <div class="text-center text-muted"
+           th:if="${saleProducts == null or #lists.isEmpty(saleProducts)}">
+        Chưa có sản phẩm khuyến mãi để hiển thị.
       </div>
     </div>
 
     <!-- Footer -->
-    <div th:replace="fragments/footer :: footer"></div>
+    <div th:replace="~{fragments/footer :: footer}"></div>
 
     <!-- CDN giữ nguyên -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

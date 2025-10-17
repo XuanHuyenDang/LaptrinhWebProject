@@ -8,6 +8,7 @@ import vn.flower.entities.Product;
 import vn.flower.repositories.ProductRepository;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static vn.flower.repositories.ProductSpecifications.*;
 
@@ -33,5 +34,21 @@ public class ProductServiceImpl implements ProductService {
   public Product getById(Integer id) {
     return productRepository.findById(id)
         .orElseThrow(() -> new IllegalArgumentException("Product not found: " + id));
+  }
+  
+  @Override
+  public List<Product> getTop10BestSellers() {
+      return productRepository.findTop10ByStatusTrueOrderBySoldDescIdDesc();
+      // hoặc cách Pageable ở trên
+  }
+  
+  @Override
+  public List<Product> getLatest5Products() {
+    return productRepository.findTop5ByStatusTrueOrderByIdDesc();
+  }
+  
+  @Override
+  public List<Product> getTop10SaleProducts() {
+    return productRepository.findTop10ByStatusTrueAndSalePriceIsNotNullOrderByIdDesc();
   }
 }
