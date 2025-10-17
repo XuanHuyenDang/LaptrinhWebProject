@@ -7,16 +7,21 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
+
     @Autowired
     private JavaMailSender mailSender;
 
+    // Gửi mã OTP
     public void sendOtp(String toEmail, String otp) {
+        String subject = "Xác nhận đăng ký - Florio Flower Shop";
+        String body = "Xin chào,\n\nMã OTP xác nhận đăng ký của bạn là: " + otp +
+                "\n\nMã này có hiệu lực trong 3 phút.\n\nCảm ơn bạn đã sử dụng dịch vụ Florio 🌸";
+
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
-        message.setSubject("🌸 Mã xác thực StarShop");
-        message.setText("Xin chào,\n\nMã OTP của bạn là: " + otp +
-                        "\n\nMã có hiệu lực trong 5 phút.\nTrân trọng,\nĐội ngũ StarShop.");
+        message.setSubject(subject);
+        message.setText(body);
+
         mailSender.send(message);
     }
 }
-

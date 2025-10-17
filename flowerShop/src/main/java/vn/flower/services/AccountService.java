@@ -1,5 +1,7 @@
 package vn.flower.services;
 
+import java.time.LocalDateTime;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,14 +18,25 @@ public class AccountService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public Account register(Account account) {
-        if (accountRepository.existsByEmail(account.getEmail())) {
-            throw new RuntimeException("Email đã được sử dụng");
-        }
-        account.setPassword(passwordEncoder.encode(account.getPassword()));
-        account.setRole("USER");
-        return accountRepository.save(account);
+    public boolean existsByEmail(String email) {
+        return accountRepository.existsByEmail(email);
     }
+    
+    public boolean register(Account account) {
+        // Kiểm tra email đã tồn tại chưa
+        if (accountRepository.findByEmail(account.getEmail()).isPresent()) {
+            return false;
+        }
+
+        // Gán giá trị mặc định
+        account.setPassword(passwordEncoder.encode(account.getPassword())); // mã hoá mật khẩu
+        account.setRole("customer");
+        account.setCreatedAt(LocalDateTime.now());
+
+        accountRepository.save(account);
+        return true;
+    }
+    
 
     public Account login(String email, String password) {
         Account account = accountRepository.findByEmail(email)

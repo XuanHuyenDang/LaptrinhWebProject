@@ -1,4 +1,4 @@
-package vn.flower.config;
+package vn.flower.Config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -33,16 +33,14 @@ public class SecurityConfig {
 		http.csrf(csrf -> csrf.disable())
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/", "/index", "/auth/**", "/register", "/login", "/assets/**", "/css/**",
-								"/js/**", "/images/**")
+								"/js/**", "/images/**","/slider/**")
 						.permitAll().requestMatchers("/admin/**").hasRole("ADMIN").anyRequest().authenticated())
 				.formLogin(form -> form.loginPage("/auth/login").loginProcessingUrl("/auth/login")
 						.usernameParameter("email").passwordParameter("password").successHandler(customSuccessHandler)
 						.failureUrl("/auth/login?error=true").permitAll())
-				.logout(logout -> logout
-					    .logoutUrl("/auth/logout")
-					    .logoutSuccessUrl("/index")
-					    .permitAll()
-					)
+				.logout(logout -> logout.logoutUrl("/auth/logout").logoutSuccessUrl("/index").permitAll())
+				.sessionManagement(session -> session.sessionCreationPolicy(
+						org.springframework.security.config.http.SessionCreationPolicy.IF_REQUIRED))
 
 				.authenticationProvider(authenticationProvider());
 

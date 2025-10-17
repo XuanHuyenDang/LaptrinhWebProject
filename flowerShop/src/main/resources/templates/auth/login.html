@@ -62,8 +62,6 @@ a:hover {
 </head>
 <body>
 
-	<!-- Header -->
-	<div id="header-placeholder"></div>
 
 	<!-- Nội dung đăng nhập -->
 	<div class="container">
@@ -103,13 +101,24 @@ a:hover {
 			<hr>
 
 			<p class="text-center small">
-				Chưa có tài khoản? <a href="register.html">Đăng ký ngay</a>
+				Chưa có tài khoản? <a th:href="@{/auth/register}">Đăng ký ngay</a>
+
 			</p>
 		</div>
 	</div>
+	<script>
+		// Nếu URL chứa ?verified=true thì hiển thị messagebox
+		const urlParams = new URLSearchParams(window.location.search);
+		if (urlParams.get('verified') === 'true') {
+			alert("✅ Xác thực thành công! Vui lòng đăng nhập.");
+			// Sau khi báo xong, xóa param để không hiện lại nếu reload
+			window.history.replaceState({}, document.title,
+					window.location.pathname);
+		}
+	</script>
 
 	<!-- Footer -->
-	<div id="footer-placeholder"></div>
+	<div th:replace="fragments/footer :: footer"></div>
 
 </body>
 </html>

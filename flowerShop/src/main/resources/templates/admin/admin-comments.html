@@ -1,199 +1,243 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Quản lý Bình luận - Florio Admin</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-  <style>
-    body {
-      background-color: #fffafc;
-      font-family: "Segoe UI", sans-serif;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quản lý Bình luận - Florio Admin</title>
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+	rel="stylesheet">
+<style>
+body {
+	background-color: #fffafc;
+	font-family: "Segoe UI", sans-serif;
+}
 
-    .sidebar {
-      position: fixed;
-      top: 0; left: 0;
-      height: 100vh; width: 250px;
-      background: linear-gradient(180deg, #ffb6c1 0%, #ffe5ec 100%);
-      color: #4a4a4a;
-      padding-top: 1rem;
-      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-    }
+.sidebar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: 100vh;
+	width: 250px;
+	background: linear-gradient(180deg, #ffb6c1 0%, #ffe5ec 100%);
+	color: #4a4a4a;
+	padding-top: 1rem;
+	box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
 
-    .sidebar h5 {
-      font-weight: bold;
-      color: #c2185b;
-    }
+.sidebar h5 {
+	font-weight: bold;
+	color: #c2185b;
+}
 
-    .sidebar a {
-      color: #5a5a5a;
-      text-decoration: none;
-      display: block;
-      padding: 10px 20px;
-      border-radius: 8px;
-      margin: 3px 10px;
-      transition: all 0.3s ease;
-      font-weight: 500;
-    }
+.sidebar a {
+	color: #5a5a5a;
+	text-decoration: none;
+	display: block;
+	padding: 10px 20px;
+	border-radius: 8px;
+	margin: 3px 10px;
+	transition: all 0.3s ease;
+	font-weight: 500;
+}
 
-    .sidebar a:hover,
-    .sidebar a.active {
-      background: #fff;
-      color: #c2185b;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-      transform: translateX(3px);
-    }
+.sidebar a:hover, .sidebar a.active {
+	background: #fff;
+	color: #c2185b;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+	transform: translateX(3px);
+}
 
-    .sidebar i { color: #c2185b; }
+.sidebar i {
+	color: #c2185b;
+}
 
-    main {
-      margin-left: 270px;
-      padding: 30px;
-    }
+main {
+	margin-left: 270px;
+	padding: 30px;
+}
 
-    h3 {
-      color: #c2185b;
-      font-weight: 700;
-    }
+h3 {
+	color: #c2185b;
+	font-weight: 700;
+}
 
-    .panel {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-      padding: 18px;
-    }
+.panel {
+	background: #fff;
+	border-radius: 12px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+	padding: 18px;
+}
 
-    .panel .controls {
-      gap: 12px;
-    }
+.panel .controls {
+	gap: 12px;
+}
 
-    .table {
-      border-radius: 10px;
-      overflow: hidden;
-      background: #fff;
-    }
+.table {
+	border-radius: 10px;
+	overflow: hidden;
+	background: #fff;
+}
 
-    thead th {
-      background-color: #ffe5ec;
-      color: #4a4a4a;
-      font-weight: 600;
-    }
+thead th {
+	background-color: #ffe5ec;
+	color: #4a4a4a;
+	font-weight: 600;
+}
 
-    .btn-outline-primary {
-      border-color: #c2185b;
-      color: #c2185b;
-    }
-    .btn-outline-primary:hover {
-      background-color: #c2185b;
-      color: #fff;
-    }
+.btn-outline-primary {
+	border-color: #c2185b;
+	color: #c2185b;
+}
 
-    .btn-outline-danger {
-      border-color: #dc3545;
-      color: #dc3545;
-    }
-    .btn-outline-danger:hover {
-      background-color: #dc3545;
-      color: #fff;
-    }
+.btn-outline-primary:hover {
+	background-color: #c2185b;
+	color: #fff;
+}
 
-    .badge {
-      font-size: 0.85rem;
-    }
+.btn-outline-danger {
+	border-color: #dc3545;
+	color: #dc3545;
+}
 
-    .text-rating { color: #f0ad4e; }
+.btn-outline-danger:hover {
+	background-color: #dc3545;
+	color: #fff;
+}
 
-    @media (max-width: 768px) {
-      main { margin-left: 0; padding: 16px; }
-      .sidebar { width: 100%; height: auto; position: relative; }
-    }
-  </style>
+.badge {
+	font-size: 0.85rem;
+}
+
+.text-rating {
+	color: #f0ad4e;
+}
+
+@media ( max-width : 768px) {
+	main {
+		margin-left: 0;
+		padding: 16px;
+	}
+	.sidebar {
+		width: 100%;
+		height: auto;
+		position: relative;
+	}
+}
+.logout-form {
+  position: absolute;
+  bottom: 160px;        /* Cố định ở gần cuối sidebar */
+  left: 45%;
+  transform: translateX(-50%); /* Căn giữa theo chiều ngang */
+  text-align: center;
+}
+</style>
 </head>
 <body>
 
-  <!-- Sidebar -->
-  <nav class="sidebar">
-    <h5 class="text-center"><i class="bi bi-flower1 me-1"></i> Florio Admin</h5>
-    <hr class="text-muted">
-    <a href="admin-dashboard.html"><i class="bi bi-speedometer2 me-2"></i> Tổng quan</a>
-    <a href="admin-categories.html"><i class="bi bi-list-ul me-2"></i> Danh mục</a>
-    <a href="admin-orders.html"><i class="bi bi-cart4 me-2"></i> Đơn hàng</a>
-    <a href="admin-customers.html"><i class="bi bi-people me-2"></i> Khách hàng</a>
-    <a href="admin-comments.html" class="active"><i class="bi bi-chat-left-text me-2"></i> Bình luận</a>
-    <hr class="text-muted">
-    <a href="../index.html"><i class="bi bi-box-arrow-right me-2"></i> Đăng xuất</a>
-  </nav>
+	<!-- Sidebar -->
+	<nav class="sidebar">
+		<h5 class="text-center">
+			<i class="bi bi-flower1 me-1"></i> Florio Admin
+		</h5>
+		<hr class="text-muted">
+		<a th:href="@{/admin/dashboard}"> <i
+			class="bi bi-speedometer2 me-2"></i> Tổng quan
+		</a> <a th:href="@{/admin/categories}"> <i class="bi bi-list-ul me-2"></i>
+			Danh mục
+		</a> <a th:href="@{/admin/orders}"> <i class="bi bi-cart4 me-2"></i>
+			Đơn hàng
+		</a> <a th:href="@{/admin/customers}"> <i class="bi bi-people me-2"></i>
+			Khách hàng
+		</a> <a th:href="@{/admin/comments}" class="active"> <i
+			class="bi bi-chat-left-text me-2"></i> Bình luận
+		</a>
+		<hr class="text-muted">
+		<form th:action="@{/auth/logout}" method="post" class="logout-form">
+			<button type="submit" class="btn btn-outline-danger">
+				<i class="bi bi-box-arrow-right"></i> Đăng xuất
+			</button>
+		</form>
+	</nav>
 
-  <!-- Main -->
-  <main>
-    <h3 class="mb-3"><i class="bi bi-chat-left-text me-2"></i>Quản lý Bình luận</h3>
+	<!-- Main -->
+	<main>
+		<h3 class="mb-3">
+			<i class="bi bi-chat-left-text me-2"></i>Quản lý Bình luận
+		</h3>
 
-    <div class="panel mb-4">
-      <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-3 controls">
-        <div class="w-100 me-2 mb-2 mb-md-0">
-          <input type="text" class="form-control form-control-sm" placeholder="Tìm theo khách hàng hoặc sản phẩm...">
-        </div>
-        <div class="d-flex align-items-center">
-          <select class="form-select form-select-sm me-2">
-            <option value="">Lọc theo tên sản phẩm</option>
-            <option value="">Lọc theo tên khách hàng</option>
-          </select>
-          <!-- ĐÃ XÓA nút Lọc và nút Thêm bình luận -->
-        </div>
-      </div>
+		<div class="panel mb-4">
+			<div
+				class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-3 controls">
+				<div class="w-100 me-2 mb-2 mb-md-0">
+					<form th:action="@{/admin/comments}" method="get"
+						class="d-flex w-100 me-2 mb-2 mb-md-0">
+						<input type="text" name="keyword" th:value="${keyword}"
+							class="form-control form-control-sm"
+							placeholder="Tìm theo khách hàng hoặc sản phẩm...">
+						<button type="submit" class="btn btn-sm btn-outline-primary ms-2">Tìm</button>
+					</form>
 
-      <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle mb-0">
-          <thead class="text-center">
-            <tr>
-              <th style="width:14%">Khách hàng</th>
-              <th style="width:16%">Sản phẩm</th>
-              <th>Nội dung bình luận</th>
-              <th style="width:10%">Đánh giá</th>
-              <th style="width:14%">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="align-middle">Nguyễn Văn A</td>
-              <td class="align-middle">Bó hoa hồng đỏ</td>
-              <td class="align-middle">Hoa rất đẹp, giao hàng nhanh và đóng gói cẩn thận.</td>
-              <td class="text-center align-middle"><span class="text-rating">★★★★★</span></td>
-              <td class="text-center align-middle">
-                <!-- ĐÃ XÓA nút Sửa -->
-                <a href="#" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Xóa</a>
-              </td>
-            </tr>
+				</div>
+				<div class="d-flex align-items-center">
+					<form th:action="@{/admin/comments}" method="get"
+						class="d-flex align-items-center">
+						<select name="filterBy" class="form-select form-select-sm me-2">
+							<option value="">Lọc theo</option>
+							<option value="product" th:selected="${filterBy=='product'}">Tên
+								sản phẩm</option>
+							<option value="customer" th:selected="${filterBy=='customer'}">Tên
+								khách hàng</option>
+						</select>
+						<button type="submit" class="btn btn-sm btn-outline-primary">Lọc</button>
+					</form>
 
-            <tr>
-              <td class="align-middle">Trần Thị B</td>
-              <td class="align-middle">Giỏ hoa lan tím</td>
-              <td class="align-middle">Bó hoa tươi, màu sắc đẹp nhưng giao chậm hơn dự kiến.</td>
-              <td class="text-center align-middle"><span class="text-rating">★★★★☆</span></td>
-              <td class="text-center align-middle">
-                <!-- ĐÃ XÓA nút Sửa -->
-                <a href="#" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Xóa</a>
-              </td>
-            </tr>
+				</div>
+			</div>
 
-            <tr>
-              <td class="align-middle">Lê Minh C</td>
-              <td class="align-middle">Chậu hoa lan trắng</td>
-              <td class="align-middle">Sản phẩm chất lượng, nhưng cần cải thiện thời gian giao.</td>
-              <td class="text-center align-middle"><span class="text-rating">★★★☆☆</span></td>
-              <td class="text-center align-middle">
-                <!-- ĐÃ XÓA nút Sửa -->
-                <a href="#" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Xóa</a>
-              </td>
-            </tr>
+			<div class="table-responsive">
+				<table class="table table-bordered table-hover align-middle mb-0">
+					<thead class="text-center">
+						<tr>
+							<th style="width: 14%">Khách hàng</th>
+							<th style="width: 16%">Sản phẩm</th>
+							<th>Nội dung bình luận</th>
+							<th style="width: 10%">Đánh giá</th>
+							<th style="width: 14%">Thao tác</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="review : ${reviews}">
+							<td class="align-middle" th:text="${review.account.fullName}">Tên
+								khách</td>
+							<td class="align-middle" th:text="${review.product.productName}">Tên
+								sản phẩm</td>
+							<td class="align-middle" th:text="${review.comment}">Nội
+								dung bình luận</td>
+							<td class="text-center align-middle"><span
+								class="text-rating"
+								th:text="${'★'.repeat(review.rating) + '☆'.repeat(5 - review.rating)}">★★★★★</span>
+							</td>
+							<td class="text-center align-middle">
+								<form th:action="@{'/admin/comments/delete/' + ${review.id}}"
+									method="post" style="display: inline;">
+									<input type="hidden" name="_method" value="delete" />
+									<button type="submit" class="btn btn-sm btn-outline-danger"
+										onclick="return confirm('Bạn có chắc muốn xóa bình luận này không?')">
+										<i class="bi bi-trash"></i> Xóa
+									</button>
+								</form>
+							</td>
+						</tr>
+					</tbody>
 
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </main>
+				</table>
+			</div>
+		</div>
+	</main>
 
 </body>
 </html>

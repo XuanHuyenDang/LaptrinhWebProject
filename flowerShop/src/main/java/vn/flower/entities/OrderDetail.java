@@ -14,7 +14,7 @@ public class OrderDetail {
   @JoinColumn(name = "OrderId")
   private Order order;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @MapsId("productId")
   @JoinColumn(name = "ProductId")
   private Product product;

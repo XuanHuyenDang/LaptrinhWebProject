@@ -13,7 +13,7 @@ public class Order {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "AccountId")
   private Account account;
 
@@ -44,8 +44,9 @@ public class Order {
   @Column(name = "Status", length = 50)
   private String status;
 
-  @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
   private List<OrderDetail> details = new ArrayList<>();
+
 
   // getters/setters
   public Integer getId(){ return id; }
