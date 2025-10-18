@@ -30,22 +30,57 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http.csrf(csrf -> csrf.disable())
-				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/", "/index", "/auth/**", "/register", "/login", "/assets/**", "/css/**",
-								"/js/**", "/images/**","/slider/**")
-						.permitAll().requestMatchers("/admin/**").hasRole("ADMIN").anyRequest().authenticated())
-				.formLogin(form -> form.loginPage("/auth/login").loginProcessingUrl("/auth/login")
-						.usernameParameter("email").passwordParameter("password").successHandler(customSuccessHandler)
-						.failureUrl("/auth/login?error=true").permitAll())
-				.logout(logout -> logout.logoutUrl("/auth/logout").logoutSuccessUrl("/index").permitAll())
-				.sessionManagement(session -> session.sessionCreationPolicy(
-						org.springframework.security.config.http.SessionCreationPolicy.IF_REQUIRED))
+	  http
+	    .csrf(csrf -> csrf.disable())
+	    .authorizeHttpRequests(auth -> auth
+	      // Public: trang chủ + static
+	      .requestMatchers("/", "/index",
+	          "/assets/**", "/css/**", "/js/**", "/images/**", "/slider/**").permitAll()
 
-				.authenticationProvider(authenticationProvider());
+	      // Public: TRANG SẢN PHẨM (page & api)
+	      .requestMatchers(
+	          "/products", "/products/**",      // danh sách / phân trang / lọc
+	          "/product/**",                    // chi tiết sản phẩm kiểu /product/{id}
+	          "/product-detail/**",             // nếu bạn dùng route này
+	          "/api/products/**"                // API công khai cho trang sản phẩm (nếu có)
+	      ).permitAll()
+	      
+	      //
+	      .requestMatchers("/about/**", "/about").permitAll()
+	      
+	      // Public: auth pages
+	      .requestMatchers("/auth/**", "/register", "/login").permitAll()
 
-		return http.build();
+	      // Admin
+	      .requestMatchers("/admin/**").hasRole("ADMIN")
+
+	      // Các route còn lại yêu cầu đăng nhập
+	      .anyRequest().authenticated()
+	    )
+	    .formLogin(form -> form
+	      .loginPage("/auth/login")
+	      .loginProcessingUrl("/auth/login")
+	      .usernameParameter("email")
+	      .passwordParameter("password")
+	      .successHandler(customSuccessHandler)
+	      .failureUrl("/auth/login?error=true")
+	      .permitAll()
+	    )
+	    .logout(logout -> logout
+	      .logoutUrl("/auth/logout")
+	      .logoutSuccessUrl("/index")
+	      .permitAll()
+	    )
+	    .sessionManagement(session -> session
+	      .sessionCreationPolicy(
+	        org.springframework.security.config.http.SessionCreationPolicy.IF_REQUIRED
+	      )
+	    )
+	    .authenticationProvider(authenticationProvider());
+
+	  return http.build();
 	}
+
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {

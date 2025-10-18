@@ -1,77 +1,7 @@
-// === Generic strip ticker: shift N items every interval ===
-function initStripTicker(
-  root,
-  { interval = 1000, anim = 350, minToAuto = 5, stepCount = 1 } = {}
-) {
-  if (!root) return;
-  const track = root.querySelector('.strip-track');
-  if (!track) return;
-
-  let timer = null, animating = false;
-
-  function forward() {
-    const items = Array.from(track.children);
-    if (animating || items.length < stepCount) return; // < stepCount thì không chạy
-
-    const gap = parseFloat(getComputedStyle(track).gap || 0);
-
-    // tổng quãng dịch = width của stepCount item đầu + (stepCount-1)*gap
-    let shift = 0;
-    for (let i = 0; i < stepCount; i++) {
-      shift += items[i].getBoundingClientRect().width;
-      if (i < stepCount - 1) shift += gap;
-    }
-
-    animating = true;
-    track.style.transition = `transform ${anim}ms ease`;
-    track.style.transform  = `translateX(-${shift}px)`;
-
-    setTimeout(() => {
-      // đẩy nguyên nhóm stepCount item ra cuối để lặp vòng
-      for (let i = 0; i < stepCount; i++) {
-        const first = track.firstElementChild;
-        if (first) track.appendChild(first);
-      }
-      track.style.transition = 'none';
-      track.style.transform  = 'translateX(0)';
-      void track.offsetWidth; // reflow
-      animating = false;
-    }, anim);
-  }
-
-  function start(){ if (!timer) timer = setInterval(forward, interval); }
-  function stop(){ if (timer){ clearInterval(timer); timer = null; } }
-
-  // Auto-run khi số item >= minToAuto
-  if (track.children.length >= minToAuto) start();
-
-  root.addEventListener('mouseenter', stop);
-  root.addEventListener('mouseleave', start);
-}
-
-// Khởi tạo: bán chạy (1 sản phẩm/lần), khuyến mãi (5 sản phẩm/lần)
-document.addEventListener('DOMContentLoaded', function () {
-  initStripTicker(document.getElementById('bestSellerStrip'), {
-    interval: 1500,
-    anim: 350,
-    minToAuto: 5,
-    stepCount: 1
-  });
-
-  // Khuyến mãi: nếu < 5 item thì không chạy (nhờ điều kiện items.length < stepCount)
-  initStripTicker(document.getElementById('saleStrip'), {
-    interval: 3000,
-    anim: 750,
-    minToAuto: 5,
-    stepCount: 5
-  });
-});
-
 // =========================
-//  ADD TO CART
+//  ADD TO CART for product detail
 // =========================
 (() => {
-  // Lấy base API từ global (nếu có) hoặc mặc định
   const API_BASE = (window.CART_CFG && window.CART_CFG.API_BASE) || '/api/cart';
 
   // ---- CSRF & fetch helpers ----
@@ -123,13 +53,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (btn.dataset.oldHtml) btn.innerHTML = btn.dataset.oldHtml;
     }
   }
-  function flash(btn, text, cls = 'text-success') {
-    const old = btn.innerHTML;
-    btn.innerHTML = text;
-    btn.classList.add(cls);
-    setTimeout(() => { btn.innerHTML = old; btn.classList.remove(cls); }, 1200);
-  }
-  function showToast(msg, type = 'danger') {
+  function showToast(msg, type = 'success') {
     let box = document.getElementById('global-toast');
     if (!box) {
       box = document.createElement('div');
@@ -147,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function () {
     setTimeout(() => el.remove(), 2500);
   }
 
-  // ---- Gắn hành vi cho toàn trang: mọi nút .btn-add-to-cart ----
+  // ---- Event: click trên mọi nút .btn-add-to-cart ----
   document.addEventListener('click', async (e) => {
     const btn = e.target.closest('.btn-add-to-cart');
     if (!btn) return;
@@ -155,18 +79,26 @@ document.addEventListener('DOMContentLoaded', function () {
     const id = Number(btn.dataset.id);
     if (!id) return;
 
+    // Nếu có chỉ định selector số lượng (nút chính), lấy từ đó; ngược lại qty=1 (related)
+    let qty = 1;
+    const qtySel = btn.getAttribute('data-qty-selector');
+    if (qtySel) {
+      const input = document.querySelector(qtySel);
+      const val = Number(input?.value || 1);
+      qty = isNaN(val) || val < 1 ? 1 : Math.floor(val);
+    }
+
     try {
       spin(btn, true);
-      await apiAddItem(id, 1);
-      flash(btn, 'Đã thêm ✓', 'text-success');
-      showToast('Đã thêm vào giỏ hàng!', 'success'); // ✅ thêm thông báo thành công
-      // Cho header/minicart biết là giỏ đã đổi (nếu có lắng nghe)
-      document.dispatchEvent(new CustomEvent('cart:updated', { detail: { productId: id } }));
+      await apiAddItem(id, qty);
+      showToast('Đã thêm vào giỏ hàng!', 'success');
+      // Thông báo cho header/minicart (nếu có lắng nghe)
+      document.dispatchEvent(new CustomEvent('cart:updated', { detail: { productId: id, quantity: qty } }));
     } catch (err) {
       const ct = String(err.contentType || '');
       if (err.status === 401 || err.status === 403 || !ct.includes('application/json')) {
         showToast('Vui lòng đăng nhập để thêm vào giỏ.', 'warning');
-        setTimeout(() => { window.location.href = '/login'; }, 800); // đổi URL nếu login khác
+        setTimeout(() => { window.location.href = '/login'; }, 800);
       } else {
         showToast(err.message || 'Không thêm được vào giỏ', 'danger');
       }

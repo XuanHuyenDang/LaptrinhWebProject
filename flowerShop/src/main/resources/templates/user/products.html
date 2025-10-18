@@ -5,11 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Sản phẩm - Florio Flower Shop</title>
 
+  <!-- CSRF: chỉ render khi _csrf có trong model (tránh lỗi khi bạn đang disable CSRF) -->
+  <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
+  <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
+
   <!-- Bootstrap CDN -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
-  <!-- CSS nội bộ -->
+  <!-- CSS -->
   <link rel="stylesheet" th:href="@{/assets/css/products.css}">
   <link rel="stylesheet" th:href="@{/assets/css/header.css}">
   <link rel="stylesheet" th:href="@{/assets/css/footer.css}">
@@ -36,16 +40,9 @@
           <div class="col-md-3">
             <select name="categoryId" class="form-select" th:value="${categoryId}">
               <option value="">Tất cả danh mục</option>
-              <!-- Nếu đã đưa list categories vào model -->
               <option th:each="c : ${categories}"
                       th:value="${c.id}"
                       th:text="${c.categoryName}">Danh mục</option>
-
-              <!-- Nếu CHƯA có categories trong model, có thể tạm hard-code:
-              <option value="1">Bó hoa</option>
-              <option value="2">Giỏ hoa</option>
-              <option value="3">Chậu hoa</option>
-              -->
             </select>
           </div>
 
@@ -80,7 +77,7 @@
              th:text="'Tổng: ' + ${page.totalElements} + ' sản phẩm'">Tổng: 0 sản phẩm</small>
     </div>
 
-    <!-- Danh sách sản phẩm -->
+    <!-- Không có sản phẩm -->
     <div class="row" th:if="${#lists.isEmpty(products)}">
       <div class="col">
         <div class="alert alert-warning d-flex align-items-center" role="alert">
@@ -90,16 +87,15 @@
       </div>
     </div>
 
-    <!-- Lưới sản phẩm: 2 cột mobile, 3 cột md, 4 cột lg -->
-<div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3" th:if="${!#lists.isEmpty(products)}">
-  <div class="col" th:each="p : ${products}">
-    <div class="card h-100 shadow-sm">
-      <div class="ratio ratio-1x1">
-        <img class="card-img-top object-fit-cover"
-             th:src="${p.imageUrl} ?: @{/assets/images/placeholder.png}"
-             th:alt="${p.productName}">
-      </div>
-
+    <!-- Lưới sản phẩm -->
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3" th:if="${!#lists.isEmpty(products)}">
+      <div class="col" th:each="p : ${products}">
+        <div class="card h-100 shadow-sm">
+          <div class="ratio ratio-1x1">
+            <img class="card-img-top object-fit-cover"
+                 th:src="${p.imageUrl} ?: @{/assets/images/placeholder.png}"
+                 th:alt="${p.productName}">
+          </div>
 
           <div class="card-body d-flex flex-column">
             <h6 class="card-title mb-2" th:text="${p.productName}">Tên sản phẩm</h6>
@@ -119,8 +115,12 @@
               <a class="btn btn-outline-primary btn-sm" th:href="@{|/products/${p.id}|}">
                 <i class="bi bi-eye"></i> Xem chi tiết
               </a>
-              <button class="btn btn-primary btn-sm"
-                      th:attr="data-id=${p.id},data-name=${p.productName},data-price=${p.salePrice != null ? p.salePrice : p.price}">
+
+              <!-- Nút Thêm giỏ hàng -->
+              <button type="button" class="btn btn-primary btn-sm btn-add-cart"
+                      th:attr="data-id=${p.id},
+                               data-name=${p.productName},
+                               data-price=${p.salePrice != null ? p.salePrice : p.price}">
                 <i class="bi bi-cart-plus"></i> Thêm vào giỏ
               </button>
             </div>
@@ -156,8 +156,26 @@
         </li>
       </ul>
     </nav>
-
   </main>
+
+  <!-- Toast thông báo -->
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
+    <div id="cartToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          Đã thêm <span id="toast-product-name" class="fw-semibold"></span> vào giỏ hàng!
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+
+    <div id="errorToast" class="toast align-items-center text-bg-danger border-0 mt-2" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body" id="errorToastMsg">Lỗi không xác định</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
 
   <!-- FOOTER (fragment) -->
   <div th:replace="fragments/footer :: footer"></div>
@@ -165,8 +183,80 @@
   <!-- Bootstrap JS CDN -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-  <!-- (Không cần JS nội bộ để render danh sách nữa vì đã SSR bằng Thymeleaf)
-       Nếu bạn có JS xử lý giỏ hàng, vẫn có thể nạp tại đây: -->
-  <!-- <script th:src="@{/assets/js/cart.js}"></script> -->
+  <!-- Add-to-cart JS -->
+  <script th:inline="javascript">
+    const CART_ITEMS_API = /*[[@{/api/cart/items}]]*/ '/api/cart/items';
+    const LOGIN_URL      = /*[[@{/auth/login}]]*/ '/auth/login';
+
+    function buildHeaders() {
+      const headers = { 'Content-Type': 'application/json' };
+      const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+      const headerName = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+      if (token && headerName) headers[headerName] = token;
+      return headers;
+    }
+
+    const fmtVND = (n) =>
+      new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(n ?? 0);
+
+    function showToast(ok, msg, productName) {
+      if (ok) {
+        document.getElementById('toast-product-name').textContent = productName || '';
+        new bootstrap.Toast(document.getElementById('cartToast'), { delay: 1500 }).show();
+      } else {
+        document.getElementById('errorToastMsg').textContent = msg || 'Có lỗi xảy ra';
+        new bootstrap.Toast(document.getElementById('errorToast'), { delay: 1800 }).show();
+      }
+    }
+
+    function setCartCount(n) {
+      const badge = document.querySelector('[data-cart-count]');
+      if (badge) badge.textContent = n ?? 0;
+    }
+
+    async function addToCart(productId, quantity = 1) {
+      const res = await fetch(CART_ITEMS_API, {
+        method: 'POST',
+        headers: buildHeaders(),
+        body: JSON.stringify({ productId: productId, quantity: quantity })
+      });
+
+      if (res.status === 401) {
+        // chưa đăng nhập → chuyển sang trang login
+        window.location.href = LOGIN_URL + '?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+        return null;
+      }
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(txt || 'Không thêm vào giỏ được');
+      }
+      return await res.json(); // CartView
+    }
+
+    document.addEventListener('click', async (e) => {
+      const btn = e.target.closest('.btn-add-cart');
+      if (!btn) return;
+
+      const pid = Number(btn.getAttribute('data-id'));
+      const name = btn.getAttribute('data-name');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang thêm...';
+
+      try {
+        const cart = await addToCart(pid, 1);
+        if (cart) {
+          // cập nhật badge số lượng (tổng số dòng hoặc tổng qty tùy bạn — ở đây dùng số dòng)
+          setCartCount((cart.lines?.length) || 0);
+          showToast(true, null, name);
+        }
+      } catch (err) {
+        showToast(false, err.message || 'Thêm giỏ hàng thất bại');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-cart-plus"></i> Thêm vào giỏ';
+      }
+    });
+  </script>
 </body>
 </html>
