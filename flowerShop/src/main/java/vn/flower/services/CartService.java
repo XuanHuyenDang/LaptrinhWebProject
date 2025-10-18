@@ -142,6 +142,13 @@ public class CartService {
     cart.setOrderDate(LocalDateTime.now());
     cart.setStatus("PENDING");
 
+    // ➕ NEW: tăng sold cho sản phẩm
+    for (OrderDetail d : lines) {
+      Product p = d.getProduct();
+      p.setSold((p.getSold() == null ? 0 : p.getSold()) + d.getQuantity());
+      productRepo.save(p);
+    }
+
     orderRepo.save(cart);
     return cart.getId();
   }
