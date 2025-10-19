@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,21 +8,26 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <style>
-    body { background-color: #f8f9fa; }
+    body {
+      background-color: #f8f9fa;
+    }
+
     .checkout-container {
       max-width: 950px;
       margin: 50px auto;
       background: #fff;
       border-radius: 12px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
       padding: 30px;
     }
+
     .section-title {
       font-weight: 600;
       border-bottom: 2px solid #e0e0e0;
       padding-bottom: 8px;
       margin-bottom: 20px;
     }
+
     .payment-option {
       border: 1px solid #dee2e6;
       border-radius: 8px;
@@ -29,13 +35,16 @@
       transition: 0.2s;
       cursor: pointer;
     }
+
     .payment-option:hover {
       border-color: #dc3545;
       background: #fff6f6;
     }
+
     .payment-option input {
       margin-right: 10px;
     }
+
     .bank-info {
       background-color: #f8f9fa;
       border: 1px dashed #aaa;
@@ -46,6 +55,7 @@
     }
   </style>
 </head>
+
 <body>
 
   <div class="checkout-container">
@@ -112,7 +122,7 @@
     <!-- Hình thức thanh toán -->
     <div class="mb-4">
       <h5 class="section-title"><i class="bi bi-cash-coin"></i> Hình thức thanh toán</h5>
-      
+
       <div class="payment-option mb-2">
         <input type="radio" name="payment" id="cod" value="COD" checked>
         <label for="cod" class="mb-0 fw-semibold">💵 Thanh toán khi nhận hàng (COD)</label>
@@ -154,7 +164,13 @@
       if (codOption.checked) bankInfo.style.display = "none";
     });
 
-    // Xử lý xác nhận đặt hàng
+    // Lưu đơn hàng vào localStorage
+    function saveOrder(order) {
+      let orders = JSON.parse(localStorage.getItem("orderHistory")) || [];
+      orders.push(order);
+      localStorage.setItem("orderHistory", JSON.stringify(orders));
+    }
+
     confirmBtn.addEventListener("click", (e) => {
       e.preventDefault();
       const name = document.getElementById("name").value.trim();
@@ -167,14 +183,57 @@
       }
 
       const payment = document.querySelector('input[name="payment"]:checked').value;
-      alert(`Cảm ơn ${name}! Đơn hàng của bạn đã được ghi nhận.\nPhương thức thanh toán: ${payment === "COD" ? "Tiền mặt" : "Chuyển khoản"}.`);
+      const paymentText = payment === "COD" ? "Tiền mặt khi nhận hàng" : "Chuyển khoản ngân hàng";
 
-      // Chuyển về trang chủ sau 2 giây
+      // Tạo đơn hàng mẫu (dữ liệu thật bạn có thể lấy từ giỏ hàng)
+      const order = {
+        id: "DH" + Date.now(),
+        name,
+        phone,
+        address,
+        total: "850000",
+        payment: paymentText,
+        status: "Đang xử lý",
+        date: new Date().toLocaleString("vi-VN"),
+        items: [
+          { name: "Bó hoa hồng đỏ", quantity: 1, price: 350000 },
+          { name: "Giỏ hoa lan trắng", quantity: 1, price: 500000 }
+        ]
+      };
+
+      saveOrder(order);
+
+      // alert(`Cảm ơn ${name}! Đơn hàng của bạn đã được ghi nhận.\nPhương thức thanh toán: ${paymentText}.`);
+      // Hiển thị modal lớn ở giữa
+      document.getElementById("modalTitle").innerText = "Đặt hàng thành công!";
+      document.getElementById("modalMessage").innerHTML = `
+  Cảm ơn <strong>${name}</strong>! Đơn hàng của bạn đã được ghi nhận.<br>
+  Phương thức thanh toán: <strong>${paymentText}</strong>.
+`;
+
+      const modal = new bootstrap.Modal(document.getElementById("successModal"));
+      modal.show();
+      // Chuyển sang trang lịch sử sau 2 giây
       setTimeout(() => {
-        window.location.href = "index.html";
+        window.location.href = "order-history.html";
       }, 2000);
     });
   </script>
+  <!-- Modal thông báo -->
+  <div class="modal fade" id="successModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-center p-4">
+        <div class="modal-body">
+          <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+          <h4 class="mt-3" id="modalTitle">Đặt hàng thành công!</h4>
+          <p class="text-muted" id="modalMessage">Cảm ơn bạn đã mua hàng tại Florio Flower Shop 💐</p>
+          <button type="button" class="btn btn-success px-4 mt-3" data-bs-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
