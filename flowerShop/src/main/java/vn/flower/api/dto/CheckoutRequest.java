@@ -5,5 +5,6 @@ public record CheckoutRequest(
     String recipientPhone,
     String shippingAddress,
     String note,
-    String paymentMethod // "COD" | "BANK"
+    String paymentMethod,         // "COD" | "BANK"
+    ShippingMethod shippingMethod // SAVING | FAST | EXPRESS
 ) {}

@@ -2,333 +2,285 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Thanh toán đơn hàng - Florio Flower Shop</title>
-
-  <!-- CSRF (render khi bật Spring Security CSRF) -->
-  <th:block th:if="${_csrf}">
-    <meta name="_csrf" th:content="${_csrf.token}">
-    <meta name="_csrf_header" th:content="${_csrf.headerName}">
-  </th:block>
-
+  <!-- CSRF cho fetch -->
+  <meta name="_csrf" th:if="${_csrf}" th:content="${_csrf.token}">
+  <meta name="_csrf_header" th:if="${_csrf}" th:content="${_csrf.headerName}">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <style>
-    body { background-color: #f8f9fa; }
-    .checkout-container {
-      max-width: 950px;
-      margin: 50px auto;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-      padding: 30px;
+    body { background: #f8f9fa; }
+    .section-title { font-weight: 600; }
+    .btn-spinner {
+      display: inline-flex; align-items:center; gap:.5rem;
     }
-    .section-title {
-      font-weight: 600;
-      border-bottom: 2px solid #e0e0e0;
-      padding-bottom: 8px;
-      margin-bottom: 20px;
-    }
-    .payment-option {
-      border: 1px solid #dee2e6;
-      border-radius: 8px;
-      padding: 15px;
-      transition: 0.2s;
-      cursor: pointer;
-    }
-    .payment-option:hover { border-color: #dc3545; background: #fff6f6; }
-    .payment-option input { margin-right: 10px; }
-    .bank-info {
-      background-color: #f8f9fa;
-      border: 1px dashed #aaa;
-      padding: 10px 15px;
-      border-radius: 8px;
-      display: none;
-      font-size: 0.95rem;
-    }
-    #global-toast { position: fixed; right: 16px; bottom: 16px; z-index: 1080; }
+    .btn-spinner .spinner-border { width:1rem; height:1rem; }
+    .badge-legend { font-size:.85rem; opacity:.9; }
   </style>
 </head>
-<body>
+<body class="bg-light">
 
-  <!-- Header (nếu dùng Thymeleaf fragment) -->
-  <div th:replace="~{fragments/navbar :: navbar}"></div>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
 
-  <div class="checkout-container">
-    <h3 class="text-center text-danger mb-4"><i class="bi bi-credit-card"></i> Thanh toán đơn hàng</h3>
+<div class="container" style="max-width: 980px;">
+  <h3 class="text-center text-danger my-4"><i class="bi bi-credit-card"></i> Thanh toán đơn hàng</h3>
 
-    <!-- Thông báo -->
-    <div id="global-toast"></div>
-
+  <div class="row g-4">
     <!-- Thông tin giao hàng -->
-    <div class="mb-4">
-      <h5 class="section-title"><i class="bi bi-truck"></i> Thông tin giao hàng</h5>
-      <form id="checkoutForm">
-        <div class="row g-3">
-          <div class="col-md-6">
+    <div class="col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="section-title mb-3"><i class="bi bi-truck"></i> Thông tin giao hàng</h5>
+
+          <div class="mb-3">
             <label class="form-label">Họ và tên *</label>
-            <input type="text" class="form-control" id="name" autocomplete="name" required>
+            <input id="name" type="text" class="form-control" required>
           </div>
-          <div class="col-md-6">
+          <div class="mb-3">
             <label class="form-label">Số điện thoại *</label>
-            <input type="tel" class="form-control" id="phone" autocomplete="tel" required>
+            <input id="phone" type="text" class="form-control" required>
           </div>
-          <div class="col-md-12">
+          <div class="mb-3">
             <label class="form-label">Địa chỉ giao hàng *</label>
-            <input type="text" class="form-control" id="address" autocomplete="street-address" required>
+            <input id="address" type="text" class="form-control" required>
           </div>
-          <div class="col-md-12">
-            <label class="form-label">Ghi chú (nếu có)</label>
-            <textarea class="form-control" rows="2" id="note" placeholder="Ví dụ: Giao buổi sáng, kèm thiệp chúc mừng..."></textarea>
+          <div class="mb-3">
+            <label class="form-label">Ghi chú</label>
+            <textarea id="note" rows="2" class="form-control" placeholder="Ví dụ: Giao giờ hành chính, gọi trước..."></textarea>
+          </div>
+
+          <h6 class="mb-2">Hình thức thanh toán</h6>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="pay" id="payCOD" value="COD" checked>
+            <label class="form-check-label" for="payCOD">💵 Thanh toán khi nhận hàng (COD)</label>
+          </div>
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="radio" name="pay" id="payBANK" value="BANK">
+            <label class="form-check-label" for="payBANK">💳 Chuyển khoản ngân hàng</label>
+          </div>
+
+          <div id="bankInfo" class="alert alert-secondary small d-none">
+            <strong>Ngân hàng:</strong> Vietcombank<br>
+            <strong>Số TK:</strong> 0123456789 (Florio Flower Shop)<br>
+            <strong>Nội dung:</strong> [Tên KH] - [SĐT] - Thanh toán đơn hàng
           </div>
         </div>
-      </form>
+      </div>
     </div>
 
-    <!-- Tóm tắt đơn hàng -->
-    <div class="mb-4">
-      <h5 class="section-title"><i class="bi bi-receipt"></i> Tóm tắt đơn hàng</h5>
+    <!-- Tóm tắt + phương thức giao hàng -->
+    <div class="col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="section-title mb-3"><i class="bi bi-receipt"></i> Tóm tắt đơn hàng</h5>
 
-      <div id="cart-loading" class="text-center py-3">
-        <div class="spinner-border text-danger" role="status" aria-hidden="true"></div>
-        <div class="mt-2 text-muted">Đang tải giỏ hàng...</div>
-      </div>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Sản phẩm</th>
+                  <th class="text-center">SL</th>
+                  <th class="text-end">Đơn giá</th>
+                  <th class="text-end">Thành tiền</th>
+                </tr>
+              </thead>
+              <tbody id="cart-lines"></tbody>
+            </table>
+          </div>
 
-      <div id="cart-empty" class="alert alert-warning d-none">
-        Giỏ hàng đang trống. <a th:href="@{/products}" href="/products" class="alert-link">Tiếp tục mua sắm</a>.
-      </div>
+          <div class="mb-3">
+            <h6 class="mb-2">Phương thức giao hàng</h6>
 
-      <div id="cart-error" class="alert alert-danger d-none"></div>
+            <div class="form-check">
+              <input class="form-check-input ship" type="radio" name="ship" id="shipSaving" value="SAVING">
+              <label class="form-check-label" for="shipSaving">
+                <span class="badge text-bg-success badge-legend">SAVING</span> – Giao tiết kiệm (20.000đ)
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input ship" type="radio" name="ship" id="shipFast" value="FAST" checked>
+              <label class="form-check-label" for="shipFast">
+                <span class="badge text-bg-primary badge-legend">FAST</span> – Giao nhanh (30.000đ)
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input ship" type="radio" name="ship" id="shipExpress" value="EXPRESS">
+              <label class="form-check-label" for="shipExpress">
+                <span class="badge text-bg-danger badge-legend">EXPRESS</span> – Hỏa tốc (60.000đ)
+              </label>
+            </div>
+          </div>
 
-      <div id="order-summary-wrap" class="d-none">
-        <div class="table-responsive">
-          <table class="table table-bordered align-middle text-center">
-            <thead class="table-light">
-              <tr>
-                <th style="min-width: 240px;">Sản phẩm</th>
-                <th style="width: 110px;">Số lượng</th>
-                <th style="width: 160px;">Đơn giá</th>
-                <th style="width: 180px;">Tổng</th>
-              </tr>
-            </thead>
-            <tbody id="order-lines"></tbody>
-            <tfoot class="table-light">
-              <tr>
-                <td colspan="3" class="text-end fw-semibold">Tạm tính:</td>
-                <td id="sum-subtotal" class="fw-semibold text-end">0₫</td>
-              </tr>
-              <tr>
-                <td colspan="3" class="text-end fw-semibold">Phí vận chuyển:</td>
-                <td id="sum-shipping" class="fw-semibold text-end">0₫</td>
-              </tr>
-              <tr>
-                <td colspan="3" class="text-end fw-bold">Tổng cộng:</td>
-                <td id="sum-total" class="fw-bold text-danger text-end">0₫</td>
-              </tr>
-            </tfoot>
-          </table>
+          <ul class="list-group mb-3">
+            <li class="list-group-item d-flex justify-content-between">
+              <span>Tạm tính</span><strong id="sum-subtotal">0đ</strong>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              <span>Phí vận chuyển</span><strong id="sum-ship">0đ</strong>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              <span>Tổng cộng</span><strong id="sum-total" class="text-danger">0đ</strong>
+            </li>
+          </ul>
+
+          <button id="btnCheckout" class="btn btn-danger w-100 btn-spinner">
+            <span class="lbl"><i class="bi bi-bag-check"></i> Xác nhận đặt hàng</span>
+            <span class="spinner-border d-none" role="status" aria-hidden="true"></span>
+          </button>
         </div>
       </div>
-    </div>
-
-    <!-- Hình thức thanh toán -->
-    <div class="mb-4">
-      <h5 class="section-title"><i class="bi bi-cash-coin"></i> Hình thức thanh toán</h5>
-      <div class="payment-option mb-2">
-        <input type="radio" name="payment" id="cod" value="COD" checked>
-        <label for="cod" class="mb-0 fw-semibold">💵 Thanh toán khi nhận hàng (COD)</label>
-        <p class="mb-0 text-muted ms-4">Quý khách thanh toán bằng tiền mặt khi nhận hàng.</p>
-      </div>
-
-      <div class="payment-option">
-        <input type="radio" name="payment" id="bank" value="BANK">
-        <label for="bank" class="mb-0 fw-semibold">💳 Chuyển khoản ngân hàng</label>
-        <p class="mb-0 text-muted ms-4">Quý khách chuyển khoản theo thông tin bên dưới.</p>
-        <div class="bank-info mt-2 ms-4" id="bankInfo">
-          <strong>Ngân hàng:</strong> Vietcombank<br>
-          <strong>Số tài khoản:</strong> 0123456789<br>
-          <strong>Chủ tài khoản:</strong> Florio Flower Shop<br>
-          <strong>Nội dung:</strong> [Tên khách hàng] - [SĐT] - Thanh toán đơn hàng
-        </div>
-      </div>
-    </div>
-
-    <!-- Nút đặt hàng -->
-    <div class="text-center">
-      <button id="confirmBtn" class="btn btn-danger px-5 py-2 fw-semibold" disabled>
-        <span class="btn-text"><i class="bi bi-bag-check"></i> Xác nhận đặt hàng</span>
-        <span class="btn-spin d-none spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-      </button>
     </div>
   </div>
+</div>
 
-  <!-- Footer -->
-  <div th:replace="~{fragments/footer :: footer}"></div>
+<script th:inline="javascript">
+  const API_BASE = /*[[@{/api/cart}]]*/ '/api/cart';
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  // Định dạng tiền khớp với order-success (đuôi 'đ')
+  const fmtVND = (n) => {
+    try { return new Intl.NumberFormat('vi-VN').format(n ?? 0) + 'đ'; }
+    catch { return (n ?? 0) + 'đ'; }
+  };
 
-  <script>
-    // ===== Helpers =====
-    const API_BASE = (window.CART_CFG && window.CART_CFG.API_BASE) || '/api/cart';
-    const fmtVND = n => new Intl.NumberFormat('vi-VN', { style:'currency', currency:'VND', maximumFractionDigits:0 }).format(n ?? 0);
+  function csrfHeaders(){
+    const h = {};
+    const t = document.querySelector('meta[name="_csrf"]')?.content;
+    const hn= document.querySelector('meta[name="_csrf_header"]')?.content;
+    if (t && hn) h[hn]=t;
+    return h;
+  }
 
-    function buildCsrfHeaders() {
-      const headers = {};
-      const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
-      const headerName = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
-      if (token && headerName) headers[headerName] = token;
-      return headers;
+  async function fetchJson(url, opt = {}){
+    const res = await fetch(url, opt);
+    const ct = res.headers.get('content-type')||'';
+    if(!res.ok){
+      let msg=''; try{ msg = ct.includes('json') ? JSON.stringify(await res.json()) : await res.text(); }catch{}
+      throw new Error(`HTTP ${res.status} – ${msg||'Yêu cầu thất bại'}`);
     }
-    function buildJsonHeaders() { return { 'Content-Type':'application/json', ...buildCsrfHeaders() }; }
+    if(!ct.includes('json')) throw new Error('Phản hồi không phải JSON (có thể hết phiên).');
+    return res.json();
+  }
 
-    async function fetchJson(url, options = {}) {
-      const res = await fetch(url, options);
-      const ct = res.headers.get('content-type') || '';
-      if (!res.ok) {
-        let detail = '';
-        try { detail = ct.includes('application/json') ? JSON.stringify(await res.json()) : await res.text(); } catch {}
-        throw new Error(`HTTP ${res.status} – ${detail || 'Yêu cầu thất bại'}`);
-      }
-      if (!ct.includes('application/json')) throw new Error('Phản hồi không phải JSON (có thể bị chuyển hướng đăng nhập).');
-      return res.json();
-    }
+  // Phí ship FE – phải đồng bộ với BE (CartService.shippingFeeFor)
+  function shipFee(method){
+    if(method==='SAVING')  return 20000;
+    if(method==='EXPRESS') return 60000;
+    return 30000; // FAST
+  }
 
-    function toast(msg, type='danger') {
-      let box = document.getElementById('global-toast');
-      if (!box) {
-        box = document.createElement('div'); box.id='global-toast';
-        box.style.position='fixed'; box.style.right='16px'; box.style.bottom='16px'; box.style.zIndex='1080';
-        document.body.appendChild(box);
-      }
-      const el = document.createElement('div');
-      el.className = `alert alert-${type} shadow-sm`;
-      el.textContent = msg;
-      box.appendChild(el);
-      setTimeout(() => el.remove(), 2500);
-    }
+  // State
+  let CART = null;
+  let SHIP_METHOD = 'FAST';
 
-    // ===== DOM refs =====
-    const elLoading   = document.getElementById('cart-loading');
-    const elEmpty     = document.getElementById('cart-empty');
-    const elError     = document.getElementById('cart-error');
-    const elWrap      = document.getElementById('order-summary-wrap');
-    const elLinesBody = document.getElementById('order-lines');
-    const elSub       = document.getElementById('sum-subtotal');
-    const elShip      = document.getElementById('sum-shipping');
-    const elTotal     = document.getElementById('sum-total');
-    const elConfirm   = document.getElementById('confirmBtn');
-    const elBtnText   = elConfirm.querySelector('.btn-text');
-    const elBtnSpin   = elConfirm.querySelector('.btn-spin');
-
-    const bankOption = document.getElementById("bank");
-    const codOption  = document.getElementById("cod");
-    const bankInfo   = document.getElementById("bankInfo");
-
-    // ===== Cart render =====
-    function rowTpl(line) {
+  // Render cart lines & summary
+  function renderCart(cart){
+    const tbody = document.getElementById('cart-lines');
+    tbody.innerHTML = '';
+    (cart.lines||[]).forEach(l=>{
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td class="text-start">${line.productName}</td>
-        <td>${line.quantity}</td>
-        <td class="text-end">${fmtVND(line.price)}</td>
-        <td class="text-end fw-semibold">${fmtVND(line.lineTotal)}</td>`;
-      return tr;
+        <td>${l.productName}</td>
+        <td class="text-center">${l.quantity}</td>
+        <td class="text-end">${fmtVND(l.price)}</td>
+        <td class="text-end">${fmtVND(l.lineTotal)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+    updateSummary();
+  }
+
+  function updateSummary(){
+    const subtotal = CART?.subtotal || 0;
+    const fee = shipFee(SHIP_METHOD);
+    const total = subtotal + fee;
+
+    document.getElementById('sum-subtotal').textContent = fmtVND(subtotal);
+    document.getElementById('sum-ship').textContent     = fmtVND(fee);
+    document.getElementById('sum-total').textContent    = fmtVND(total);
+  }
+
+  // Bank info toggle
+  document.getElementById('payBANK').addEventListener('change', e=>{
+    document.getElementById('bankInfo').classList.toggle('d-none', !e.target.checked);
+  });
+  document.getElementById('payCOD').addEventListener('change', e=>{
+    if(e.target.checked) document.getElementById('bankInfo').classList.add('d-none');
+  });
+
+  // Ship method change
+  document.querySelectorAll('input.ship').forEach(r=>{
+    r.addEventListener('change', ()=>{
+      if(r.checked){ SHIP_METHOD = r.value; updateSummary(); }
+    });
+  });
+
+  // Nút xác nhận (thêm spinner/disable để khớp UX)
+  const btnCheckout = document.getElementById('btnCheckout');
+  function setBusy(on){
+    btnCheckout.disabled = on;
+    btnCheckout.querySelector('.spinner-border').classList.toggle('d-none', !on);
+    btnCheckout.querySelector('.lbl').classList.toggle('d-none', on);
+  }
+
+  // Submit checkout
+  btnCheckout.addEventListener('click', async ()=>{
+    const name = document.getElementById('name').value.trim();
+    const phone= document.getElementById('phone').value.trim();
+    const addr = document.getElementById('address').value.trim();
+    const note = document.getElementById('note').value.trim();
+    const pay  = document.getElementById('payBANK').checked ? 'BANK' : 'COD';
+
+    if(!name || !phone || !addr){
+      alert('Vui lòng điền đủ Họ tên, SĐT và Địa chỉ.');
+      return;
     }
 
-    function renderCart(cart) {
-      elLinesBody.innerHTML = '';
-      (cart.lines || []).forEach(l => elLinesBody.appendChild(rowTpl(l)));
-      elSub.textContent = fmtVND(cart.subtotal);
-      elShip.textContent= fmtVND(cart.shipping);
-      elTotal.textContent=fmtVND(cart.total);
-    }
-
-    // ===== API =====
-    async function apiGetCart() {
-      return fetchJson(API_BASE, { headers: buildCsrfHeaders() });
-    }
-    async function apiCheckout(payload) {
-      return fetchJson(`${API_BASE}/checkout`, {
-        method: 'POST',
-        headers: buildJsonHeaders(),
-        body: JSON.stringify(payload)
+    try{
+      setBusy(true);
+      const body = JSON.stringify({
+        recipientName: name,
+        recipientPhone: phone,
+        shippingAddress: addr,
+        note: note || null,
+        paymentMethod: pay,        // "COD" | "BANK"
+        shippingMethod: SHIP_METHOD // "SAVING" | "FAST" | "EXPRESS"
       });
+
+      // BE sẽ set: status="PENDING", shippingFee = theo method, totalAmount = subtotal + shippingFee
+      const orderId = await fetchJson(`${API_BASE}/checkout`, {
+        method:'POST',
+        headers: { 'Content-Type':'application/json', ...csrfHeaders() },
+        body
+      });
+
+      // Điều hướng sang trang thành công /orders/{id} (CheckoutController đã chuẩn bị view order-success)
+      window.location.href = `/orders/${orderId}`;
+    }catch(err){
+      alert(err.message || 'Đặt hàng thất bại, vui lòng thử lại.');
+      if(String(err.message).includes('401')) window.location.href='/login';
+    }finally{
+      setBusy(false);
     }
+  });
 
-    // ===== Init =====
-    async function init() {
-      try {
-        elLoading.classList.remove('d-none');
-        const cart = await apiGetCart();
-
-        if (!cart || !cart.lines || cart.lines.length === 0) {
-          elEmpty.classList.remove('d-none');
-          elWrap.classList.add('d-none');
-          elConfirm.disabled = true;
-        } else {
-          renderCart(cart);
-          elWrap.classList.remove('d-none');
-          elEmpty.classList.add('d-none');
-          elConfirm.disabled = false;
-        }
-      } catch (err) {
-        elError.textContent = err.message || 'Không tải được giỏ hàng.';
-        elError.classList.remove('d-none');
-        elWrap.classList.add('d-none');
-        elConfirm.disabled = true;
-      } finally {
-        elLoading.classList.add('d-none');
-      }
-    }
-
-    // ===== Events =====
-    bankOption.addEventListener("change", () => { if (bankOption.checked) bankInfo.style.display = "block"; });
-    codOption .addEventListener("change", () => { if (codOption.checked)  bankInfo.style.display = "none";  });
-
-    elConfirm.addEventListener('click', async (e) => {
-      e.preventDefault();
-      const recipientName   = document.getElementById("name").value.trim();
-      const recipientPhone  = document.getElementById("phone").value.trim();
-      const shippingAddress = document.getElementById("address").value.trim();
-      const note            = document.getElementById("note").value.trim();
-      const paymentMethod   = document.querySelector('input[name="payment"]:checked')?.value || 'COD';
-
-      if (!recipientName || !recipientPhone || !shippingAddress) {
-        toast('Vui lòng điền đầy đủ thông tin giao hàng!', 'warning');
+  // Init: nạp giỏ hàng
+  (async function init(){
+    try{
+      CART = await fetchJson(API_BASE, { headers: csrfHeaders() });
+      if(!CART || !CART.lines || CART.lines.length===0){
+        alert('Giỏ hàng trống, vui lòng chọn sản phẩm.');
+        window.location.href='/products';
         return;
       }
+      renderCart(CART);
+    }catch(err){
+      alert(err.message || 'Không tải được giỏ hàng.');
+      if(String(err.message).includes('401')) window.location.href='/login';
+    }
+  })();
+</script>
 
-      try {
-        elConfirm.disabled = true;
-        elBtnText.classList.add('d-none');
-        elBtnSpin.classList.remove('d-none');
-
-        const orderId = await apiCheckout({ recipientName, recipientPhone, shippingAddress, note, paymentMethod });
-
-        toast('Đặt hàng thành công! Đang chuyển trang...', 'success');
-        document.dispatchEvent(new CustomEvent('cart:updated')); // để header cập nhật số lượng nếu có
-        // Điều hướng tới trang chi tiết đơn (điều chỉnh nếu route khác)
-        setTimeout(() => {
-          window.location.href = `/orders/${orderId}`;
-        }, 800);
-      } catch (err) {
-        const msg = err.message || 'Đặt hàng thất bại, vui lòng thử lại.';
-        // Nếu có khả năng chưa đăng nhập
-        if (/HTTP 401|HTTP 403/.test(msg)) {
-          toast('Vui lòng đăng nhập để thanh toán.', 'warning');
-          setTimeout(() => { window.location.href = '/login'; }, 700);
-        } else {
-          toast(msg, 'danger');
-        }
-      } finally {
-        elBtnSpin.classList.add('d-none');
-        elBtnText.classList.remove('d-none');
-        elConfirm.disabled = false;
-      }
-    });
-
-    // Go!
-    init();
-  </script>
+<div th:replace="~{fragments/footer :: footer}"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -3,6 +3,8 @@ package vn.flower.entities;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 
+import vn.flower.api.dto.ShippingMethod;
+
 @Entity
 @Table(name = "OrderDetails")
 public class OrderDetail {
@@ -25,6 +27,13 @@ public class OrderDetail {
   @Column(name = "Price", precision = 18, scale = 2, nullable = false)
   private BigDecimal price;
 
+  @Enumerated(EnumType.STRING)
+  @Column(name = "ShippingMethod", length = 20)
+  private ShippingMethod shippingMethod;
+
+  public ShippingMethod getShippingMethod() { return shippingMethod; }
+  public void setShippingMethod(ShippingMethod shippingMethod) { this.shippingMethod = shippingMethod; }
+  
   // getters/setters
   public OrderDetailId getId(){ return id; }
   public void setId(OrderDetailId id){ this.id = id; }

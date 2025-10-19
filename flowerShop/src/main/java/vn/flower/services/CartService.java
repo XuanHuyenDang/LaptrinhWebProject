@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import vn.flower.api.dto.CartLine;
 import vn.flower.api.dto.CartView;
 import vn.flower.api.dto.CheckoutRequest;
+import vn.flower.api.dto.ShippingMethod;
 
 import vn.flower.entities.Account;
 import vn.flower.entities.Order;
@@ -36,7 +37,27 @@ public class CartService {
     this.odRepo = odRepo;
     this.productRepo = productRepo;
   }
+  
+  
 
+  private BigDecimal shippingFeeFor(ShippingMethod method, BigDecimal subtotal) {
+	  if (subtotal == null) subtotal = BigDecimal.ZERO;
+	  ShippingMethod m = (method != null) ? method : ShippingMethod.FAST;
+
+	  return switch (m) {
+	    case SAVING   -> new BigDecimal("20000");                           // tiết kiệm: 20k
+	    case EXPRESS  -> new BigDecimal("60000");                           // hỏa tốc: 60k
+	    case FAST     -> (subtotal.compareTo(new BigDecimal("500000"))>=0)  // nhanh: >= 500k miễn phí
+	                    ? BigDecimal.ZERO : new BigDecimal("30000");
+	  };
+	}
+  
+  private BigDecimal calcSubtotal(List<OrderDetail> lines) {
+	  return lines.stream()
+	      .map(l -> l.getPrice().multiply(BigDecimal.valueOf(l.getQuantity())))
+	      .reduce(BigDecimal.ZERO, BigDecimal::add);
+	}
+  
   private static final String STATUS_CART = "CART";
   private static final BigDecimal DEFAULT_SHIP = new BigDecimal("30000");
 
@@ -156,20 +177,22 @@ public class CartService {
   private record Totals(BigDecimal subtotal, BigDecimal shipping, BigDecimal total) {}
 
   private CartView toView(Integer orderId) {
-    List<OrderDetail> lines = odRepo.findById_OrderId(orderId);
-    var totals = calcTotals(lines, DEFAULT_SHIP);
+	  List<OrderDetail> lines = odRepo.findById_OrderId(orderId);
+	  BigDecimal subtotal = calcSubtotal(lines);
+	  BigDecimal shipping = shippingFeeFor(ShippingMethod.FAST, subtotal); // default view
+	  BigDecimal total = subtotal.add(shipping);
 
-    var viewLines = lines.stream().map(l ->
-        new CartLine(
-            l.getProduct().getId(),
-            l.getProduct().getProductName(),
-            l.getQuantity(),
-            l.getPrice(),
-            l.getPrice().multiply(BigDecimal.valueOf(l.getQuantity()))
-        )).collect(Collectors.toList());
+	  var viewLines = lines.stream().map(l ->
+	      new CartLine(
+	          l.getProduct().getId(),
+	          l.getProduct().getProductName(),
+	          l.getQuantity(),
+	          l.getPrice(),
+	          l.getPrice().multiply(BigDecimal.valueOf(l.getQuantity()))
+	      )).collect(Collectors.toList());
 
-    return new CartView(orderId, viewLines, totals.subtotal(), totals.shipping(), totals.total());
-  }
+	  return new CartView(orderId, viewLines, subtotal, shipping, total);
+	}
 
   private Totals calcTotals(List<OrderDetail> lines, BigDecimal ship) {
     BigDecimal subtotal = lines.stream()

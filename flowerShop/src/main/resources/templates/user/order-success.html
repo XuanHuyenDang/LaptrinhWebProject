@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Đặt hàng thành công - Florio Flower Shop</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    /* ====== Theme & base ====== */
+    :root{
+      --ink:#0f172a;
+      --muted:#64748b;
+      --ring:#e2e8f0;
+      --card:#ffffff;
+      --accent:#ff6b9b;      /* điểm nhấn hồng */
+      --accent-2:#ffd2e1;    /* hồng nhạt */
+      --success:#22c55e;
+    }
+    body{ background:#f6f7fb; color:#334155; }
+
+    .container-narrow{ max-width: 980px; }
+
+    /* ====== Hero success ====== */
+    .success-hero{
+      border-radius: 16px;
+      padding: 26px 22px;
+      background:
+        radial-gradient(800px 400px at 0% 0%, var(--accent-2), transparent 60%),
+        linear-gradient(180deg,#fff,#fff);
+      border:1px solid #f1f5f9;
+      box-shadow: 0 10px 28px rgba(24,39,75,.06);
+    }
+    .success-badge{
+      width:78px;height:78px;border-radius:50%;
+      display:grid;place-items:center;
+      background: conic-gradient(from 210deg, var(--accent), #ff8fb3);
+      color:#fff;font-size:36px;
+      box-shadow: 0 12px 26px rgba(255,107,155,.35);
+    }
+    .order-meta .badge-status{
+      background:#f1f5f9;color:#0f172a;border:1px solid #e2e8f0;
+    }
+
+    /* ====== Card & blocks ====== */
+    .soft-card{
+      background: var(--card);
+      border:1px solid #eef2f7;
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(15,23,42,.05);
+      height: 100%;
+    }
+    .soft-card .card-body{ padding: 18px 18px; }
+
+    .section-title{
+      font-weight:700; color:var(--ink);
+      display:flex; align-items:center; gap:10px;
+      margin-bottom: 10px;
+    }
+    .section-title .bi{ opacity:.9; }
+
+    .kv{ display:flex; gap:10px; margin-bottom:10px; font-size: 0.98rem; }
+    .kv .k{ min-width:120px; color:var(--muted); }
+    .kv .v{ font-weight:600; color:var(--ink); }
+
+    /* ====== Table products ====== */
+    .table-products thead th{
+      background:#f8fafc !important;
+      color:#475569; font-weight:700;
+      border-bottom:1px solid #e2e8f0 !important;
+    }
+    .table-products tbody td{
+      vertical-align: middle;
+      border-color:#eef2f7 !important;
+    }
+
+    /* ====== Summary ====== */
+    .summary{
+      background:var(--card);
+      border:1px solid #eef2f7;
+      border-radius:14px;
+      box-shadow:0 8px 24px rgba(15,23,42,.05);
+      padding: 16px 18px;
+    }
+    .summary .row-item{ display:flex; justify-content:space-between; margin-bottom:10px; }
+    .summary .row-item .label{ color:var(--muted); }
+    .summary .row-item .val{ font-weight:700; }
+    .summary .total{ color:#dc2626; font-size:1.08rem; }
+    .divider-dashed{ border-top:1px dashed #e2e8f0; margin: 14px 0; }
+
+    /* ====== Buttons ====== */
+    .btn-ghost{
+      border:1px solid #e2e8f0; background:#fff; color:#0f172a;
+    }
+    .btn-ghost:hover{
+      background:#f8fafc; border-color:#cbd5e1;
+    }
+  </style>
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container container-narrow my-4">
+  <!-- HERO -->
+  <div class="success-hero mb-4">
+    <div class="d-flex align-items-center gap-3">
+      <div class="success-badge">
+        <i class="bi bi-check-lg"></i>
+      </div>
+      <div>
+        <h4 class="mb-1 fw-bold" style="color:var(--ink)">Đặt hàng thành công!</h4>
+        <div class="order-meta">
+          <span class="me-2">Mã đơn hàng:
+            <span class="badge text-bg-dark" th:text="${order.id}">#0</span>
+          </span>
+          <span class="badge badge-status" th:text="${order.status} ?: 'PENDING'">PENDING</span>
+        </div>
+      </div>
+      <div class="ms-auto">
+        <button class="btn btn-ghost" onclick="window.print()">
+          <i class="bi bi-printer"></i> In hoá đơn
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- INFO ROW -->
+  <div class="row g-3 mb-3">
+    <div class="col-md-6">
+      <div class="soft-card">
+        <div class="card-body">
+          <div class="section-title"><i class="bi bi-person-lines-fill text-primary"></i><span>Thông tin nhận hàng</span></div>
+          <div class="kv"><div class="k">Họ và tên</div><div class="v" th:text="${order.recipientName}">Khách hàng</div></div>
+          <div class="kv"><div class="k">Số điện thoại</div><div class="v" th:text="${order.recipientPhone}">000000000</div></div>
+          <div class="kv"><div class="k">Địa chỉ</div><div class="v" th:text="${order.shippingAddress}">Địa chỉ</div></div>
+          <div class="kv" th:if="${order.note}">
+            <div class="k">Ghi chú</div><div class="v" th:text="${order.note}">Ghi chú...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="soft-card">
+        <div class="card-body">
+          <div class="section-title"><i class="bi bi-gear text-success"></i><span>Thông tin đơn hàng</span></div>
+
+          <div class="kv" th:with="pm=${order.paymentMethod != null ? order.paymentMethod : 'COD'}">
+            <div class="k">Thanh toán</div>
+            <div class="v">
+              <span th:text="${pm == 'BANK'} ? 'Chuyển khoản' : 'Thanh toán khi nhận hàng (COD)'">COD</span>
+            </div>
+          </div>
+
+          <div class="kv">
+            <div class="k">Ngày đặt</div>
+            <div class="v" th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}">--/--/----</div>
+          </div>
+
+          <div class="divider-dashed"></div>
+          <div class="small text-secondary">
+            Cảm ơn bạn đã tin tưởng Florio! Chúng tôi sẽ liên hệ xác nhận và giao hàng sớm nhất 💐
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCTS + SUMMARY -->
+  <div class="row g-3">
+    <div class="col-lg-8">
+      <div class="soft-card">
+        <div class="card-body">
+          <div class="section-title"><i class="bi bi-receipt text-danger"></i><span>Chi tiết đơn hàng</span></div>
+
+          <div class="table-responsive">
+            <table class="table table-products table-sm align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Sản phẩm</th>
+                  <th class="text-center" style="width:100px;">SL</th>
+                  <th class="text-end" style="width:160px;">Đơn giá</th>
+                  <th class="text-end" style="width:180px;">Thành tiền</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- GIỮ LOGIC CŨ: chỉ format & tính lineTotal, không đổi -->
+                <tr th:each="d : ${order.details}"
+                    th:with="
+                      qty=${d.quantity != null ? d.quantity.longValue() : 0L},
+                      lineTotal=${(d.price != null) ? d.price.multiply(T(java.math.BigDecimal).valueOf(qty)) : T(java.math.BigDecimal).ZERO}
+                    ">
+                  <td th:text="${d.product != null ? d.product.productName : 'Sản phẩm'}">Tên SP</td>
+                  <td class="text-center" th:text="${d.quantity}">1</td>
+                  <td class="text-end" th:text="${#numbers.formatDecimal(d.price,0,'COMMA',0,'POINT')} + 'đ'">0đ</td>
+                  <td class="text-end fw-semibold" th:text="${#numbers.formatDecimal(lineTotal,0,'COMMA',0,'POINT')} + 'đ'">0đ</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="col-lg-4">
+      <div class="summary">
+        <div class="section-title mb-2"><i class="bi bi-cash-coin text-warning"></i><span>Tổng kết</span></div>
+
+        <div th:with="
+              total = ${order.totalAmount != null ? order.totalAmount : T(java.math.BigDecimal).ZERO},
+              ship  = ${order.shippingFee  != null ? order.shippingFee  : T(java.math.BigDecimal).ZERO},
+              sub   = ${total.subtract(ship)}
+            ">
+          <div class="row-item">
+            <div class="label">Tạm tính</div>
+            <div class="val" th:text="${#numbers.formatDecimal(sub,0,'COMMA',0,'POINT')} + 'đ'">0đ</div>
+          </div>
+          <div class="row-item">
+            <div class="label">Phí vận chuyển</div>
+            <div class="val" th:text="${#numbers.formatDecimal(ship,0,'COMMA',0,'POINT')} + 'đ'">0đ</div>
+          </div>
+          <div class="divider-dashed"></div>
+          <div class="row-item">
+            <div class="label fw-bold">Tổng cộng</div>
+            <div class="val total" th:text="${#numbers.formatDecimal(total,0,'COMMA',0,'POINT')} + 'đ'">0đ</div>
+          </div>
+
+          <div class="d-grid gap-2 mt-3">
+            <a class="btn btn-outline-secondary" th:href="@{/}">
+              <i class="bi bi-bag"></i> Tiếp tục mua sắm
+            </a>
+            <a class="btn btn-primary" th:href="@{/orders}">
+              <i class="bi bi-clock-history"></i> Xem lịch sử đặt hàng
+            </a>
+            <button class="btn btn-ghost" onclick="window.print()">
+              <i class="bi bi-printer"></i> In hoá đơn
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center text-secondary small mt-4">
+    <i class="bi bi-flower1"></i> Cảm ơn bạn đã chọn Florio. Chúc bạn một ngày tươi xinh!
+  </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

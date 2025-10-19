@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import vn.flower.api.dto.ShippingMethod;
+
 @Entity
 @Table(name = "Orders")
 public class Order {
@@ -47,6 +49,12 @@ public class Order {
   @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
   private List<OrderDetail> details = new ArrayList<>();
 
+  @Enumerated(EnumType.STRING)
+  @Column(name = "ShippingMethod", length = 20, nullable = false)
+  private ShippingMethod shippingMethod = ShippingMethod.FAST;
+
+  public ShippingMethod getShippingMethod() { return shippingMethod; }
+  public void setShippingMethod(ShippingMethod shippingMethod) { this.shippingMethod = shippingMethod; }
 
   // getters/setters
   public Integer getId(){ return id; }

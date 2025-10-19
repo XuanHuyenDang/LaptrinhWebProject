@@ -10,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import vn.flower.api.dto.CartView;
+import vn.flower.api.dto.ShippingMethod;
 import vn.flower.api.dto.CheckoutRequest;
 import vn.flower.repositories.AccountRepository;
 import vn.flower.repositories.OrderRepository;
@@ -45,7 +46,7 @@ public class CheckoutController {
     Integer accId = currentAccountId();
     CartView cart = cartService.getCart(accId);
     model.addAttribute("cart", cart); // subtotal, shipping, total, lines...
-    model.addAttribute("form", new CheckoutRequest("", "", "", null, "COD")); // mặc định COD
+    model.addAttribute("form", new CheckoutRequest("", "", "", null, "COD",ShippingMethod.SAVING)); // mặc định COD
     return "checkout"; // templates/checkout.html
   }
 
@@ -75,6 +76,6 @@ public class CheckoutController {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy đơn hàng"));
 
     model.addAttribute("order", order);
-    return "order-success"; // tạo view đơn giản hiển thị mã đơn + tổng tiền
+    return "user/order-success"; // tạo view đơn giản hiển thị mã đơn + tổng tiền
   }
 }
