@@ -161,7 +161,7 @@ public class CartService {
     cart.setShippingFee(totals.shipping());
     cart.setTotalAmount(totals.total());
     cart.setOrderDate(LocalDateTime.now());
-    cart.setStatus("PENDING");
+    cart.setStatus("Đang xử lý");
 
     // ➕ NEW: tăng sold cho sản phẩm
     for (OrderDetail d : lines) {
