@@ -1,5 +1,6 @@
 package vn.flower.repositories;
 
+import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,5 +23,9 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     	""")
     	List<CustomerDTO> findAllCustomersWithOrderCount();
     long countByRole(String role);
+    
+    @Query("SELECT DISTINCT a.email FROM Account a JOIN ChatMessage m ON (m.sender.id = a.id OR m.receiver.id = a.id) " +
+            "WHERE (m.sender.id = :adminId OR m.receiver.id = :adminId) AND a.id != :adminId")
+     List<String> findDistinctChatPartners(@Param("adminId") Integer adminId);
 }  
 

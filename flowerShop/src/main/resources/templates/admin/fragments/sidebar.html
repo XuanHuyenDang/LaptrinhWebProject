@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+	<nav th:fragment="sidebar(page)" class="sidebar">
+		<h5 class="text-center">
+			<i class="bi bi-flower1 me-1"></i> Florio Admin
+		</h5>
+		<hr class="text-muted">
+		
+		<a th:href="@{/admin/dashboard}" th:classappend="${page == 'dashboard'} ? 'active'"> 
+			<i class="bi bi-speedometer2 me-2"></i> Tổng quan
+		</a> 
+		<a th:href="@{/admin/categories}" th:classappend="${page == 'categories'} ? 'active'"> 
+			<i class="bi bi-list-ul me-2"></i> Danh mục
+		</a> 
+		<a th:href="@{/admin/orders}" th:classappend="${page == 'orders'} ? 'active'"> 
+			<i class="bi bi-cart4 me-2"></i> Đơn hàng
+		</a> 
+		<a th:href="@{/admin/customers}" th:classappend="${page == 'customers'} ? 'active'"> 
+			<i class="bi bi-people me-2"></i> Khách hàng
+		</a> 
+		<a th:href="@{/admin/comments}" th:classappend="${page == 'comments'} ? 'active'"> 
+			<i class="bi bi-chat-left-text me-2"></i> Bình luận
+		</a>
+		<a th:href="@{/chat}" th:classappend="${page == 'chat'} ? 'active'">
+			<i class="bi bi-chat-dots me-2"></i> Chat
+		</a>
+
+		<hr class="text-muted">
+		<form th:action="@{/auth/logout}" method="post" class="logout-form">
+			<button type="submit" class="btn btn-outline-danger">
+				<i class="bi bi-box-arrow-right"></i> Đăng xuất
+			</button>
+		</form>
+	</nav>
+
+</body>
+</html>
