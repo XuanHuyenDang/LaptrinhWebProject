@@ -11,7 +11,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Integer> {
 
-
     // Lọc theo tên sản phẩm A->Z
     List<Review> findAllByOrderByProductProductNameAsc();
 
@@ -32,5 +31,10 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
 
     // Tìm theo cả tên sản phẩm hoặc tên khách hàng
     List<Review> findByProductProductNameContainingIgnoreCaseOrAccountFullNameContainingIgnoreCase(String productName, String fullName);
+    
+    // === THÊM PHƯƠNG THỨC NÀY ===
+    /**
+     * Lấy tất cả đánh giá cho một sản phẩm, sắp xếp mới nhất lên đầu.
+     */
+    List<Review> findByProductIdOrderByIdDesc(Integer productId);
 }
-

@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -31,30 +30,29 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 	  http
-	    .csrf(csrf -> csrf.disable())
+	    .csrf(csrf -> csrf.disable()) // Tạm thời tắt CSRF để dễ test, nên bật lại sau
 	    .authorizeHttpRequests(auth -> auth
-	      // Public: trang chủ + static
+	      // Public: trang chủ + tài nguyên tĩnh
 	      .requestMatchers("/", "/index",
 	          "/assets/**", "/css/**", "/js/**", "/images/**", "/slider/**").permitAll()
 
-	      // Public: TRANG SẢN PHẨM (page & api)
-	      .requestMatchers(
-	          "/products", "/products/**",      // danh sách / phân trang / lọc
-	          "/product/**",                    // chi tiết sản phẩm kiểu /product/{id}
-	          "/product-detail/**",             // nếu bạn dùng route này
-	          "/api/products/**"                // API công khai cho trang sản phẩm (nếu có)
-	      ).permitAll()
-	      
-	      //
+	      // === ĐÃ SẮP XẾP LẠI ĐỂ SỬA LỖI ===
+	      // Public: Đặt quy tắc cụ thể nhất lên trước
+	      .requestMatchers("/products/{id:[0-9]+}").permitAll() // Chi tiết sản phẩm (Cụ thể nhất)
+	      .requestMatchers("/products").permitAll() // Danh sách sản phẩm
+	      .requestMatchers("/products/**").permitAll() // Các URL khác dưới /products/ (Chung chung)
+	      // ===================================
+
+	      // Public: trang giới thiệu
 	      .requestMatchers("/about/**", "/about").permitAll()
-	      
-	      // Public: auth pages
+
+	      // Public: các trang xác thực
 	      .requestMatchers("/auth/**", "/register", "/login").permitAll()
 
-	      // Admin
+	      // Admin: yêu cầu quyền ADMIN
 	      .requestMatchers("/admin/**").hasRole("ADMIN")
 
-	      // Các route còn lại yêu cầu đăng nhập
+	      // Các request còn lại yêu cầu phải đăng nhập
 	      .anyRequest().authenticated()
 	    )
 	    .formLogin(form -> form

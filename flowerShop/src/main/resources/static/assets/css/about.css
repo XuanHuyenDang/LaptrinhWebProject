@@ -1,106 +1,91 @@
 body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #fff8f9;
-      color: #333;
-    }
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #fff8f9; /* Màu nền hồng nhạt */
+  color: #333; /* Màu chữ chính */
+}
 
-    header {
-      background: linear-gradient(135deg, #f9a8d4, #ec4899);
-      color: white;
-      padding: 60px 0;
-      text-align: center;
-    }
-    header h1 {
-      font-size: 2.8rem;
-      font-weight: bold;
-      letter-spacing: 1px;
-    }
-    header p {
-      font-size: 1.1rem;
-    }
+/* Phần Giới thiệu */
+.intro-section {
+  padding: 80px 0;
+  background-color: #fff; /* Nền trắng cho section này */
+}
+.intro-section img {
+  border-radius: 12px;
+  width: 100%;
+  height: auto;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* Bóng đổ nhẹ */
+}
+.intro-section h2 {
+  color: #d946ef; /* Màu tím hồng cho tiêu đề */
+  margin-bottom: 20px;
+  font-weight: bold;
+}
 
-    /* Giới thiệu */
-    .intro-section {
-      padding: 80px 0;
-      background-color: #fff;
-    }
-    .intro-section img {
-      border-radius: 12px;
-      width: 100%;
-      height: auto;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .intro-section h2 {
-      color: #d946ef;
-      margin-bottom: 20px;
-      font-weight: bold;
-    }
+/* Phần Giá trị cốt lõi */
+.values {
+  background-color: #ffe4ef; /* Nền hồng nhạt hơn */
+  padding: 80px 0;
+}
+.values h2 {
+  color: #c2185b; /* Màu hồng đậm cho tiêu đề */
+  font-weight: 700;
+  margin-bottom: 50px;
+}
+.values i { /* Icon */
+  font-size: 45px;
+  color: #d946ef; /* Màu tím hồng cho icon */
+  margin-bottom: 15px;
+  transition: transform 0.3s; /* Hiệu ứng phóng to khi hover */
+}
+.values i:hover {
+  transform: scale(1.2);
+}
+.values h5 { /* Tiêu đề nhỏ */
+    font-weight: bold;
+    color: #c2185b; /* Đồng bộ màu với tiêu đề chính */
+}
 
-    /* Giá trị cốt lõi */
-    .values {
-      background-color: #ffe4ef;
-      padding: 80px 0;
-    }
-    .values h2 {
-      color: #c2185b;
-      font-weight: 700;
-      margin-bottom: 50px;
-    }
-    .values i {
-      font-size: 45px;
-      color: #d946ef;
-      margin-bottom: 15px;
-      transition: 0.3s;
-    }
-    .values i:hover {
-      transform: scale(1.2);
-    }
-
-    /* Đội ngũ */
-    .team {
-      background-color: #fff;
-      padding: 80px 0;
-    }
-    .team h2 {
-      color: #c2185b;
-      font-weight: 700;
-      margin-bottom: 50px;
-    }
-    .team-member {
-      transition: all 0.3s ease;
-      background-color: #fff;
-      border-radius: 12px;
-      padding: 25px 15px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-    .team-member:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 18px rgba(0,0,0,0.12);
-    }
-    .team-member img {
-      border: 4px solid #f9a8d4;
-      border-radius: 50%;
-      margin-bottom: 15px;
-      transition: 0.3s;
-    }
-    .team-member img:hover {
-      border-color: #ec4899;
-      transform: scale(1.05);
-    }
-    .team-member h5 {
-      font-weight: 600;
-      color: #c2185b;
-    }
-    .team-member p {
-      color: #555;
-      font-size: 0.95rem;
-    }
-
-    /* Footer */
-    .footer {
-      background-color: #ec4899;
-      color: white;
-      padding: 35px 0;
-      text-align: center;
-      font-size: 0.95rem;
-    }
+/* Phần Đội ngũ */
+.team {
+  background-color: #fff; /* Nền trắng */
+  padding: 80px 0;
+}
+.team h2 {
+  color: #c2185b; /* Màu hồng đậm */
+  font-weight: 700;
+  margin-bottom: 50px;
+}
+.team-member {
+  transition: all 0.3s ease; /* Hiệu ứng mượt mà khi hover */
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 25px 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* Bóng đổ nhẹ */
+  text-align: center; /* Căn giữa nội dung */
+}
+.team-member:hover {
+  transform: translateY(-5px); /* Nhấc lên khi hover */
+  box-shadow: 0 8px 18px rgba(0,0,0,0.12); /* Bóng đổ rõ hơn */
+}
+.team-member img {
+  border: 4px solid #f9a8d4; /* Viền hồng nhạt */
+  border-radius: 50%; /* Bo tròn ảnh */
+  margin-bottom: 15px;
+  transition: transform 0.3s, border-color 0.3s; /* Hiệu ứng cho ảnh */
+  width: 120px; /* Đảm bảo kích thước ảnh đồng đều */
+  height: 120px;
+  object-fit: cover; /* Tránh méo ảnh */
+}
+.team-member img:hover {
+  border-color: #ec4899; /* Đổi màu viền khi hover */
+  transform: scale(1.05); /* Phóng to nhẹ ảnh */
+}
+.team-member h5 {
+  font-weight: 600;
+  color: #c2185b; /* Màu hồng đậm */
+  margin-top: 10px; /* Khoảng cách giữa ảnh và tên */
+}
+.team-member p {
+  color: #555; /* Màu chữ mô tả */
+  font-size: 0.95rem;
+}
