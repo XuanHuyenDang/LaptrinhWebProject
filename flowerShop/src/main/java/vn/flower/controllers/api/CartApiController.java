@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import vn.flower.api.dto.AddItemRequest;
+// === THÊM IMPORT NÀY ===
+import vn.flower.api.dto.BuyNowRequest; 
 import vn.flower.api.dto.CartView;
 import vn.flower.api.dto.CheckoutRequest;
 import vn.flower.api.dto.UpdateQtyRequest;
@@ -67,12 +69,26 @@ public class CartApiController {
         cartService.removeItem(currentAccountId(), productId));
   }
 
+  /**
+   * API này xử lý thanh toán cho GIỎ HÀNG (status='CART')
+   */
   @PostMapping("/checkout")
   public ResponseEntity<Integer> checkout(@RequestBody CheckoutRequest req) {
     // CartService đã xử lý ShippingMethod (SAVING/FAST/EXPRESS), shipping fee, total, v.v.
     return ResponseEntity.ok(
         cartService.checkout(currentAccountId(), req));
   }
+
+  /**
+   * === API MỚI: XỬ LÝ THANH TOÁN "MUA NGAY" ===
+   * Tạo một đơn hàng mới chỉ với 1 sản phẩm, không đụng đến giỏ 'CART'.
+   */
+  @PostMapping("/checkout/buy-now")
+  public ResponseEntity<Integer> checkoutBuyNow(@RequestBody BuyNowRequest req) {
+    return ResponseEntity.ok(
+        cartService.checkoutBuyNow(currentAccountId(), req));
+  }
+
 
   // --- Optional: trả mã lỗi & message gọn gàng ---
   @ExceptionHandler(IllegalArgumentException.class)

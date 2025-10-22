@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- Thêm xmlns:sec để kiểm tra đăng nhập -->
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
@@ -7,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title th:text="${product.productName} + ' - Florio Flower Shop'">Chi tiết sản phẩm - Florio Flower Shop</title>
 
-  <!-- CSRF (nếu Spring Security bật CSRF) -->
   <th:block th:if="${_csrf}">
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
@@ -16,7 +14,6 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
-  <!-- CSS nội bộ -->
   <link th:href="@{/assets/css/product-detail.css}" rel="stylesheet">
   <link th:href="@{/assets/css/header.css}" rel="stylesheet">
   <link th:href="@{/assets/css/footer.css}" rel="stylesheet">
@@ -116,9 +113,11 @@
                   th:attr="data-id=${product.id}, data-name=${product.productName}, data-price=${product.salePrice != null ? product.salePrice : product.price}, data-qty-selector='#quantity'">
             <i class="bi bi-cart-plus"></i> Thêm vào giỏ
           </button>
-          <a class="btn btn-pink text-white" th:href="@{/checkout(productId=${product.id}, qty=${1})}">
+          
+          <button class="btn btn-pink text-white" id="btn-buy-now"
+                  th:attr="data-id=${product.id}, data-qty-selector='#quantity'">
             <i class="bi bi-bag-heart"></i> Mua ngay
-          </a>
+          </button>
         </div>
         <hr>
         <ul class="mb-0">
@@ -164,11 +163,9 @@
         </div>
       </div>
 
-      <!-- ===== ĐÃ SỬA LỖI #request.requestURI ===== -->
       <div sec:authorize="isAnonymous()" class="alert alert-warning">
-        Vui lòng <a th:href="@{/auth/login(redirect=${'/products/' + product.id})}" class="alert-link">đăng nhập</a> để gửi đánh giá.
+         Vui lòng <a th:href="@{/auth/login(redirect=${'/products/' + product.id})}" class="alert-link">đăng nhập</a> để gửi đánh giá.
       </div>
-      <!-- ========================================== -->
 
       <hr class="my-4">
 
@@ -232,8 +229,7 @@
               <div class="mt-auto d-flex gap-2 justify-content-center">
                 <a class="btn btn-outline-primary btn-sm" th:href="@{|/products/${r.id}|}">Xem chi tiết</a>
                 <button class="btn btn-success btn-sm btn-add-to-cart"
-                        th:attr="data-id=${r.id},data-name=${r.productName},data-price=${r.salePrice != null ? r.salePrice : r.price}">
-                  Thêm vào giỏ
+                        th:attr="data-id=${r.id},data-name=${r.productName},data-price=${r.salePrice != null ? r.salePrice : r.price}, data-qty-selector='null'"> Thêm vào giỏ
                 </button>
               </div>
             </div>
@@ -241,11 +237,135 @@
         </div>
       </div>
     </div>
-
+    </div>
+  
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
+      <div id="cartToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          Đã thêm <span id="toast-product-name" class="fw-semibold"></span> vào giỏ hàng!
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+    <div id="errorToast" class="toast align-items-center text-bg-danger border-0 mt-2" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body" id="errorToastMsg">Lỗi không xác định</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
   </div>
-
   <div th:replace="fragments/footer :: footer"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+  
+      // --- Cấu hình API và CSRF ---
+      const API_BASE_URL = /*[[@{/api/cart}]]*/ '/api/cart'; 
+      const CHECKOUT_URL = /*[[@{/checkout}]]*/ '/checkout'; // URL trang thanh toán
+      // Thêm URL đăng nhập để chuyển hướng khi cần
+      const LOGIN_URL = /*[[@{/auth/login}]]*/ '/auth/login';
+
+      const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+      const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+      const headers = { 'Content-Type': 'application/json' };
+      if (csrfToken && csrfHeader) {
+        headers[csrfHeader] = csrfToken;
+      }
+  
+      // --- Toast elements ---
+      const cartToastEl = document.getElementById('cartToast');
+      const cartToast = cartToastEl ? new bootstrap.Toast(cartToastEl) : null;
+      const errorToastEl = document.getElementById('errorToast');
+      const errorToast = errorToastEl ? new bootstrap.Toast(errorToastEl) : null;
+  
+      // --- Hàm gọi API (Chỉ dùng cho "Thêm vào giỏ") ---
+      async function callAddToCartApi(productId, quantity) {
+        try {
+          // Validate quantity client-side
+          const qtyInt = parseInt(quantity);
+          if (isNaN(qtyInt) || qtyInt <= 0) {
+              throw new Error("Số lượng không hợp lệ.");
+          }
+
+          const body = JSON.stringify({
+            productId: parseInt(productId),
+            quantity: qtyInt
+          });
+  
+          const response = await fetch(`${API_BASE_URL}/items`, {
+            method: 'POST',
+            headers: headers,
+            body: body
+          });
+  
+          if (response.status === 401) {
+             // Nếu lỗi 401 (chưa đăng nhập), chuyển sang trang login kèm redirect
+             window.location.href = LOGIN_URL + '?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+             return null;
+          }
+          if (!response.ok) {
+            const errorMsg = await response.text();
+            throw new Error(errorMsg || 'Thêm vào giỏ hàng thất bại.');
+          }
+          return await response.json(); // Trả về cartView
+  
+        } catch (err) {
+          console.error('Lỗi API:', err);
+          if (errorToast) {
+              document.getElementById('errorToastMsg').textContent = err.message;
+              errorToast.show();
+          } else {
+              alert(err.message);
+          }
+          return null; // Trả về null nếu lỗi
+        }
+      }
+  
+      // --- Gắn sự kiện cho TẤT CẢ các nút "Thêm vào giỏ" ---
+      // (Bao gồm cả nút trên sản phẩm chính và sản phẩm liên quan)
+      document.querySelectorAll('.btn-add-to-cart').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            const currentBtn = e.currentTarget;
+            currentBtn.disabled = true; 
+            const productId = currentBtn.dataset.id;
+            const qtySelector = currentBtn.dataset.qtySelector;
+            // Nếu không có selector (null hoặc #null), mặc định là 1
+            const qty = (qtySelector && qtySelector !== 'null') ? document.querySelector(qtySelector)?.value : 1; 
+            const productName = currentBtn.dataset.name || 'Sản phẩm';
+    
+            const cartView = await callAddToCartApi(productId, qty);
+            
+            if (cartView && cartToast) {
+              document.getElementById('toast-product-name').textContent = productName;
+              cartToast.show();
+            }
+            currentBtn.disabled = false;
+          });
+      });
+  
+      // --- Gắn sự kiện cho nút "Mua ngay" (Giữ nguyên) ---
+      const btnBuyNow = document.getElementById('btn-buy-now');
+      if (btnBuyNow) {
+        btnBuyNow.addEventListener('click', (e) => {
+          const btn = e.currentTarget;
+          const productId = btn.dataset.id;
+          const qtySelector = btn.dataset.qtySelector;
+          const qty = document.querySelector(qtySelector)?.value || 1;
+          const qtyInt = parseInt(qty);
+
+          if (isNaN(qtyInt) || qtyInt <= 0) {
+              alert("Vui lòng chọn số lượng lớn hơn 0.");
+              return;
+          }
+          
+          // Chỉ cần điều hướng, không gọi API
+          window.location.href = `${CHECKOUT_URL}?buyNow=true&productId=${productId}&qty=${qtyInt}`;
+        });
+      }
+    });
+  </script>
   </body>
 </html>

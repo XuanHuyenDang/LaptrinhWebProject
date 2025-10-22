@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+// === THÊM IMPORT NÀY ===
+import vn.flower.api.dto.BuyNowRequest; 
 import vn.flower.api.dto.CartLine;
 import vn.flower.api.dto.CartView;
 import vn.flower.api.dto.CheckoutRequest;
@@ -41,7 +43,7 @@ public class CartService {
   
 
   private BigDecimal shippingFeeFor(ShippingMethod method, BigDecimal subtotal) {
-	  if (subtotal == null) subtotal = BigDecimal.ZERO;
+	  if (subtotal == null || subtotal.compareTo(BigDecimal.ZERO) <= 0) return BigDecimal.ZERO; // Nếu không có tiền hàng thì 0đ ship
 	  ShippingMethod m = (method != null) ? method : ShippingMethod.FAST;
 
 	  return switch (m) {
@@ -59,7 +61,6 @@ public class CartService {
 	}
   
   private static final String STATUS_CART = "CART";
-  private static final BigDecimal DEFAULT_SHIP = new BigDecimal("30000");
 
   @Transactional
   public Order getOrCreateCart(Integer accountId) {
@@ -129,7 +130,6 @@ public class CartService {
     return toView(cart.getId());
   }
 
-  // ✅ Hàm xóa riêng, dùng JPQL DELETE (nhanh, dứt khoát, có flush auto)
   @Transactional
   public CartView removeItem(Integer accountId, Integer productId) {
     Order cart = getOrCreateCart(accountId);
@@ -143,6 +143,9 @@ public class CartService {
     return toView(cart.getId());
   }
 
+  /**
+   * Thanh toán giỏ hàng (status='CART') hiện có.
+   */
   @Transactional
   public Integer checkout(Integer accountId, CheckoutRequest req) {
     Order cart = orderRepo.findFirstByAccount_IdAndStatusOrderByIdDesc(accountId, STATUS_CART)
@@ -151,13 +154,18 @@ public class CartService {
     List<OrderDetail> lines = odRepo.findById_OrderId(cart.getId());
     if (lines.isEmpty()) throw new IllegalStateException("Giỏ hàng trống");
 
-    var totals = calcTotals(lines, DEFAULT_SHIP);
+    // === SỬA LỖI LOGIC: Tính phí ship dựa trên req, không dùng DEFAULT_SHIP ===
+    BigDecimal subtotal = calcSubtotal(lines);
+    BigDecimal shippingFee = shippingFeeFor(req.shippingMethod(), subtotal);
+    var totals = calcTotals(lines, shippingFee);
+    // ===================================================================
 
     cart.setRecipientName(req.recipientName());
     cart.setRecipientPhone(req.recipientPhone());
     cart.setShippingAddress(req.shippingAddress());
     cart.setNote(req.note());
     cart.setPaymentMethod(req.paymentMethod());
+    cart.setShippingMethod(req.shippingMethod()); // <-- Lưu phương thức ship
     cart.setShippingFee(totals.shipping());
     cart.setTotalAmount(totals.total());
     cart.setOrderDate(LocalDateTime.now());
@@ -174,12 +182,77 @@ public class CartService {
     return cart.getId();
   }
 
+  /**
+   * === PHƯƠNG THỨC MỚI CHO "MUA NGAY" ===
+   * Tạo một đơn hàng hoàn toàn mới (không đụng đến giỏ status='CART')
+   * chỉ với 1 sản phẩm duy nhất.
+   */
+  @Transactional
+  public Integer checkoutBuyNow(Integer accountId, BuyNowRequest req) {
+    if (req.quantity() <= 0) {
+        throw new IllegalArgumentException("Số lượng phải lớn hơn 0");
+    }
+
+    // 1. Lấy thông tin
+    Product p = productRepo.findById(req.productId())
+        .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sản phẩm"));
+    Account acc = new Account();
+    acc.setId(accountId);
+    CheckoutRequest checkoutInfo = req.checkout(); // Thông tin người nhận
+
+    // 2. Tạo Order MỚI
+    Order order = new Order();
+    order.setAccount(acc);
+    order.setStatus("Đang xử lý"); // Đặt hàng thẳng, không qua 'CART'
+    order.setOrderDate(LocalDateTime.now());
+
+    // 3. Set thông tin người nhận
+    order.setRecipientName(checkoutInfo.recipientName());
+    order.setRecipientPhone(checkoutInfo.recipientPhone());
+    order.setShippingAddress(checkoutInfo.shippingAddress());
+    order.setNote(checkoutInfo.note());
+    order.setPaymentMethod(checkoutInfo.paymentMethod());
+    order.setShippingMethod(checkoutInfo.shippingMethod());
+
+    // 4. Tạo OrderDetail MỚI
+    OrderDetail line = new OrderDetail();
+    BigDecimal stampedPrice = p.getSalePrice() != null ? p.getSalePrice() : p.getPrice();
+    
+    // OrderId sẽ được set tự động khi save
+    line.setId(new OrderDetailId(null, p.getId())); 
+    line.setOrder(order);
+    line.setProduct(p);
+    line.setQuantity(req.quantity());
+    line.setPrice(stampedPrice);
+
+    // 5. Tính toán tổng tiền
+    BigDecimal subtotal = stampedPrice.multiply(BigDecimal.valueOf(req.quantity()));
+    BigDecimal shippingFee = shippingFeeFor(checkoutInfo.shippingMethod(), subtotal);
+    BigDecimal total = subtotal.add(shippingFee);
+
+    order.setShippingFee(shippingFee);
+    order.setTotalAmount(total);
+
+    // 6. Tăng số lượng đã bán
+    p.setSold((p.getSold() == null ? 0 : p.getSold()) + req.quantity());
+    productRepo.save(p);
+
+    // 7. Lưu Order (và OrderDetail qua cascade)
+    // Phải thêm line vào list của order để cascade hoạt động
+    order.setDetails(List.of(line));
+    Order savedOrder = orderRepo.save(order);
+
+    return savedOrder.getId();
+  }
+
+
   private record Totals(BigDecimal subtotal, BigDecimal shipping, BigDecimal total) {}
 
   private CartView toView(Integer orderId) {
 	  List<OrderDetail> lines = odRepo.findById_OrderId(orderId);
 	  BigDecimal subtotal = calcSubtotal(lines);
-	  BigDecimal shipping = shippingFeeFor(ShippingMethod.FAST, subtotal); // default view
+	  // Mặc định là FAST, nhưng khi checkout thật sẽ tính lại
+	  BigDecimal shipping = shippingFeeFor(ShippingMethod.FAST, subtotal); 
 	  BigDecimal total = subtotal.add(shipping);
 
 	  var viewLines = lines.stream().map(l ->
@@ -194,6 +267,7 @@ public class CartService {
 	  return new CartView(orderId, viewLines, subtotal, shipping, total);
 	}
 
+  // Sửa lại hàm này để nhận phí ship từ bên ngoài
   private Totals calcTotals(List<OrderDetail> lines, BigDecimal ship) {
     BigDecimal subtotal = lines.stream()
         .map(l -> l.getPrice().multiply(BigDecimal.valueOf(l.getQuantity())))
