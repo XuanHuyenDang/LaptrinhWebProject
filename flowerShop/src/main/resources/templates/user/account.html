@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tài khoản của tôi - Florio Flower Shop</title>
+    <!-- Bootstrap & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/assets/css/account.css}">
+    <!-- Header/Footer CSS -->
+    <link rel="stylesheet" th:href="@{/assets/css/header.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/footer.css}">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <div class="container my-5 account-container">
+        <h3 class="account-title mb-4">
+            <i class="bi bi-person-circle me-2"></i>Tài khoản của tôi
+        </h3>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+
+        <div class="card shadow-sm account-card">
+            <div class="card-body p-lg-4">
+                <!-- Form binding to accountUpdateForm -->
+                <form id="accountForm" th:action="@{/account/update}" th:object="${accountUpdateForm}" method="post">
+                    <!-- Hidden ID field -->
+                    <input type="hidden" th:field="*{id}" />
+
+                    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                         <h5 class="card-title mb-0">Thông tin cá nhân</h5>
+                         <!-- Nút Sửa/Hủy/Lưu -->
+                         <div>
+                            <button type="button" id="btnEditInfo" class="btn btn-outline-primary btn-sm account-edit-btn">
+                                <i class="bi bi-pencil-square me-1"></i>Sửa thông tin
+                            </button>
+                            <button type="submit" id="btnSaveChanges" class="btn btn-primary btn-sm account-btn-save d-none">
+                                <i class="bi bi-save me-1"></i>Lưu thay đổi
+                            </button>
+                            <button type="button" id="btnCancelEdit" class="btn btn-outline-secondary btn-sm d-none ms-2">
+                                <i class="bi bi-x-circle me-1"></i>Hủy
+                            </button>
+                        </div>
+                    </div>
+
+
+                    <div class="row g-3">
+                        <div class="col-md-6 mb-3">
+                            <label for="fullName" class="form-label">Họ và tên</label>
+                            <input type="text" class="form-control editable-field" id="fullName" th:field="*{fullName}" readonly required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <!-- Email luôn readonly -->
+                            <input type="email" class="form-control" id="email" th:field="*{email}" readonly disabled>
+                            <small class="form-text text-muted">Email không thể thay đổi.</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="phoneNumber" class="form-label">Số điện thoại</label>
+                            <input type="tel" class="form-control editable-field" id="phoneNumber" th:field="*{phoneNumber}" readonly>
+                        </div>
+                         <div class="col-md-6 mb-3">
+                            <label for="createdAt" class="form-label">Ngày tham gia</label>
+                            <input type="text" class="form-control" id="createdAt" th:value="${#temporals.format(account.createdAt, 'dd/MM/yyyy')}" readonly disabled>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label for="address" class="form-label">Địa chỉ</label>
+                            <textarea class="form-control editable-field" id="address" rows="3" th:field="*{address}" readonly></textarea>
+                        </div>
+                    </div>
+
+                </form>
+
+                <hr class="my-4">
+
+                <div class="account-links">
+                     <a th:href="@{/orders}" class="btn btn-outline-secondary account-link-btn">
+                         <i class="bi bi-receipt me-2"></i>Lịch sử đơn hàng
+                     </a>
+                     <!-- Nút Đổi mật khẩu (chưa làm chức năng) -->
+                     <button type="button" class="btn btn-outline-secondary account-link-btn" disabled>
+                         <i class="bi bi-key me-2"></i>Đổi mật khẩu (Sắp có)
+                     </button>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const btnEditInfo = document.getElementById('btnEditInfo');
+        const btnSaveChanges = document.getElementById('btnSaveChanges');
+        const btnCancelEdit = document.getElementById('btnCancelEdit');
+        const editableFields = document.querySelectorAll('.editable-field');
+        const accountForm = document.getElementById('accountForm');
+
+        // Lưu giá trị gốc khi tải trang
+        const originalValues = {};
+        editableFields.forEach(field => {
+            originalValues[field.id] = field.value;
+        });
+
+        // Bật chế độ chỉnh sửa
+        btnEditInfo.addEventListener('click', () => {
+            editableFields.forEach(field => field.readOnly = false);
+            btnEditInfo.classList.add('d-none');
+            btnSaveChanges.classList.remove('d-none');
+            btnCancelEdit.classList.remove('d-none');
+        });
+
+        // Hủy chỉnh sửa
+        btnCancelEdit.addEventListener('click', () => {
+            editableFields.forEach(field => {
+                field.readOnly = true;
+                // Khôi phục giá trị gốc
+                field.value = originalValues[field.id];
+            });
+            btnEditInfo.classList.remove('d-none');
+            btnSaveChanges.classList.add('d-none');
+            btnCancelEdit.classList.add('d-none');
+        });
+
+        // (Nút Save Changes sẽ submit form như bình thường)
+
+    </script>
+</body>
+</html>
