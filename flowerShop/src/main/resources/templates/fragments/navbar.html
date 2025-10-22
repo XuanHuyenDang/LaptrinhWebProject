@@ -24,13 +24,15 @@
         <li class="nav-item"><a class="nav-link text-dark fw-semibold" th:href="@{/chat}">Chat với cửa hàng</a></li>
       </ul>
 
-      <!-- Tìm kiếm: giới hạn chiều rộng để không chiếm chỗ -->
-      <form class="d-none d-lg-flex me-3 search-wrap" th:action="@{/search}" method="get">
+      <!-- === FORM TÌM KIẾM ĐÃ SỬA === -->
+      <!-- Action trỏ đến /products -->
+      <form class="d-none d-lg-flex me-3 search-wrap" th:action="@{/products}" method="get">
         <input class="form-control me-2" type="search" name="q" placeholder="Tìm kiếm hoa..." aria-label="Search">
         <button class="btn btn-outline-danger" type="submit">
           <i class="bi bi-search"></i>
         </button>
       </form>
+      <!-- ========================= -->
 
       <!-- Nhóm phải: không cho wrap -->
       <div class="d-flex align-items-center gap-2 ms-lg-0 flex-nowrap">
@@ -75,3 +77,4 @@
     </div>
   </div>
 </nav>
+

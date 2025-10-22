@@ -1,27 +1,36 @@
 package vn.flower.controllers.user;
 
+// === THÊM CÁC IMPORT NÀY ===
+import org.springframework.beans.factory.annotation.Autowired; // Hoặc dùng constructor injection
+import vn.flower.entities.Category;
+import vn.flower.repositories.CategoryRepository;
+import java.util.List;
+// ==========================
+
 import vn.flower.services.ProductService;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import vn.flower.entities.Product;
-import vn.flower.entities.Review; // <-- THÊM IMPORT
-import vn.flower.services.ReviewService; // <-- THÊM IMPORT
+// Bỏ import vn.flower.services.ProductService; dư thừa
 
 import java.math.BigDecimal;
-import java.util.List; // <-- THÊM IMPORT
 
 @Controller
 public class ProductsController {
 
   private final ProductService productService;
-  private final ReviewService reviewService; // <-- INJECT REVIEW SERVICE
+  // === TIÊM CATEGORY REPOSITORY ===
+  private final CategoryRepository categoryRepository;
+  // ==============================
 
-  public ProductsController(ProductService productService, ReviewService reviewService) {
+  // === SỬA CONSTRUCTOR ĐỂ NHẬN REPOSITORY ===
+  public ProductsController(ProductService productService, CategoryRepository categoryRepository) {
     this.productService = productService;
-    this.reviewService = reviewService; // <-- THÊM
+    this.categoryRepository = categoryRepository; // Gán giá trị
   }
+  // ========================================
 
   @GetMapping({"/product", "/products"})
   public String products(@RequestParam(required = false) String q,
@@ -36,46 +45,35 @@ public class ProductsController {
     Sort s = switch (sort) {
       case "asc" -> Sort.by(Sort.Direction.ASC, "price");
       case "desc" -> Sort.by(Sort.Direction.DESC, "price");
-      default -> Sort.by(Sort.Direction.DESC, "id");
+      default -> Sort.by(Sort.Direction.DESC, "id"); // Sắp xếp mặc định theo ID mới nhất
     };
 
-    Page<Product> result = productService.search(q, categoryId, min, max, PageRequest.of(page, size, s));
+    Pageable pageable = PageRequest.of(page, size, s);
+    Page<Product> resultPage = productService.search(q, categoryId, min, max, pageable);
 
-    model.addAttribute("page", result);
-    model.addAttribute("products", result.getContent());
+    // === LẤY DANH SÁCH CATEGORIES ===
+    List<Category> categories = categoryRepository.findAll();
+    // ================================
+
+    // === GỬI DỮ LIỆU SANG TEMPLATE ===
+    model.addAttribute("page", resultPage); // Đối tượng Page chứa thông tin phân trang
+    model.addAttribute("products", resultPage.getContent()); // Danh sách sản phẩm của trang hiện tại
+    model.addAttribute("categories", categories); // <-- GỬI CATEGORIES SANG
     model.addAttribute("q", q);
-    model.addAttribute("categoryId", categoryId);
+    model.addAttribute("categoryId", categoryId); // Giữ lại ID đã chọn
     model.addAttribute("min", min);
     model.addAttribute("max", max);
     model.addAttribute("sort", sort);
-    return "user/products";            // --> templates/user/products.html
+    // ================================
+
+    return "user/products"; // -> templates/user/products.html
   }
 
   @GetMapping("/products/{id}")
   public String detail(@PathVariable Integer id, Model model) {
-    
-    // 1. Lấy thông tin sản phẩm (như cũ)
-    model.addAttribute("product", productService.getById(id));
-
-    // 2. Lấy danh sách reviews
-    List<Review> reviews = reviewService.getReviewsForProduct(id);
-    model.addAttribute("reviews", reviews);
-
-    // 3. Tính toán rating trung bình và tổng số
-    double avgRating = reviews.stream()
-                              .mapToInt(Review::getRating)
-                              .average()
-                              .orElse(0.0);
-                              
-    model.addAttribute("averageRating", avgRating);
-    model.addAttribute("reviewCount", reviews.size());
-
-    // 4. Chuẩn bị 1 object rỗng cho form
-    model.addAttribute("newReview", new Review());
-
-    // (Logic sản phẩm liên quan của bạn nếu có)
-    // model.addAttribute("related", ...);
-
-    return "user/product-detail";      // --> templates/user/product-detail.html
+    Product product = productService.getById(id);
+    model.addAttribute("product", product);
+    // (Optionally add related products here if needed)
+    return "user/product-detail"; // -> templates/user/product-detail.html
   }
 }

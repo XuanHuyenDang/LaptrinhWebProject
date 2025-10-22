@@ -10,7 +10,9 @@ import vn.flower.repositories.ProductRepository;
 import java.math.BigDecimal;
 import java.util.List;
 
+// === THÊM IMPORT NÀY ===
 import static vn.flower.repositories.ProductSpecifications.*;
+// ========================
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -23,7 +25,10 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   public Page<Product> search(String q, Integer categoryId, BigDecimal min, BigDecimal max, Pageable pageable) {
-    Specification<Product> spec = Specification.where(nameLike(q))
+    // === SỬA DÒNG NÀY ===
+    // Sử dụng nameOrDescriptionLike thay vì chỉ nameLike
+    Specification<Product> spec = Specification.where(nameOrDescriptionLike(q))
+    // ====================
         .and(categoryIdEq(categoryId))
         .and(priceGte(min))
         .and(priceLte(max));
@@ -35,18 +40,17 @@ public class ProductServiceImpl implements ProductService {
     return productRepository.findById(id)
         .orElseThrow(() -> new IllegalArgumentException("Product not found: " + id));
   }
-  
+
   @Override
   public List<Product> getTop10BestSellers() {
       return productRepository.findTop10ByStatusTrueOrderBySoldDescIdDesc();
-      // hoặc cách Pageable ở trên
   }
-  
+
   @Override
   public List<Product> getLatest5Products() {
     return productRepository.findTop5ByStatusTrueOrderByIdDesc();
   }
-  
+
   @Override
   public List<Product> getTop10SaleProducts() {
     return productRepository.findTop10ByStatusTrueAndSalePriceIsNotNullOrderByIdDesc();
