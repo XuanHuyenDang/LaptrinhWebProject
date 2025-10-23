@@ -5,20 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Sản phẩm - Florio Flower Shop</title>
 
-  <!-- CSRF -->
   <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
   <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
 
-  <!-- Bootstrap CDN -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
-  <!-- CSS -->
   <link rel="stylesheet" th:href="@{/assets/css/products.css}">
   <link rel="stylesheet" th:href="@{/assets/css/header.css}">
   <link rel="stylesheet" th:href="@{/assets/css/footer.css}">
 
-  <!-- CSS FOR PRICE SLIDER -->
   <style>
     .price-slider-container {
         padding-top: 10px;
@@ -79,28 +75,44 @@
         color: #495057;
         margin-bottom: 5px;
     }
+    
+    /* === CSS CHO NÚT YÊU THÍCH MỚI === */
+    .btn-wishlist {
+      position: absolute; top: 10px; right: 10px; 
+      z-index: 10; border-radius: 50%; 
+      width: 34px; height: 34px; 
+      background-color: rgba(255, 255, 255, 0.7);
+      border: 1px solid #ddd;
+      color: #dc3545; /* Màu đỏ */
+      display: flex; align-items: center; justify-content: center;
+      padding: 0;
+    }
+    .btn-wishlist:hover {
+      background-color: white;
+      border-color: #dc3545;
+    }
+    .btn-wishlist.active {
+      background-color: #dc3545;
+      color: white;
+      border-color: #dc3545;
+    }
   </style>
 
 </head>
 
 <body>
-  <!-- HEADER (fragment) -->
   <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-  <!-- MAIN -->
   <main class="container my-4">
 
-    <!-- Product Filter Form -->
     <div class="card shadow-sm mb-4">
       <div class="card-body">
         <form class="row g-3 align-items-center" method="get" th:action="@{/products}">
-          <!-- Keyword -->
           <div class="col-md-4">
             <input type="text" name="q" class="form-control" placeholder="🔍 Tìm theo tên sản phẩm..."
                    th:value="${q}">
           </div>
 
-          <!-- Category -->
           <div class="col-md-3">
             <select name="categoryId" class="form-select">
               <option value="">Tất cả danh mục</option>
@@ -111,31 +123,21 @@
             </select>
           </div>
 
-          <!-- === PRICE SLIDER (UPDATED RANGE) === -->
           <div class="col-md-3 price-slider-container">
-            <!-- Hidden inputs -->
             <input type="hidden" name="min" id="hiddenMinPrice" th:value="${min != null ? min : 0}">
-            <!-- Sửa giá trị max mặc định -->
             <input type="hidden" name="max" id="hiddenMaxPrice" th:value="${max != null ? max : 10000000}">
 
-            <!-- Display values -->
             <div class="price-values">
               <span id="minPriceDisplay">0đ</span>
-              <!-- Sửa giá trị hiển thị max mặc định -->
               <span id="maxPriceDisplay">10,000,000đ</span>
             </div>
 
-            <!-- Slider structure -->
             <div class="price-slider">
               <div class="slider-track"></div>
-              <!-- Sửa max và step (step có thể giữ nguyên hoặc tăng lên) -->
               <input type="range" id="minPriceSlider" min="0" max="10000000" step="100000" th:value="${min != null ? min : 0}">
               <input type="range" id="maxPriceSlider" min="0" max="10000000" step="100000" th:value="${max != null ? max : 10000000}">
             </div>
           </div>
-          <!-- ====================================== -->
-
-          <!-- Sort -->
           <div class="col-md-2">
             <select name="sort" class="form-select">
               <option value="" th:selected="${sort == null or sort == ''}">Mới nhất</option>
@@ -144,7 +146,6 @@
             </select>
           </div>
 
-          <!-- Filter Button -->
           <div class="col-12 d-flex justify-content-end">
             <button type="submit" class="btn btn-primary">
               <i class="bi bi-funnel"></i> Lọc
@@ -154,14 +155,12 @@
       </div>
     </div>
 
-    <!-- Results count -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="mb-0">Kết quả</h5>
       <small class="text-muted" th:if="${page != null}"
              th:text="'Tổng: ' + ${page.totalElements} + ' sản phẩm'">Tổng: 0 sản phẩm</small>
     </div>
 
-    <!-- No products found message -->
     <div class="row" th:if="${page == null or page.empty}">
         <div class="col">
         <div class="alert alert-warning d-flex align-items-center" role="alert">
@@ -171,10 +170,13 @@
       </div>
     </div>
 
-    <!-- Product Grid -->
     <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3" th:if="${page != null and !page.empty}">
       <div class="col" th:each="p : ${page.content}">
         <div class="card h-100 shadow-sm">
+            
+            <button class="btn btn-sm btn-wishlist" th:attr="data-id=${p.id}">
+                <i class="bi bi-heart"></i>
+            </button>
             <div class="ratio ratio-1x1">
             <img class="card-img-top object-fit-cover"
                  th:src="${p.imageUrl != null and p.imageUrl != '' ? '/assets/' + p.imageUrl : '/assets/images/placeholder.png'}"
@@ -207,7 +209,6 @@
       </div>
     </div>
 
-    <!-- Pagination -->
     <nav th:if="${page != null and page.totalPages > 1}" class="mt-4">
       <ul class="pagination justify-content-center">
           <li class="page-item" th:classappend="${page.first}? 'disabled'">
@@ -234,7 +235,6 @@
     </nav>
   </main>
 
-  <!-- Toast Messages -->
   <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
       <div id="cartToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
       <div class="d-flex">
@@ -252,16 +252,12 @@
     </div>
   </div>
 
-  <!-- FOOTER (fragment) -->
   <div th:replace="~{fragments/footer :: footer}"></div>
 
-  <!-- Bootstrap JS CDN -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-  <!-- Add-to-cart JS -->
   <script th:src="@{/assets/js/product-page-cart.js}"></script>
 
-  <!-- === JAVASCRIPT FOR PRICE SLIDER (NO CHANGE NEEDED HERE) === -->
   <script th:inline="javascript">
     const minSlider = document.getElementById('minPriceSlider');
     const maxSlider = document.getElementById('maxPriceSlider');
@@ -271,10 +267,7 @@
     const hiddenMax = document.getElementById('hiddenMaxPrice');
     const sliderTrack = document.querySelector('.price-slider .slider-track');
 
-    // Sửa chỗ này: Lấy giá trị max TỪ SLIDER HTML
     const sliderMaxValue = parseInt(minSlider.max);
-
-    // Currency formatter
     const formatter = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 });
 
     function updateSliderAppearance(event) {
@@ -310,11 +303,106 @@
     minSlider.addEventListener('input', updateSliderAppearance);
     maxSlider.addEventListener('input', updateSliderAppearance);
 
-    // Initial update on page load - Sẽ tự đọc value từ th:value
     updateSliderAppearance();
   </script>
-  <!-- ================================= -->
+  <script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+        const wishlistedIds = new Set();
+        const wishlistButtons = document.querySelectorAll('.btn-wishlist');
+        // URL đăng nhập với redirect về trang hiện tại
+        const loginUrl = /*[[@{/auth/login}]]*/ '/auth/login';
+        const currentPath = window.location.pathname + window.location.search;
+        const loginRedirectUrl = `${loginUrl}?redirect=${encodeURIComponent(currentPath)}`;
 
-</body>
+        // Lấy CSRF
+        const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+        const headers = { 'Content-Type': 'application/json' };
+        if (csrfToken && csrfHeader) {
+            headers[csrfHeader] = csrfToken;
+        }
+
+        // 1. Hàm cập nhật giao diện các nút
+        function updateButtonUI() {
+            wishlistButtons.forEach(btn => {
+                const productId = parseInt(btn.dataset.id, 10);
+                const icon = btn.querySelector('i');
+                if (wishlistedIds.has(productId)) {
+                    icon.classList.remove('bi-heart');
+                    icon.classList.add('bi-heart-fill');
+                    btn.classList.add('active'); 
+                } else {
+                    icon.classList.remove('bi-heart-fill');
+                    icon.classList.add('bi-heart');
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        // 2. Hàm gọi API toggle
+        async function toggleWishlist(productId, btn) {
+            btn.disabled = true;
+            try {
+                const response = await fetch(`/api/wishlist/toggle/${productId}`, {
+                    method: 'POST',
+                    headers: headers
+                });
+
+                if (response.status === 401 || response.status === 403) { // 401 (Chưa đăng nhập) hoặc 403 (CSRF sai)
+                    alert('Vui lòng đăng nhập để sử dụng chức năng này.');
+                    window.location.href = loginRedirectUrl; // Chuyển hướng
+                    return; // Dừng
+                }
+
+                if (!response.ok) throw new Error('API failed with status ' + response.status);
+
+                const result = await response.json();
+                
+                if (result.status === 'added') {
+                    wishlistedIds.add(productId);
+                } else if (result.status === 'removed') {
+                    wishlistedIds.delete(productId);
+                }
+                
+                updateButtonUI();
+
+            } catch (err) {
+                console.error('Wishlist error:', err);
+                alert('Đã xảy ra lỗi. Vui lòng thử lại sau.');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // 3. Lấy danh sách ID ban đầu (chỉ khi đã đăng nhập)
+        (async function fetchInitialIds() {
+            // Chỉ gọi API nếu có vẻ đã đăng nhập (có token)
+            if (csrfToken && csrfHeader) {
+                try {
+                    const response = await fetch('/api/wishlist/ids', { headers: headers });
+                    if (response.ok) {
+                        const ids = await response.json();
+                        ids.forEach(id => wishlistedIds.add(id));
+                        updateButtonUI();
+                    } else if (response.status !== 401 && response.status !== 403) {
+                         console.warn('Could not fetch wishlist IDs, status:', response.status);
+                    }
+                } catch (err) {
+                    console.warn('Could not fetch wishlist IDs', err);
+                }
+            }
+        })();
+
+        // 4. Gắn sự kiện click
+        wishlistButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault(); 
+                // Gọi thẳng API, backend sẽ xử lý xác thực và CSRF
+                const productId = parseInt(btn.dataset.id, 10);
+                toggleWishlist(productId, btn); 
+            });
+        });
+    });
+  </script>
+  </body>
 </html>
-

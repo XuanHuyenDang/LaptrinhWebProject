@@ -28,12 +28,14 @@
 		</a>
 
 		<hr class="text-muted">
-		<form th:action="@{/auth/logout}" method="post" class="logout-form">
+        <form th:action="@{/auth/logout}" method="post" class="logout-form">
+            <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            
 			<button type="submit" class="btn btn-outline-danger">
 				<i class="bi bi-box-arrow-right"></i> Đăng xuất
 			</button>
 		</form>
-	</nav>
+        </nav>
 
 </body>
 </html>

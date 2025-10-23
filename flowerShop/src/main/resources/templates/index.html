@@ -16,6 +16,27 @@
     <link rel="stylesheet" th:href="@{/assets/css/index.css}">
     <link rel="stylesheet" th:href="@{/assets/css/header.css}">
     <link rel="stylesheet" th:href="@{/assets/css/footer.css}">
+    
+    <style>
+      .btn-wishlist {
+        position: absolute; top: 10px; right: 10px; 
+        z-index: 10; border-radius: 50%; 
+        width: 34px; height: 34px; 
+        background-color: rgba(255, 255, 255, 0.7);
+        border: 1px solid #ddd;
+        color: #dc3545; /* Màu đỏ */
+        display: flex; align-items: center; justify-content: center;
+      }
+      .btn-wishlist:hover {
+        background-color: white;
+        border-color: #dc3545;
+      }
+      .btn-wishlist.active {
+        background-color: #dc3545;
+        color: white;
+        border-color: #dc3545;
+      }
+    </style>
   </head>
   <body>
 
@@ -58,10 +79,14 @@
           <ul class="strip-track" role="list">
             <li class="strip-item" th:each="prod : ${topSoldProducts}">
               <div class="card product-card h-100 shadow-sm">
+                <button class="btn btn-sm btn-wishlist" th:attr="data-id=${prod.id}">
+                    <i class="bi bi-heart"></i>
+                </button>
                 <div class="ratio ratio-1x1"> 
                   <img class="card-img-top object-fit-cover"
-                       th:src="${#strings.isEmpty(prod.imageUrl)} ? @{/assets/images/placeholder.png} : @{${prod.imageUrl}}"
-                       th:alt="${prod.productName}">
+                       th:src="${#strings.isEmpty(prod.imageUrl)} ? @{/assets/images/placeholder.png} : @{/assets/${prod.imageUrl}}"
+                       th:alt="${prod.productName}"
+                       onerror="this.onerror=null; this.src='/assets/images/placeholder.png';">
                 </div>
                 <div class="card-body d-flex flex-column">
                   <h6 class="card-title mb-2" th:text="${prod.productName}">Tên sản phẩm</h6>
@@ -80,7 +105,7 @@
                       <i class="bi bi-eye"></i> Xem chi tiết
                     </a>
                     <button type="button" class="btn btn-primary btn-sm btn-add-to-cart"
-                            th:attr="data-id=${prod.id}">
+                            th:attr="data-id=${prod.id}, data-name=${prod.productName}, data-price=${prod.salePrice != null ? prod.salePrice : prod.price}">
                       <i class="bi bi-cart-plus"></i> Thêm vào giỏ
                     </button>
                   </div>
@@ -100,10 +125,14 @@
           <ul class="strip-track" role="list">
             <li class="strip-item" th:each="prod : ${latestProducts}">
               <div class="card product-card h-100 shadow-sm"> 
+                <button class="btn btn-sm btn-wishlist" th:attr="data-id=${prod.id}">
+                    <i class="bi bi-heart"></i>
+                </button>
                 <div class="ratio ratio-1x1">
                   <img class="card-img-top object-fit-cover"
-                       th:src="${#strings.isEmpty(prod.imageUrl)} ? @{/assets/images/placeholder.png} : @{${prod.imageUrl}}"
-                       th:alt="${prod.productName}">
+                       th:src="${#strings.isEmpty(prod.imageUrl)} ? @{/assets/images/placeholder.png} : @{/assets/${prod.imageUrl}}"
+                       th:alt="${prod.productName}"
+                       onerror="this.onerror=null; this.src='/assets/images/placeholder.png';">
                 </div>
                 <div class="card-body d-flex flex-column">
                   <h6 class="card-title mb-2" th:text="${prod.productName}">Tên sản phẩm</h6>
@@ -122,7 +151,7 @@
                       <i class="bi bi-eye"></i> Xem chi tiết
                     </a>
                     <button type="button" class="btn btn-primary btn-sm btn-add-to-cart"
-                            th:attr="data-id=${prod.id}">
+                            th:attr="data-id=${prod.id}, data-name=${prod.productName}, data-price=${prod.salePrice != null ? prod.salePrice : prod.price}">
                       <i class="bi bi-cart-plus"></i> Thêm vào giỏ
                     </button>
                   </div>
@@ -141,10 +170,14 @@
           <ul class="strip-track" role="list">
             <li class="strip-item" th:each="prod : ${saleProducts}">
               <div class="card product-card h-100 shadow-sm">
+                <button class="btn btn-sm btn-wishlist" th:attr="data-id=${prod.id}">
+                    <i class="bi bi-heart"></i>
+                </button>
                 <div class="ratio ratio-1x1">
                   <img class="card-img-top object-fit-cover"
-                       th:src="${#strings.isEmpty(prod.imageUrl)} ? @{/assets/images/placeholder.png} : @{${prod.imageUrl}}"
-                       th:alt="${prod.productName}">
+                       th:src="${#strings.isEmpty(prod.imageUrl)} ? @{/assets/images/placeholder.png} : @{/assets/${prod.imageUrl}}"
+                       th:alt="${prod.productName}"
+                       onerror="this.onerror=null; this.src='/assets/images/placeholder.png';">
                 </div>
                 <div class="card-body d-flex flex-column">
                   <h6 class="card-title mb-2" th:text="${prod.productName}">Tên sản phẩm</h6>
@@ -161,7 +194,7 @@
                       <i class="bi bi-eye"></i> Xem chi tiết
                     </a>
                     <button type="button" class="btn btn-primary btn-sm btn-add-to-cart"
-                            th:attr="data-id=${prod.id}">
+                            th:attr="data-id=${prod.id}, data-name=${prod.productName}, data-price=${prod.salePrice != null ? prod.salePrice : prod.price}">
                       <i class="bi bi-cart-plus"></i> Thêm vào giỏ
                     </button>
                   </div>
@@ -189,5 +222,109 @@
 
     <script th:src="@{/assets/js/index.js}"></script>
     <script th:src="@{/assets/js/layout.js}"></script>
-  </body>
+    
+    <script th:inline="javascript">
+      document.addEventListener('DOMContentLoaded', () => {
+          const wishlistedIds = new Set();
+          const wishlistButtons = document.querySelectorAll('.btn-wishlist');
+          const loginUrl = /*[[@{/auth/login}]]*/ '/auth/login';
+          const currentPath = window.location.pathname + window.location.search;
+          const loginRedirectUrl = `${loginUrl}?redirect=${encodeURIComponent(currentPath)}`;
+  
+          // Lấy CSRF từ thẻ meta
+          const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+          const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+          const headers = { 'Content-Type': 'application/json' };
+          if (csrfToken && csrfHeader) {
+              headers[csrfHeader] = csrfToken;
+          }
+  
+          // 1. Hàm cập nhật giao diện các nút
+          function updateButtonUI() {
+              wishlistButtons.forEach(btn => {
+                  const productId = parseInt(btn.dataset.id, 10);
+                  const icon = btn.querySelector('i');
+                  if (wishlistedIds.has(productId)) {
+                      icon.classList.remove('bi-heart');
+                      icon.classList.add('bi-heart-fill');
+                      btn.classList.add('active'); 
+                  } else {
+                      icon.classList.remove('bi-heart-fill');
+                      icon.classList.add('bi-heart');
+                      btn.classList.remove('active');
+                  }
+              });
+          }
+  
+          // 2. Hàm gọi API toggle
+          async function toggleWishlist(productId, btn) {
+              btn.disabled = true;
+              try {
+                  const response = await fetch(`/api/wishlist/toggle/${productId}`, {
+                      method: 'POST',
+                      headers: headers // Gửi headers có CSRF
+                  });
+  
+                  if (response.status === 401 || response.status === 403) { // 401 (Chưa đăng nhập) hoặc 403 (CSRF sai)
+                      alert('Vui lòng đăng nhập để sử dụng chức năng này.');
+                      window.location.href = loginRedirectUrl; // Chuyển hướng
+                      return; // Dừng lại
+                  }
+  
+                  if (!response.ok) throw new Error('API failed with status ' + response.status);
+  
+                  const result = await response.json();
+                  
+                  if (result.status === 'added') {
+                      wishlistedIds.add(productId);
+                  } else if (result.status === 'removed') {
+                      wishlistedIds.delete(productId);
+                  }
+                  
+                  updateButtonUI();
+  
+              } catch (err) {
+                  console.error('Wishlist error:', err);
+                  alert('Đã xảy ra lỗi. Vui lòng thử lại sau.');
+              } finally {
+                  btn.disabled = false;
+              }
+          }
+  
+          // 3. Lấy danh sách ID ban đầu (chỉ khi đã đăng nhập)
+          (async function fetchInitialIds() {
+              // Chỉ gọi API lấy ID nếu có vẻ đã đăng nhập (có token)
+              if (csrfToken && csrfHeader) {
+                  try {
+                      const response = await fetch('/api/wishlist/ids', { headers: headers });
+                      if (response.ok) {
+                          const ids = await response.json();
+                          ids.forEach(id => wishlistedIds.add(id));
+                          updateButtonUI();
+                      } else if (response.status !== 401 && response.status !== 403) {
+                          // Log lỗi nếu không phải lỗi xác thực
+                          console.warn('Could not fetch wishlist IDs, status:', response.status);
+                      }
+                  } catch (err) {
+                      console.warn('Could not fetch wishlist IDs', err);
+                  }
+              }
+          })();
+  
+          // 4. Gắn sự kiện click
+          wishlistButtons.forEach(btn => {
+              btn.addEventListener('click', (e) => {
+                  e.preventDefault(); // Ngăn hành vi mặc định
+                  // Không cần kiểm tra CSRF ở đây nữa, gọi thẳng API
+                  const productId = parseInt(btn.dataset.id, 10);
+                  toggleWishlist(productId, btn); 
+              });
+          });
+          
+          // Gắn sự kiện cho các nút "add-to-cart"
+          // Lưu ý: Đảm bảo logic gốc trong index.js/layout.js vẫn hoạt động
+          // Nếu bạn đã tích hợp vào đây thì không cần gọi file js ngoài nữa
+      });
+    </script>
+    </body>
 </html>

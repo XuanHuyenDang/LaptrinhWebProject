@@ -73,14 +73,14 @@ body {
 			Nhập mã OTP được gửi đến <strong th:text="${email}"></strong>
 		</p>
 
-		<!-- HIỂN THỊ THÔNG BÁO -->
 		<div th:if="${error}" class="alert alert-danger py-2"
 			th:text="${error}"></div>
 		<div th:if="${message}" class="alert alert-success py-2"
 			th:text="${message}"></div>
 
-		<form th:action="@{/auth/register/confirm}" method="post"
-			th:object="${account}">
+		<form th:action="@{/auth/register/confirm}" method="post">
+			<input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
 			<input type="hidden" name="email" th:value="${email}">
 
 			<div class="mb-3">

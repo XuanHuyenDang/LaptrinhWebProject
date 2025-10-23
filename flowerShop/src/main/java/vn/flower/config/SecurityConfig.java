@@ -9,6 +9,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+// Import thêm CsrfTokenRepository nếu muốn tùy chỉnh (ví dụ: CookieCsrfTokenRepository)
+// import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Configuration
 @EnableWebSecurity
@@ -30,34 +32,33 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 	  http
-	    .csrf(csrf -> csrf.disable()) // Tạm thời tắt CSRF để dễ test, nên bật lại sau
+	    // .csrf(csrf -> csrf.disable()) // <-- ĐÃ XÓA DÒNG NÀY ĐỂ BẬT LẠI CSRF
+	    /* // Tùy chọn: Nếu muốn dùng Cookie-based CSRF thay vì Session-based (mặc định)
+	    .csrf(csrf -> csrf
+	        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+	        // .csrfTokenRequestHandler(new CsrfTokenRequestAttributeNameRequestHandler()) // Nếu cần
+	    )
+	    */
 	    .authorizeHttpRequests(auth -> auth
 	      // Public: trang chủ + tài nguyên tĩnh
 	      .requestMatchers("/", "/index",
 	          "/assets/**", "/css/**", "/js/**", "/images/**", "/slider/**").permitAll()
-
-	      // === ĐÃ SẮP XẾP LẠI ĐỂ SỬA LỖI ===
-	      // Public: Đặt quy tắc cụ thể nhất lên trước
-	      .requestMatchers("/products/{id:[0-9]+}").permitAll() // Chi tiết sản phẩm (Cụ thể nhất)
-	      .requestMatchers("/products").permitAll() // Danh sách sản phẩm
-	      .requestMatchers("/products/**").permitAll() // Các URL khác dưới /products/ (Chung chung)
-	      // ===================================
-
+	      // Public: sản phẩm
+	      .requestMatchers("/products/{id:[0-9]+}").permitAll()
+	      .requestMatchers("/products").permitAll()
+	      .requestMatchers("/products/**").permitAll()
 	      // Public: trang giới thiệu
 	      .requestMatchers("/about/**", "/about").permitAll()
-
 	      // Public: các trang xác thực
 	      .requestMatchers("/auth/**", "/register", "/login").permitAll()
-
 	      // Admin: yêu cầu quyền ADMIN
 	      .requestMatchers("/admin/**").hasRole("ADMIN")
-
 	      // Các request còn lại yêu cầu phải đăng nhập
 	      .anyRequest().authenticated()
 	    )
 	    .formLogin(form -> form
 	      .loginPage("/auth/login")
-	      .loginProcessingUrl("/auth/login")
+	      .loginProcessingUrl("/auth/login") // URL xử lý POST login
 	      .usernameParameter("email")
 	      .passwordParameter("password")
 	      .successHandler(customSuccessHandler)
@@ -65,7 +66,7 @@ public class SecurityConfig {
 	      .permitAll()
 	    )
 	    .logout(logout -> logout
-	      .logoutUrl("/auth/logout")
+	      .logoutUrl("/auth/logout") // URL xử lý POST logout
 	      .logoutSuccessUrl("/index")
 	      .permitAll()
 	    )

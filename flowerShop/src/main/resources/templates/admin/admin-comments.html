@@ -138,11 +138,7 @@ thead th {
 </head>
 <body>
 
-	<!-- Sidebar -->
-	<div th:replace="~{admin/fragments/sidebar :: sidebar(page='dashboard')}"></div>
-
-	<!-- Main -->
-	<main>
+	<div th:replace="~{admin/fragments/sidebar :: sidebar(page='comments')}"></div> <main>
 		<h3 class="mb-3">
 			<i class="bi bi-chat-left-text me-2"></i>Quản lý Bình luận
 		</h3>
@@ -151,7 +147,7 @@ thead th {
 			<div
 				class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-3 controls">
 				<div class="w-100 me-2 mb-2 mb-md-0">
-					<form th:action="@{/admin/comments}" method="get"
+                    <form th:action="@{/admin/comments}" method="get"
 						class="d-flex w-100 me-2 mb-2 mb-md-0">
 						<input type="text" name="keyword" th:value="${keyword}"
 							class="form-control form-control-sm"
@@ -161,7 +157,7 @@ thead th {
 
 				</div>
 				<div class="d-flex align-items-center">
-					<form th:action="@{/admin/comments}" method="get"
+                    <form th:action="@{/admin/comments}" method="get"
 						class="d-flex align-items-center">
 						<select name="filterBy" class="form-select form-select-sm me-2">
 							<option value="">Lọc theo</option>
@@ -202,8 +198,8 @@ thead th {
 							<td class="text-center align-middle">
 								<form th:action="@{'/admin/comments/delete/' + ${review.id}}"
 									method="post" style="display: inline;">
-									<input type="hidden" name="_method" value="delete" />
-									<button type="submit" class="btn btn-sm btn-outline-danger"
+                                    <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"
 										onclick="return confirm('Bạn có chắc muốn xóa bình luận này không?')">
 										<i class="bi bi-trash"></i> Xóa
 									</button>

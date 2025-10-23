@@ -2,7 +2,7 @@ package vn.flower.controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.lang.Nullable;
-import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.security.web.csrf.CsrfToken; // Import cần thiết
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,15 +19,15 @@ public class HomeController {
 
   @GetMapping({"/", "/index"})
   public String index(Model model,
-                      @Nullable CsrfToken csrfToken,
+                      @Nullable CsrfToken csrfToken, // <-- Nhận CsrfToken làm tham số
                       HttpServletRequest req) {
     // dữ liệu hiển thị
     model.addAttribute("topSoldProducts", productService.getTop10BestSellers());
     model.addAttribute("latestProducts",  productService.getLatest5Products());
     model.addAttribute("saleProducts",    productService.getTop10SaleProducts());
 
-    // >>> THÊM 2 DÒNG NÀY <<<
-    if (csrfToken != null) model.addAttribute("_csrf", csrfToken);  // để render meta CSRF
+    // >>> THÊM CSRF VÀO MODEL <<<
+    if (csrfToken != null) model.addAttribute("_csrf", csrfToken);
     model.addAttribute("cartApiBase", req.getContextPath() + "/api/cart"); // để JS biết API
 
     return "index";

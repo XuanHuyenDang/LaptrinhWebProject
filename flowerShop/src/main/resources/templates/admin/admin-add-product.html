@@ -12,9 +12,10 @@
 		<div class="card p-4 shadow-lg">
 			<h3 class="text-center text-primary mb-4">🟩 Thêm sản phẩm mới</h3>
 
-			<!-- ✅ form gửi dữ liệu về controller -->
 			<form th:action="@{/admin/products/add}" th:object="${product}"
 				method="post" enctype="multipart/form-data">
+				<input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
 				<div class="mb-3">
 					<label class="form-label">Tên sản phẩm</label> <input type="text"
 						th:field="*{productName}" class="form-control"
@@ -30,21 +31,19 @@
 				<div class="row">
 					<div class="mb-3">
 						<label class="form-label">Danh mục</label> <input type="text"
-							class="form-control" th:value="${category.categoryName}" readonly>
+							class="form-control" th:value="${category != null ? category.categoryName : ''}" readonly>
 						<input type="hidden" th:field="*{category}"
-							th:value="${category.id}">
+							th:value="${category != null ? category.id : ''}">
 					</div>
-
-
 
 					<div class="col-md-3 mb-3">
 						<label class="form-label">Giá gốc (VNĐ)</label> <input
-							type="number" th:field="*{price}" class="form-control">
+							type="number" th:field="*{price}" class="form-control" required>
 					</div>
 					<div class="col-md-3 mb-3">
 						<label class="form-label">Giá khuyến mãi (VNĐ)</label> <input
 							type="number" th:field="*{salePrice}" class="form-control"
-							placeholder="Giá khuyến mãi" />
+							placeholder="Bỏ trống nếu không có" />
 					</div>
 					<div class="mb-3">
 						<label class="form-label">Hình ảnh sản phẩm</label> <input
@@ -56,7 +55,7 @@
 				<div class="text-center mt-4">
 					<button type="submit" class="btn btn-success px-4">Lưu sản
 						phẩm</button>
-					<a th:href="@{/admin/products}" class="btn btn-secondary px-4">Hủy</a>
+					<a th:href="@{/admin/products(category=${category != null ? category.id : ''})}" class="btn btn-secondary px-4">Hủy</a>
 				</div>
 			</form>
 		</div>
