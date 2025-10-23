@@ -34,6 +34,11 @@ public class Order {
   @Column(name = "OrderDate")
   private LocalDateTime orderDate;
 
+  // === THÊM TRƯỜNG MỚI ===
+  @Column(name = "CompletedDate")
+  private LocalDateTime completedDate; // Ngày đơn hàng được chuyển sang "Hoàn tất"
+  // ======================
+
   @Column(name = "ShippingFee", precision = 18, scale = 2)
   private BigDecimal shippingFee;
 
@@ -53,10 +58,22 @@ public class Order {
   @Column(name = "ShippingMethod", length = 20, nullable = false)
   private ShippingMethod shippingMethod = ShippingMethod.FAST;
 
+  // === THÊM LIÊN KẾT MỚI ===
+  @OneToOne(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  private OrderReturnRequest returnRequest;
+  // =======================
+
   public ShippingMethod getShippingMethod() { return shippingMethod; }
   public void setShippingMethod(ShippingMethod shippingMethod) { this.shippingMethod = shippingMethod; }
+  
+  // === THÊM GETTER/SETTER MỚI ===
+  public LocalDateTime getCompletedDate() { return completedDate; }
+  public void setCompletedDate(LocalDateTime completedDate) { this.completedDate = completedDate; }
+  public OrderReturnRequest getReturnRequest() { return returnRequest; }
+  public void setReturnRequest(OrderReturnRequest returnRequest) { this.returnRequest = returnRequest; }
+  // =============================
 
-  // getters/setters
+  // (giữ nguyên các getters/setters còn lại)
   public Integer getId(){ return id; }
   public void setId(Integer id){ this.id = id; }
   public Account getAccount(){ return account; }

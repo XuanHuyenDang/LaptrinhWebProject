@@ -34,6 +34,11 @@ import vn.flower.services.AdminOrderService;
 import vn.flower.services.CategoryService;
 import vn.flower.services.CustomerService;
 
+import java.time.LocalDateTime; 
+import vn.flower.entities.OrderReturnRequest;
+import vn.flower.services.OrderReturnService; 
+import vn.flower.entities.OrderReturnRequest.ReturnStatus; 
+
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
@@ -63,6 +68,41 @@ public class AdminController {
 	private ProductRepository productRepository;
 
 	private Category category;
+	
+	@Autowired
+	private OrderReturnService orderReturnService; // <-- THÊM SERVICE MỚI
+
+    @GetMapping("/returns")
+    public String showReturnRequests(Model model) {
+        model.addAttribute("pendingRequests", orderReturnService.getPendingReturnRequests());
+        // Bạn cũng có thể thêm các list khác (đã duyệt, đã từ chối) nếu muốn
+        return "admin/admin-returns";
+    }
+
+    @GetMapping("/returns/{requestId}")
+    public String showReturnRequestDetail(@PathVariable Long requestId, Model model) {
+        try {
+            OrderReturnRequest request = orderReturnService.getReturnRequestById(requestId);
+            model.addAttribute("returnRequest", request);
+            return "admin/admin-return-detail";
+        } catch (Exception e) {
+            return "redirect:/admin/returns?error=NotFound";
+        }
+    }
+
+    @PostMapping("/returns/process")
+    public String processReturnRequest(@RequestParam Long requestId,
+                                       @RequestParam boolean approve,
+                                       @RequestParam String adminNotes,
+                                       RedirectAttributes ra) {
+        try {
+            orderReturnService.processReturnRequest(requestId, approve, adminNotes);
+            ra.addFlashAttribute("success", "Đã xử lý yêu cầu thành công.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Lỗi xử lý yêu cầu: " + e.getMessage());
+        }
+        return "redirect:/admin/returns";
+    }
 
 	// Tong quan
 	@GetMapping("/dashboard")
@@ -252,10 +292,18 @@ public class AdminController {
 	}
 
 	@PostMapping("/orders/update-status")
-	public String updateOrderStatus(@RequestParam("orderId") Long orderId, @RequestParam("status") String status,
-			RedirectAttributes redirectAttributes) {
+	public String updateOrderStatus(@RequestParam("orderId") Long orderId, 
+                                    @RequestParam("status") String status,
+			                        RedirectAttributes redirectAttributes) {
 		Order order = orderRepository.findById(orderId).orElse(null);
 		if (order != null) {
+            
+            // === LOGIC MỚI: GHI NHẬN NGÀY HOÀN TẤT ===
+            if ("Hoàn tất".equals(status) && order.getCompletedDate() == null) {
+                order.setCompletedDate(LocalDateTime.now());
+            }
+            // ======================================
+
 			order.setStatus(status);
 			orderRepository.save(order);
 			redirectAttributes.addFlashAttribute("success", "Cập nhật trạng thái thành công!");

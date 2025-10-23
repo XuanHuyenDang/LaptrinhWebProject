@@ -20,13 +20,31 @@
     .pagination .page-item .page-link {
         cursor: pointer; /* Indicate clickable links */
     }
+    
+    /* Thêm style cho các trạng thái mới */
+    .badge-status.st-return {
+        background-color: var(--bs-warning-bg-subtle);
+        color: var(--bs-warning-text-emphasis);
+        border: 1px solid var(--bs-warning-border-subtle);
+    }
+    .badge-status.st-return-done {
+        background-color: var(--bs-gray-300);
+        color: var(--bs-gray-700);
+        border: 1px solid var(--bs-gray-400);
+    }
+    .badge-status.st-return-fail {
+        background-color: var(--bs-danger-bg-subtle);
+        color: var(--bs-danger-text-emphasis);
+        border: 1px solid var(--bs-danger-border-subtle);
+    }
   </style>
 </head>
 <body>
 
 <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-<main class="container-narrow my-4"> <div class="page-title">
+<main class="container-narrow my-4"> 
+  <div class="page-title">
     <div class="icon"><i class="bi bi-receipt-cutoff"></i></div>
     <div>
       <h4 class="mb-0">Lịch sử đơn hàng</h4>
@@ -35,7 +53,9 @@
              th:text="'Bạn có ' + ${#lists.size(orders)} + ' đơn hàng'">Bạn có 0 đơn hàng</small>
     </div>
   </div>
-
+  
+  <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+  <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
   <div class="empty" th:if="${orders == null or #lists.isEmpty(orders)}">
        <div style="font-size: 3rem; margin-bottom: 1rem;">🛍️</div>
        <div class="fs-5 mb-3">Chưa có đơn hàng nào được ghi nhận.</div>
@@ -45,7 +65,8 @@
   </div>
 
   <div id="orderListContainer" class="vstack gap-0" th:if="${orders != null and !#lists.isEmpty(orders)}">
-      <div class="order-card" th:each="o, iterStat : ${orders}" th:attr="data-page=${iterStat.index / 6}"> <div class="order-head">
+      <div class="order-card" th:each="o, iterStat : ${orders}" th:attr="data-page=${iterStat.index / 6}"> 
+          <div class="order-head">
               <div>
                   <div class="order-id">Đơn #<span th:text="${o.id}">0</span></div>
                   <div class="order-date">
@@ -60,7 +81,11 @@
                            #strings.equalsIgnoreCase(st,'Đang xử lý') ? ' st-processing' :
                            #strings.equalsIgnoreCase(st,'Đang giao')   ? ' st-shipping'  :
                            #strings.equalsIgnoreCase(st,'Hoàn tất')    ? ' st-complete'  :
-                           #strings.equalsIgnoreCase(st,'Đã hủy')      ? ' st-cancel'    : ' st-processing'
+                           #strings.equalsIgnoreCase(st,'Đã hủy')      ? ' st-cancel'    :
+                           #strings.equalsIgnoreCase(st,'Yêu cầu trả hàng') ? ' st-return' :
+                           #strings.equalsIgnoreCase(st,'Đã trả hàng') ? ' st-return-done' :
+                           #strings.equalsIgnoreCase(st,'Đã từ chối trả hàng') ? ' st-return-fail' :
+                           ' st-processing'
                        }">
                   <div class="order-total mb-1">
                       <span class="soft">Tổng:</span>
@@ -81,8 +106,23 @@
                           <div th:if="${o.paymentMethod != null}"><i class="bi bi-credit-card me-2"></i> <span th:text="${o.paymentMethod == 'BANK' ? 'Chuyển khoản' : 'COD'}">COD</span></div>
                       </div>
                   </div>
+                  
                   <div class="col-md-5 d-flex justify-content-md-end gap-2">
                       <a class="btn btn-primary btn-sm" th:href="@{|/orders/${o.id}|}"><i class="bi bi-search"></i> Chi tiết</a>
+
+                      <a th:if="${o.status == 'Hoàn tất' 
+                                 and o.completedDate != null 
+                                 and now != null and now.isBefore(o.completedDate.plusDays(7))
+                                 and o.returnRequest == null}"
+                         th:href="@{/orders/return/{id}(id=${o.id})}" 
+                         class="btn btn-outline-danger btn-sm">
+                          <i class="bi bi-arrow-return-left"></i> Yêu cầu trả hàng
+                      </a>
+                      
+                      <span th:if="${o.status == 'Đã từ chối trả hàng'}"
+                         class="btn btn-sm btn-danger disabled" style="opacity: 0.7;">
+                          Đã từ chối
+                      </span>
                   </div>
                   </div>
               <div class="accordion accordion-flush mt-3" th:if="${o.details != null and !#lists.isEmpty(o.details)}" th:id="${'acc-'+o.id}">

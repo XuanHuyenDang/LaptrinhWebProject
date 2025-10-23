@@ -86,7 +86,8 @@ h3, h5 {
 </head>
 <body>
 
-	<div th:replace="~{admin/fragments/sidebar :: sidebar(page='orders')}"></div> <main>
+	<div th:replace="~{admin/fragments/sidebar :: sidebar(page='orders')}"></div> 
+    <main>
 		<div class="d-flex align-items-center justify-content-between mb-4">
 			<h3>
 				<i class="bi bi-receipt-cutoff me-2"></i>Chi tiết đơn hàng <span
@@ -100,7 +101,16 @@ h3, h5 {
 			th:text="${success}"></div>
 		<div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-		<div class="row g-4">
+        <div th:if="${(order.status == 'Yêu cầu trả hàng' or 
+                       order.status == 'Đã trả hàng' or 
+                       order.status == 'Đã từ chối trả hàng') 
+                       and order.returnRequest != null}" 
+             class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle-fill"></i> 
+            Đơn hàng này có liên quan đến yêu cầu trả hàng.
+            <a th:href="@{/admin/returns/{id}(id=${order.returnRequest.id})}" class="alert-link">Xem chi tiết yêu cầu.</a>
+        </div>
+        <div class="row g-4">
 			<div class="col-lg-5">
 				<div class="card mb-4">
 					<div class="card-header bg-light">
@@ -143,18 +153,24 @@ h3, h5 {
 							<strong>Ngày đặt:</strong> <span
 								th:text="${#temporals.format(order.orderDate,'dd/MM/yyyy HH:mm')}"></span>
 						</p>
+                        <p th:if="${order.completedDate != null}">
+							<strong>Ngày hoàn tất:</strong> <span
+								th:text="${#temporals.format(order.completedDate,'dd/MM/yyyy HH:mm')}"></span>
+						</p>
 						<p>
 							<strong>Thanh toán:</strong> <span
 								th:text="${order.paymentMethod}"></span>
 						</p>
 						<p>
 							<strong>Trạng thái:</strong>
-						<form th:action="@{/admin/orders/update-status}" method="post"
+                            
+                            <form th:if="${order.returnRequest == null}"
+                            th:action="@{/admin/orders/update-status}" method="post"
 							class="d-inline">
 							<input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-							<input type="hidden" name="orderId" th:value="${order.id}" /> <select
-								name="status"
+							<input type="hidden" name="orderId" th:value="${order.id}" /> 
+                            <select name="status"
 								class="form-select form-select-sm d-inline-block w-auto me-2">
 								<option value="Đang xử lý"
 									th:selected="${order.status=='Đang xử lý'}">Đang xử lý</option>
@@ -169,6 +185,10 @@ h3, h5 {
 								<i class="bi bi-check-circle me-1"></i> Cập nhật trạng thái
 							</button>
 						</form>
+                        
+                        <span th:if="${order.returnRequest != null}" 
+                              class="badge bg-warning text-dark" 
+                              th:text="${order.status}"></span>
 						</p>
 					</div>
 				</div>

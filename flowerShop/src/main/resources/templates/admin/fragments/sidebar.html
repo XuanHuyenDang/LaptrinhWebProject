@@ -17,7 +17,11 @@
 		<a th:href="@{/admin/orders}" th:classappend="${page == 'orders'} ? 'active'"> 
 			<i class="bi bi-cart4 me-2"></i> Đơn hàng
 		</a> 
-		<a th:href="@{/admin/customers}" th:classappend="${page == 'customers'} ? 'active'"> 
+        
+        <a th:href="@{/admin/returns}" th:classappend="${page == 'returns'} ? 'active'"> 
+			<i class="bi bi-arrow-return-left me-2"></i> Duyệt trả hàng
+		</a> 
+        <a th:href="@{/admin/customers}" th:classappend="${page == 'customers'} ? 'active'"> 
 			<i class="bi bi-people me-2"></i> Khách hàng
 		</a> 
 		<a th:href="@{/admin/comments}" th:classappend="${page == 'comments'} ? 'active'"> 

@@ -2,6 +2,7 @@
 package vn.flower.controllers.user;
 
 import org.springframework.security.core.context.SecurityContextHolder;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,7 @@ import vn.flower.entities.Order;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDateTime;
 
 @Controller
 public class OrderHistoryController {
@@ -60,6 +62,11 @@ public class OrderHistoryController {
             model.addAttribute("orders", Collections.emptyList());
         }
     }
+    
+ // === THÊM DÒNG NÀY ===
+    // Truyền thời gian hiện tại để UI so sánh
+    model.addAttribute("now", LocalDateTime.now());
+    // ======================
     return "user/order-list";
   }
 }
