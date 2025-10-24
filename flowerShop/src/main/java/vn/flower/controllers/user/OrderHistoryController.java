@@ -11,6 +11,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.flower.entities.OrderDetail;
 import vn.flower.entities.Product;
 import vn.flower.repositories.ProductRepository;
+import vn.flower.services.VnpayService; // <-- THÊM VNPAY SERVICE
+import jakarta.servlet.http.HttpServletRequest; // <-- THÊM HTTP SERVLET REQUEST
 // ==========================
 
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,7 +28,9 @@ import vn.flower.entities.Account;
 import vn.flower.entities.Order;
 
 import java.util.Collections;
+import java.util.HashMap; // <-- THÊM HASHMAP
 import java.util.List;
+import java.util.Map; // <-- THÊM MAP
 import java.util.Optional;
 import java.time.LocalDateTime;
 
@@ -35,15 +39,18 @@ public class OrderHistoryController {
 
   private final OrderRepository orderRepo;
   private final AccountRepository accountRepo;
-  private final ProductRepository productRepo; // <-- THÊM VÀO
+  private final ProductRepository productRepo; // <-- Giữ nguyên
+  private final VnpayService vnpayService; // <-- THÊM VNPAY SERVICE
 
   // === CẬP NHẬT CONSTRUCTOR ===
-  public OrderHistoryController(OrderRepository orderRepo, 
-                                AccountRepository accountRepo, 
-                                ProductRepository productRepo) { // <-- THÊM VÀO
+  public OrderHistoryController(OrderRepository orderRepo,
+                                AccountRepository accountRepo,
+                                ProductRepository productRepo,
+                                VnpayService vnpayService) { // <-- THÊM VNPAY SERVICE
     this.orderRepo = orderRepo;
     this.accountRepo = accountRepo;
-    this.productRepo = productRepo; // <-- THÊM VÀO
+    this.productRepo = productRepo; // <-- Giữ nguyên
+    this.vnpayService = vnpayService; // <-- GÁN VNPAY SERVICE
   }
 
   private Optional<Integer> getCurrentAccountId() {
@@ -58,8 +65,10 @@ public class OrderHistoryController {
   @GetMapping("/orders")
   @Transactional(readOnly = true)
   public String showOrderHistory(Model model,
-                                 @Nullable CsrfToken csrfToken) { // <-- THÊM CsrfToken
+                                 HttpServletRequest httpServletRequest, // <-- THÊM HttpServletRequest
+                                 @Nullable CsrfToken csrfToken) { // <-- Giữ nguyên CsrfToken
     Optional<Integer> accountIdOpt = getCurrentAccountId();
+    Map<Integer, String> vnpayUrls = new HashMap<>(); // Map để lưu URL VNPAY cho từng Order ID
 
     if (accountIdOpt.isEmpty()) {
         System.err.println("User not logged in for order history.");
@@ -70,6 +79,19 @@ public class OrderHistoryController {
             List<Order> orders =
                 orderRepo.findAllByAccount_IdAndStatusNotOrderByOrderDateDesc(accountId, "CART");
 
+            // Tạo URL VNPAY cho các đơn hàng đang chờ
+            for (Order order : orders) {
+                if ("Chờ thanh toán".equals(order.getStatus()) && "VNPAY".equalsIgnoreCase(order.getPaymentMethod())) {
+                    try {
+                        String paymentUrl = vnpayService.createPaymentUrl(order, httpServletRequest);
+                        vnpayUrls.put(order.getId(), paymentUrl);
+                    } catch (Exception e) {
+                        System.err.println("Lỗi tạo URL VNPAY cho đơn hàng " + order.getId() + " trong lịch sử: " + e.getMessage());
+                        // Không thêm URL nếu có lỗi
+                    }
+                }
+            }
+
             System.out.println("[DEBUG] Fetched orders for Account ID: " + accountId + ". Found: " + orders.size() + " orders (excluding CART).");
             model.addAttribute("orders", orders);
 
@@ -79,21 +101,22 @@ public class OrderHistoryController {
             model.addAttribute("orders", Collections.emptyList());
         }
     }
-    
+
     model.addAttribute("now", LocalDateTime.now());
-    
-    // === THÊM CSRF VÀO MODEL ===
+    model.addAttribute("vnpayUrls", vnpayUrls); // <-- TRUYỀN MAP URL VÀO MODEL
+
+    // === Giữ nguyên CSRF ===
     if (csrfToken != null) model.addAttribute("_csrf", csrfToken);
     // ======================
     return "user/order-list";
   }
-  
-  // === PHƯƠNG THỨC MỚI ĐỂ HỦY ĐƠN ===
+
+  // === PHƯƠNG THỨC HỦY ĐƠN GIỮ NGUYÊN ===
   @PostMapping("/orders/cancel/{orderId}")
   @Transactional // Đảm bảo tất cả các thao tác (hủy đơn + cập nhật 'sold') thành công
-  public String cancelOrder(@PathVariable Integer orderId, 
+  public String cancelOrder(@PathVariable Integer orderId,
                             RedirectAttributes ra) {
-      
+
       Optional<Integer> accountIdOpt = getCurrentAccountId();
       if (accountIdOpt.isEmpty()) {
           ra.addFlashAttribute("errorMessage", "Bạn cần đăng nhập để thực hiện.");
@@ -110,8 +133,8 @@ public class OrderHistoryController {
 
       Order order = orderOpt.get();
 
-      // Chỉ cho phép hủy khi "Đang xử lý"
-      if (!"Đang xử lý".equals(order.getStatus())) {
+      // Chỉ cho phép hủy khi "Đang xử lý" hoặc "Chờ thanh toán" (thêm chờ thanh toán)
+      if (!"Đang xử lý".equals(order.getStatus()) && !"Chờ thanh toán".equals(order.getStatus())) {
           ra.addFlashAttribute("errorMessage", "Không thể hủy đơn hàng ở trạng thái " + order.getStatus());
           return "redirect:/orders";
       }
@@ -121,15 +144,18 @@ public class OrderHistoryController {
           order.setStatus("Đã hủy");
           orderRepo.save(order);
 
-          // 2. Hoàn trả lại số lượng 'sold' cho sản phẩm
-          for (OrderDetail detail : order.getDetails()) {
-              Product p = detail.getProduct();
-              if (p != null) {
-                  int newSold = (p.getSold() == null ? 0 : p.getSold()) - detail.getQuantity();
-                  p.setSold(Math.max(0, newSold)); // Đảm bảo không bị âm
-                  productRepo.save(p);
+          // 2. Hoàn trả lại số lượng 'sold' cho sản phẩm (Chỉ hoàn trả nếu đơn KHÔNG phải là chờ thanh toán VNPAY, vì chờ thanh toán chưa trừ sold)
+          if (!"Chờ thanh toán".equals(order.getStatus())) { // Kiểm tra lại trạng thái TRƯỚC KHI hủy
+              for (OrderDetail detail : order.getDetails()) {
+                  Product p = detail.getProduct();
+                  if (p != null) {
+                      int newSold = (p.getSold() == null ? 0 : p.getSold()) - detail.getQuantity();
+                      p.setSold(Math.max(0, newSold)); // Đảm bảo không bị âm
+                      productRepo.save(p);
+                  }
               }
           }
+
 
           ra.addFlashAttribute("successMessage", "Đã hủy đơn hàng #" + orderId + " thành công.");
       } catch (Exception e) {

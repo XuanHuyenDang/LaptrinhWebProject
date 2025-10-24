@@ -60,7 +60,7 @@
           <div class="kv" th:with="pm=${order.paymentMethod != null ? order.paymentMethod : 'COD'}">
             <div class="k">Thanh toán</div>
             <div class="v">
-              <span th:text="${pm == 'BANK'} ? 'Chuyển khoản' : 'Thanh toán khi nhận hàng (COD)'">COD</span>
+              <span th:text="${pm == 'BANK'} ? 'Chuyển khoản' : (${pm == 'VNPAY'} ? 'VNPAY' : 'Thanh toán khi nhận hàng (COD)')">COD</span>
             </div>
           </div>
 
@@ -136,6 +136,17 @@
             <div class="val total" th:text="${#numbers.formatDecimal(total,0,'COMMA',0,'POINT')} + 'đ'">0đ</div>
           </div>
 
+          <div th:if="${pendingVnpayPayment}" class="mt-3 text-center alert alert-warning p-2">
+              <small>Đơn hàng này đang chờ thanh toán qua VNPAY.</small>
+              <div th:if="${vnpayPaymentUrl}" class="mt-2 d-grid">
+                  <a th:href="${vnpayPaymentUrl}" class="btn btn-warning fw-bold btn-sm">
+                      <i class="bi bi-credit-card-2-front"></i> Thanh toán ngay qua VNPAY
+                  </a>
+              </div>
+              <div th:if="${vnpayError}" class="mt-2 text-danger small" th:text="${vnpayError}">
+                  Lỗi tạo link thanh toán.
+              </div>
+          </div>
           <div class="d-grid gap-2 mt-3">
             <a class="btn btn-outline-secondary" th:href="@{/}">
               <i class="bi bi-bag"></i> Tiếp tục mua sắm

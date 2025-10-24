@@ -18,7 +18,7 @@ import vn.flower.entities.Order;
 import vn.flower.entities.OrderDetail;
 import vn.flower.entities.OrderDetailId;
 import vn.flower.entities.Product;
-import vn.flower.repositories.OrderDetailRepository;
+import vn.flower.repositories.OrderDetailRepository; // Đảm bảo import này có
 import vn.flower.repositories.OrderRepository;
 import vn.flower.repositories.ProductRepository;
 
@@ -145,11 +145,18 @@ public class CartService {
   @Transactional
   public CartView removeItem(Integer accountId, Integer productId) {
     Order cart = getOrCreateCart(accountId);
-    OrderDetailId id = new OrderDetailId(cart.getId(), productId);
-    odRepo.deleteById(id); // Use deleteById for standard JPA operations
-    // odRepo.flush(); // Usually not needed, let transaction handle flush
-    return toView(cart.getId());
+    Integer orderId = cart.getId(); // Lấy orderId từ cart
+
+    // === THAY ĐỔI Ở ĐÂY ===
+    // Sử dụng phương thức xóa tùy chỉnh thay vì deleteById
+    int deletedCount = odRepo.deleteByOrderIdAndProductId(orderId, productId);
+    // Bạn có thể kiểm tra deletedCount nếu cần (ví dụ: > 0 là xóa thành công)
+    // odRepo.flush(); // Thường không cần flush thủ công trong @Transactional
+    // ======================
+
+    return toView(cart.getId()); // Trả về view giỏ hàng đã cập nhật
   }
+
 
   @Transactional(readOnly = true)
   public CartView getCart(Integer accountId) {

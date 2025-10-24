@@ -135,50 +135,48 @@ h3 {
 </head>
 <body>
 
-	<!-- Sidebar -->
-	<div th:replace="~{admin/fragments/sidebar :: sidebar(page='dashboard')}"></div>
+	<div th:replace="~{admin/fragments/sidebar :: sidebar(page='orders')}"></div>
 
-	<!-- Main -->
 	<main>
 		<div class="d-flex align-items-center justify-content-between mb-4">
 			<h3>
 				<i class="bi bi-receipt me-2"></i>Quản lý đơn hàng
 			</h3>
+			<a th:href="@{/admin/orders}" class="btn btn-sm btn-outline-secondary">Xem tất cả</a>
 		</div>
 
-		<!-- summary cards -->
 		<div class="row g-4 mb-4">
-			<div class="col-md-4">
+			<div class="col"> <a th:href="@{/admin/orders(status='Đang xử lý')}"
+					class="card text-center p-3 bg-light text-decoration-none h-100">
+                    <i class="bi bi-hourglass-split text-warning"></i>
+					<h6 class="mt-2 text-dark">Đang xử lý</h6> <p class="fw-bold fs-6 text-warning mb-0" th:text="${countDangXuLy}">0</p> </a>
+			</div>
+            <div class="col">
 				<a th:href="@{/admin/orders(status='Đang giao')}"
-					class="card text-center p-3 bg-light text-decoration-none"> <i
-					class="bi bi-truck text-danger"></i>
-					<h5 class="mt-2 text-dark">Đang giao</h5>
-					<p class="fw-bold fs-5 text-danger mb-0" th:text="${countDangGiao}">0</p>
+					class="card text-center p-3 bg-light text-decoration-none h-100">
+                    <i class="bi bi-truck text-info"></i> <h6 class="mt-2 text-dark">Đang giao</h6>
+					<p class="fw-bold fs-6 text-info mb-0" th:text="${countDangGiao}">0</p>
 				</a>
 			</div>
-			<div class="col-md-4">
+			<div class="col">
 				<a th:href="@{/admin/orders(status='Hoàn tất')}"
-					class="card text-center p-3 bg-light text-decoration-none"> <i
-					class="bi bi-check2-circle text-success"></i>
-					<h5 class="mt-2 text-dark">Hoàn tất</h5>
-					<p class="fw-bold fs-5 text-success mb-0" th:text="${countHoanTat}">0</p>
+					class="card text-center p-3 bg-light text-decoration-none h-100">
+                    <i class="bi bi-check2-circle text-success"></i>
+					<h6 class="mt-2 text-dark">Hoàn tất</h6>
+					<p class="fw-bold fs-6 text-success mb-0" th:text="${countHoanTat}">0</p>
 				</a>
 			</div>
-			<div class="col-md-4">
-				<a th:href="@{/admin/orders(status='Đang xử lý')}"
-					class="card text-center p-3 bg-light text-decoration-none"> <i
-					class="bi bi-hourglass-split text-warning"></i>
-					<h5 class="mt-2 text-dark">Đang xử lý</h5>
-					<p class="fw-bold fs-5 text-warning mb-0" th:text="${countDangXuLy}">0</p>
-				</a>
+			<div class="col">
+				<a th:href="@{/admin/orders(paymentMethod='VNPAY')}" class="card text-center p-3 bg-light text-decoration-none h-100">
+                    <i class="bi bi-credit-card-2-front-fill text-primary"></i>
+					<h6 class="mt-2 text-dark">Đơn VNPAY</h6> <p class="fw-bold fs-6 text-primary mb-0" th:text="${countVnpay}">0</p> </a>
 			</div>
-		</div>
+			</div>
 
 
-		<!-- Orders table -->
 		<div class="mt-2">
 			<h5 class="fw-bold text-secondary mb-3">
-				<i class="bi bi-basket2 me-2"></i>Danh sách đơn hàng
+				<i class="bi bi-basket2 me-2"></i>Danh sách đơn hàng (<span th:text="${selectedStatus != null ? selectedStatus : 'Tất cả'}"></span>)
 			</h5>
 			<div class="card p-0">
 				<div class="card-body p-0">
@@ -204,29 +202,34 @@ h3 {
 											th:text="${detail.product.productName + ' x' + detail.quantity}"></li>
 									</ul>
 								</td>
-								<td class="text-center"
-									th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
+								<td class="text-center">
+                                    <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+                                    <span th:if="${#strings.equalsIgnoreCase(order.paymentMethod, 'VNPAY')}"
+                                          class="badge bg-info text-dark ms-1" style="font-size: 0.7em;">
+                                        VNPAY
+                                    </span>
+								</td>
 								<td class="text-center"
 									th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}"></td>
-								<td class="text-center"><span class="badge"
-									th:classappend="${order.status == 'Hoàn tất' ? 'bg-success' :
-                                  (order.status == 'Đang giao' ? 'bg-info text-dark' : 'bg-warning text-dark')}"
-									th:text="${order.status}"> </span></td>
-								<td class="text-center"><a
-									th:href="@{'/admin/orders/' + ${order.id}}"
-									class="btn btn-sm-custom btn-edit me-1"><i
-										class="bi bi-eye"></i></a> <a
-									th:href="@{'/admin/orders/delete/' + ${order.id}}"
-									class="btn btn-sm-custom btn-delete"><i class="bi bi-trash"></i></a>
-								</td>
+								<td class="text-center">
+                                    <span class="badge"
+                                          th:classappend="${order.status == 'Hoàn tất' ? 'bg-success' :
+                                                        (order.status == 'Đang giao' ? 'bg-info text-dark' :
+                                                        (order.status == 'Chờ thanh toán' ? 'bg-secondary' :
+                                                        (order.status == 'Đã hủy' ? 'bg-danger' : 'bg-warning text-dark')))}"
+                                          th:text="${order.status}">
+                                    </span>
+                                    </td>
+								<td class="text-center">
+                                    <a th:href="@{'/admin/orders/' + ${order.id}}"
+									    class="btn btn-sm-custom btn-edit me-1" title="Xem chi tiết"><i class="bi bi-eye"></i></a>
+                                    </td>
 							</tr>
 						</tbody>
-
 					</table>
 				</div>
 			</div>
 		</div>
-
 	</main>
 
 </body>

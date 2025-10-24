@@ -1,3 +1,4 @@
+// java/vn/flower/controllers/user/CheckoutController.java
 package vn.flower.controllers.user;
 
 import org.springframework.http.HttpStatus;
@@ -8,7 +9,7 @@ import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.server.ResponseStatusException; // **Đảm bảo import này có**
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
@@ -25,6 +26,8 @@ import vn.flower.api.dto.CartView;
 import vn.flower.api.dto.ShippingMethod;
 import vn.flower.api.dto.CheckoutRequest;
 import vn.flower.api.dto.BuyNowRequest; // **Import BuyNowRequest**
+import vn.flower.services.VnpayService; // **THÊM IMPORT**
+import jakarta.servlet.http.HttpServletRequest; // **THÊM IMPORT**
 
 @Controller
 public class CheckoutController {
@@ -33,20 +36,19 @@ public class CheckoutController {
   private final AccountRepository accountRepo;
   private final OrderRepository orderRepo;
   private final ProductRepository productRepo;
-  // Inject VnpayService if you handle VNPAY URL generation here (though API is better)
-  // private final VnpayService vnpayService;
-  // import jakarta.servlet.http.HttpServletRequest; // Needed if generating VNPAY URL here
+  private final VnpayService vnpayService; // **INJECT VNPAY SERVICE**
 
   public CheckoutController(CartService cartService,
                             AccountRepository accountRepo,
                             OrderRepository orderRepo,
-                            ProductRepository productRepo
-                            /*, VnpayService vnpayService */) { // Add VnpayService if needed
+                            ProductRepository productRepo,
+                            VnpayService vnpayService // **THÊM VÀO CONSTRUCTOR**
+                            ) {
     this.cartService = cartService;
     this.accountRepo = accountRepo;
     this.orderRepo = orderRepo;
     this.productRepo = productRepo;
-    // this.vnpayService = vnpayService;
+    this.vnpayService = vnpayService; // **GÁN VNPAY SERVICE**
   }
 
   // Helper to get current Account ID
@@ -221,20 +223,29 @@ public class CheckoutController {
 
   // View Order Success/Details Page (GET request)
   @GetMapping("/orders/{id}")
-  public String orderSuccess(@PathVariable Integer id, Model model) {
+  public String orderSuccess(@PathVariable Integer id, Model model, HttpServletRequest httpServletRequest /* **THÊM HttpServletRequest** */) {
        Integer accId = currentAccountId(); // Throws 401 if not logged in
        // Find the order by ID and ensure it belongs to the current user
        Order order = orderRepo.findByIdAndAccount_Id(id, accId)
            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy đơn hàng #" + id + " hoặc bạn không có quyền xem đơn hàng này."));
 
        model.addAttribute("order", order);
-       // Add a flag if the order is pending VNPAY payment
+
+       // *** LOGIC THÊM NÚT THANH TOÁN LẠI VNPAY ***
        if ("Chờ thanh toán".equals(order.getStatus()) && "VNPAY".equalsIgnoreCase(order.getPaymentMethod())) {
            model.addAttribute("pendingVnpayPayment", true);
-           // Optionally generate payment URL again if needed (usually not necessary here)
-           // String paymentUrl = vnpayService.createPaymentUrl(order, httpServletRequest);
-           // model.addAttribute("vnpayPaymentUrl", paymentUrl);
+           try {
+               // Tạo lại URL thanh toán VNPAY
+               String paymentUrl = vnpayService.createPaymentUrl(order, httpServletRequest);
+               model.addAttribute("vnpayPaymentUrl", paymentUrl);
+           } catch (Exception e) {
+               System.err.println("Lỗi tạo lại URL VNPAY cho đơn hàng " + id + ": " + e.getMessage());
+               // Thêm thuộc tính lỗi vào model để hiển thị thông báo trên trang
+               model.addAttribute("vnpayError", "Không thể tạo liên kết thanh toán VNPAY. Vui lòng thử lại sau.");
+           }
        }
+       // *** KẾT THÚC LOGIC THÊM ***
+
        return "user/order-success"; // Return the success/details view template
   }
 }
