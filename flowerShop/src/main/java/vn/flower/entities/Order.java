@@ -46,10 +46,10 @@ public class Order {
   private BigDecimal totalAmount;
 
   @Column(name = "PaymentMethod", length = 100)
-  private String paymentMethod;
+  private String paymentMethod; // "COD", "BANK", "VNPAY"
 
   @Column(name = "Status", length = 50)
-  private String status;
+  private String status; // "CART", "Đang xử lý", "Hoàn tất", "Đã hủy", "Yêu cầu trả hàng", "Chờ thanh toán"
 
   @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
   private List<OrderDetail> details = new ArrayList<>();
@@ -65,7 +65,7 @@ public class Order {
 
   public ShippingMethod getShippingMethod() { return shippingMethod; }
   public void setShippingMethod(ShippingMethod shippingMethod) { this.shippingMethod = shippingMethod; }
-  
+
   // === THÊM GETTER/SETTER MỚI ===
   public LocalDateTime getCompletedDate() { return completedDate; }
   public void setCompletedDate(LocalDateTime completedDate) { this.completedDate = completedDate; }

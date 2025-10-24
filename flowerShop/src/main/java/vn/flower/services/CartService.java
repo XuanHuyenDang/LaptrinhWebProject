@@ -1,26 +1,23 @@
 package vn.flower.services;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional; // ✅ dùng Spring Transactional
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-// === THÊM IMPORT NÀY ===
-import vn.flower.api.dto.BuyNowRequest; 
+import vn.flower.api.dto.BuyNowRequest;
 import vn.flower.api.dto.CartLine;
 import vn.flower.api.dto.CartView;
 import vn.flower.api.dto.CheckoutRequest;
 import vn.flower.api.dto.ShippingMethod;
-
 import vn.flower.entities.Account;
 import vn.flower.entities.Order;
 import vn.flower.entities.OrderDetail;
 import vn.flower.entities.OrderDetailId;
 import vn.flower.entities.Product;
-
 import vn.flower.repositories.OrderDetailRepository;
 import vn.flower.repositories.OrderRepository;
 import vn.flower.repositories.ProductRepository;
@@ -39,27 +36,33 @@ public class CartService {
     this.odRepo = odRepo;
     this.productRepo = productRepo;
   }
-  
-  
 
-  private BigDecimal shippingFeeFor(ShippingMethod method, BigDecimal subtotal) {
-	  if (subtotal == null || subtotal.compareTo(BigDecimal.ZERO) <= 0) return BigDecimal.ZERO; // Nếu không có tiền hàng thì 0đ ship
+  // --- **FIXED HERE: Changed private to public** ---
+  /**
+   * Calculates the shipping fee based on the method and subtotal.
+   * Made public so CheckoutController can use it for Buy Now view calculation.
+   */
+  public BigDecimal shippingFeeFor(ShippingMethod method, BigDecimal subtotal) {
+	  if (subtotal == null || subtotal.compareTo(BigDecimal.ZERO) <= 0) return BigDecimal.ZERO;
 	  ShippingMethod m = (method != null) ? method : ShippingMethod.FAST;
 
 	  return switch (m) {
-	    case SAVING   -> new BigDecimal("20000");                           // tiết kiệm: 20k
-	    case EXPRESS  -> new BigDecimal("60000");                           // hỏa tốc: 60k
-	    case FAST     -> (subtotal.compareTo(new BigDecimal("500000"))>=0)  // nhanh: >= 500k miễn phí
+	    case SAVING   -> new BigDecimal("20000");
+	    case EXPRESS  -> new BigDecimal("60000");
+	    case FAST     -> (subtotal.compareTo(new BigDecimal("500000"))>=0)
 	                    ? BigDecimal.ZERO : new BigDecimal("30000");
 	  };
 	}
-  
+  // --- **END FIX** ---
+
   private BigDecimal calcSubtotal(List<OrderDetail> lines) {
-	  return lines.stream()
+	  if (lines == null) return BigDecimal.ZERO; // Add null check
+      return lines.stream()
+          .filter(l -> l != null && l.getPrice() != null && l.getQuantity() != null) // Add null checks for safety
 	      .map(l -> l.getPrice().multiply(BigDecimal.valueOf(l.getQuantity())))
 	      .reduce(BigDecimal.ZERO, BigDecimal::add);
 	}
-  
+
   private static final String STATUS_CART = "CART";
 
   @Transactional
@@ -79,6 +82,7 @@ public class CartService {
           o.setPaymentMethod(null);
           o.setShippingFee(BigDecimal.ZERO);
           o.setTotalAmount(BigDecimal.ZERO);
+          o.setShippingMethod(ShippingMethod.FAST);
           return orderRepo.save(o);
         });
   }
@@ -90,6 +94,10 @@ public class CartService {
     Order cart = getOrCreateCart(accountId);
     Product p = productRepo.findById(productId)
         .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sản phẩm"));
+
+    if (p.getStatus() == null || !p.getStatus()) {
+        throw new IllegalStateException("Sản phẩm '" + p.getProductName() + "' hiện đã hết hàng.");
+    }
 
     BigDecimal stampedPrice = p.getSalePrice() != null ? p.getSalePrice() : p.getPrice();
 
@@ -107,7 +115,8 @@ public class CartService {
       line.setQuantity(line.getQuantity() + qty);
     }
     odRepo.save(line);
-    odRepo.flush(); // ✅ chắc chắn ghi xuống DB trước khi đọc lại
+    // Let Spring manage flushing at the end of the transaction unless explicitly needed
+    // odRepo.flush();
 
     return toView(cart.getId());
   }
@@ -117,15 +126,18 @@ public class CartService {
     Order cart = getOrCreateCart(accountId);
     OrderDetailId id = new OrderDetailId(cart.getId(), productId);
     OrderDetail line = odRepo.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Mục không tồn tại"));
+        .orElseThrow(() -> new IllegalArgumentException("Mục không tồn tại trong giỏ hàng"));
 
     if (qty == null || qty <= 0) {
-      odRepo.delete(line);   // remove entity
-      odRepo.flush();        // ✅ ép DELETE ngay
+      odRepo.delete(line);
+      // odRepo.flush();
     } else {
+      if (line.getProduct() != null && (line.getProduct().getStatus() == null || !line.getProduct().getStatus())) {
+          throw new IllegalStateException("Sản phẩm '" + line.getProduct().getProductName() + "' hiện đã hết hàng.");
+      }
       line.setQuantity(qty);
       odRepo.save(line);
-      odRepo.flush();        // ✅ ép UPDATE ngay
+      // odRepo.flush();
     }
     return toView(cart.getId());
   }
@@ -133,80 +145,84 @@ public class CartService {
   @Transactional
   public CartView removeItem(Integer accountId, Integer productId) {
     Order cart = getOrCreateCart(accountId);
-    odRepo.deleteByOrderIdAndProductId(cart.getId(), productId); // trả về số dòng bị xóa
+    OrderDetailId id = new OrderDetailId(cart.getId(), productId);
+    odRepo.deleteById(id); // Use deleteById for standard JPA operations
+    // odRepo.flush(); // Usually not needed, let transaction handle flush
     return toView(cart.getId());
   }
 
   @Transactional(readOnly = true)
   public CartView getCart(Integer accountId) {
-    Order cart = getOrCreateCart(accountId);
-    return toView(cart.getId());
+    return orderRepo.findFirstByAccount_IdAndStatusOrderByIdDesc(accountId, STATUS_CART)
+        .map(cart -> toView(cart.getId()))
+        .orElseGet(() -> new CartView(null, List.of(), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO));
   }
 
-  /**
-   * Thanh toán giỏ hàng (status='CART') hiện có.
-   */
   @Transactional
-  public Integer checkout(Integer accountId, CheckoutRequest req) {
+  public Order checkout(Integer accountId, CheckoutRequest req) {
     Order cart = orderRepo.findFirstByAccount_IdAndStatusOrderByIdDesc(accountId, STATUS_CART)
-        .orElseThrow(() -> new IllegalStateException("Không có giỏ hàng"));
+        .orElseThrow(() -> new IllegalStateException("Không có giỏ hàng hoặc giỏ hàng không hợp lệ."));
 
     List<OrderDetail> lines = odRepo.findById_OrderId(cart.getId());
-    if (lines.isEmpty()) throw new IllegalStateException("Giỏ hàng trống");
+    if (lines.isEmpty()) throw new IllegalStateException("Giỏ hàng trống, không thể thanh toán.");
 
-    // === SỬA LỖI LOGIC: Tính phí ship dựa trên req, không dùng DEFAULT_SHIP ===
+    for (OrderDetail line : lines) {
+        Product p = line.getProduct();
+        if (p == null || p.getStatus() == null || !p.getStatus()) {
+            throw new IllegalStateException("Sản phẩm '" + (p != null ? p.getProductName() : "ID " + line.getId().getProductId()) + "' trong giỏ đã hết hàng.");
+        }
+    }
+
     BigDecimal subtotal = calcSubtotal(lines);
     BigDecimal shippingFee = shippingFeeFor(req.shippingMethod(), subtotal);
-    var totals = calcTotals(lines, shippingFee);
-    // ===================================================================
+    Totals totals = calcTotals(lines, shippingFee);
 
     cart.setRecipientName(req.recipientName());
     cart.setRecipientPhone(req.recipientPhone());
     cart.setShippingAddress(req.shippingAddress());
     cart.setNote(req.note());
     cart.setPaymentMethod(req.paymentMethod());
-    cart.setShippingMethod(req.shippingMethod()); // <-- Lưu phương thức ship
+    cart.setShippingMethod(req.shippingMethod());
     cart.setShippingFee(totals.shipping());
     cart.setTotalAmount(totals.total());
     cart.setOrderDate(LocalDateTime.now());
-    cart.setStatus("Đang xử lý");
 
-    // ➕ NEW: tăng sold cho sản phẩm
-    for (OrderDetail d : lines) {
-      Product p = d.getProduct();
-      p.setSold((p.getSold() == null ? 0 : p.getSold()) + d.getQuantity());
-      productRepo.save(p);
+    if ("VNPAY".equalsIgnoreCase(req.paymentMethod())) {
+        cart.setStatus("Chờ thanh toán");
+    } else {
+        cart.setStatus("Đang xử lý");
+        for (OrderDetail d : lines) {
+          Product p = d.getProduct();
+          if (p != null) {
+              p.setSold((p.getSold() == null ? 0 : p.getSold()) + d.getQuantity());
+              // No need to save product here if OrderDetail cascades (check Order entity relationship)
+              // productRepo.save(p);
+          }
+        }
     }
 
-    orderRepo.save(cart);
-    return cart.getId();
+    return orderRepo.save(cart); // Return the saved/updated order
   }
 
-  /**
-   * === PHƯƠNG THỨC MỚI CHO "MUA NGAY" ===
-   * Tạo một đơn hàng hoàn toàn mới (không đụng đến giỏ status='CART')
-   * chỉ với 1 sản phẩm duy nhất.
-   */
   @Transactional
-  public Integer checkoutBuyNow(Integer accountId, BuyNowRequest req) {
+  public Order checkoutBuyNow(Integer accountId, BuyNowRequest req) {
     if (req.quantity() <= 0) {
-        throw new IllegalArgumentException("Số lượng phải lớn hơn 0");
+        throw new IllegalArgumentException("Số lượng sản phẩm phải lớn hơn 0.");
     }
 
-    // 1. Lấy thông tin
     Product p = productRepo.findById(req.productId())
-        .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sản phẩm"));
+        .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sản phẩm với ID: " + req.productId()));
+    if (p.getStatus() == null || !p.getStatus()) {
+        throw new IllegalStateException("Sản phẩm '" + p.getProductName() + "' hiện đã hết hàng.");
+    }
+
     Account acc = new Account();
     acc.setId(accountId);
-    CheckoutRequest checkoutInfo = req.checkout(); // Thông tin người nhận
+    CheckoutRequest checkoutInfo = req.checkout();
 
-    // 2. Tạo Order MỚI
     Order order = new Order();
     order.setAccount(acc);
-    order.setStatus("Đang xử lý"); // Đặt hàng thẳng, không qua 'CART'
     order.setOrderDate(LocalDateTime.now());
-
-    // 3. Set thông tin người nhận
     order.setRecipientName(checkoutInfo.recipientName());
     order.setRecipientPhone(checkoutInfo.recipientPhone());
     order.setShippingAddress(checkoutInfo.shippingAddress());
@@ -214,48 +230,54 @@ public class CartService {
     order.setPaymentMethod(checkoutInfo.paymentMethod());
     order.setShippingMethod(checkoutInfo.shippingMethod());
 
-    // 4. Tạo OrderDetail MỚI
     OrderDetail line = new OrderDetail();
     BigDecimal stampedPrice = p.getSalePrice() != null ? p.getSalePrice() : p.getPrice();
-    
-    // OrderId sẽ được set tự động khi save
-    line.setId(new OrderDetailId(null, p.getId())); 
+
+    line.setId(new OrderDetailId(null, p.getId())); // OrderId will be set by JPA
     line.setOrder(order);
     line.setProduct(p);
     line.setQuantity(req.quantity());
     line.setPrice(stampedPrice);
 
-    // 5. Tính toán tổng tiền
     BigDecimal subtotal = stampedPrice.multiply(BigDecimal.valueOf(req.quantity()));
     BigDecimal shippingFee = shippingFeeFor(checkoutInfo.shippingMethod(), subtotal);
     BigDecimal total = subtotal.add(shippingFee);
 
     order.setShippingFee(shippingFee);
     order.setTotalAmount(total);
+    order.setDetails(List.of(line)); // Associate the detail with the order
 
-    // 6. Tăng số lượng đã bán
-    p.setSold((p.getSold() == null ? 0 : p.getSold()) + req.quantity());
-    productRepo.save(p);
+    if ("VNPAY".equalsIgnoreCase(checkoutInfo.paymentMethod())) {
+        order.setStatus("Chờ thanh toán");
+    } else {
+        order.setStatus("Đang xử lý");
+        p.setSold((p.getSold() == null ? 0 : p.getSold()) + req.quantity());
+        // productRepo.save(p); // Saving Order might cascade save Product if configured
+    }
 
-    // 7. Lưu Order (và OrderDetail qua cascade)
-    // Phải thêm line vào list của order để cascade hoạt động
-    order.setDetails(List.of(line));
-    Order savedOrder = orderRepo.save(order);
-
-    return savedOrder.getId();
+    return orderRepo.save(order); // Return the saved order
   }
 
 
   private record Totals(BigDecimal subtotal, BigDecimal shipping, BigDecimal total) {}
 
+  // Convert OrderDetails to CartView
   private CartView toView(Integer orderId) {
+      // Find order first to get shipping method
+      Order order = orderRepo.findById(orderId).orElse(null);
+      if (order == null) { // Handle case where order might not exist (e.g., after deletion)
+          return new CartView(orderId, List.of(), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+      }
+
 	  List<OrderDetail> lines = odRepo.findById_OrderId(orderId);
 	  BigDecimal subtotal = calcSubtotal(lines);
-	  // Mặc định là FAST, nhưng khi checkout thật sẽ tính lại
-	  BigDecimal shipping = shippingFeeFor(ShippingMethod.FAST, subtotal); 
+      // Use the actual shipping method from the order
+      BigDecimal shipping = shippingFeeFor(order.getShippingMethod(), subtotal);
 	  BigDecimal total = subtotal.add(shipping);
 
-	  var viewLines = lines.stream().map(l ->
+	  var viewLines = lines.stream()
+          .filter(l -> l != null && l.getProduct() != null) // Filter out potential nulls
+          .map(l ->
 	      new CartLine(
 	          l.getProduct().getId(),
 	          l.getProduct().getProductName(),
@@ -267,12 +289,10 @@ public class CartService {
 	  return new CartView(orderId, viewLines, subtotal, shipping, total);
 	}
 
-  // Sửa lại hàm này để nhận phí ship từ bên ngoài
-  private Totals calcTotals(List<OrderDetail> lines, BigDecimal ship) {
-    BigDecimal subtotal = lines.stream()
-        .map(l -> l.getPrice().multiply(BigDecimal.valueOf(l.getQuantity())))
-        .reduce(BigDecimal.ZERO, BigDecimal::add);
-    BigDecimal shipping = subtotal.compareTo(BigDecimal.ZERO) > 0 ? ship : BigDecimal.ZERO;
+  // Calculate totals based on lines and provided shipping fee
+  private Totals calcTotals(List<OrderDetail> lines, BigDecimal calculatedShippingFee) {
+    BigDecimal subtotal = calcSubtotal(lines);
+    BigDecimal shipping = subtotal.compareTo(BigDecimal.ZERO) > 0 ? calculatedShippingFee : BigDecimal.ZERO;
     BigDecimal total = subtotal.add(shipping);
     return new Totals(subtotal, shipping, total);
   }
