@@ -84,7 +84,7 @@
                 </button>
                 <div class="ratio ratio-1x1"> 
                   <img class="card-img-top object-fit-cover"
-                       th:src="${#strings.isEmpty(prod.imageUrl)} ? @{/assets/images/placeholder.png} : @{/assets/${prod.imageUrl}}"
+                            th:src="@{${#strings.isEmpty(prod.imageUrl) ? '/assets/images/placeholder.png' : '/assets/' + prod.imageUrl}}"
                        th:alt="${prod.productName}"
                        onerror="this.onerror=null; this.src='/assets/images/placeholder.png';">
                 </div>
@@ -130,7 +130,7 @@
                 </button>
                 <div class="ratio ratio-1x1">
                   <img class="card-img-top object-fit-cover"
-                       th:src="${#strings.isEmpty(prod.imageUrl)} ? @{/assets/images/placeholder.png} : @{/assets/${prod.imageUrl}}"
+                            th:src="@{${#strings.isEmpty(prod.imageUrl) ? '/assets/images/placeholder.png' : '/assets/' + prod.imageUrl}}"
                        th:alt="${prod.productName}"
                        onerror="this.onerror=null; this.src='/assets/images/placeholder.png';">
                 </div>
@@ -175,7 +175,7 @@
                 </button>
                 <div class="ratio ratio-1x1">
                   <img class="card-img-top object-fit-cover"
-                       th:src="${#strings.isEmpty(prod.imageUrl)} ? @{/assets/images/placeholder.png} : @{/assets/${prod.imageUrl}}"
+                            th:src="@{${#strings.isEmpty(prod.imageUrl) ? '/assets/images/placeholder.png' : '/assets/' + prod.imageUrl}}"
                        th:alt="${prod.productName}"
                        onerror="this.onerror=null; this.src='/assets/images/placeholder.png';">
                 </div>

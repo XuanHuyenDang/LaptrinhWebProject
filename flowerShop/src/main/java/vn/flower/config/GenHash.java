@@ -1,4 +1,4 @@
-package vn.flower.config;
+package vn.flower.Config;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 

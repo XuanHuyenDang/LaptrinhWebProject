@@ -1,4 +1,4 @@
-package vn.flower.config;
+package vn.flower.Config;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
