@@ -124,54 +124,60 @@
       <div class="summary">
         <div class="section-title mb-2"><i class="bi bi-cash-coin text-warning"></i><span>Tổng kết</span></div>
 
-        <div th:with="
-              totalFinal = ${order.totalAmount != null ? order.totalAmount : T(java.math.BigDecimal).ZERO},
-              ship  = ${order.shippingFee  != null ? order.shippingFee  : T(java.math.BigDecimal).ZERO},
-              discount = ${order.discountAmount != null ? order.discountAmount : T(java.math.BigDecimal).ZERO},
-              sub   = ${totalFinal.add(discount).subtract(ship)}  /* Tính lại subtotal trước giảm giá */
-            ">
-          <div class="row-item">
-            <div class="label">Tạm tính</div>
-            <div class="val" th:text="${#numbers.formatDecimal(sub,0,'COMMA',0,'POINT')} + 'đ'">0đ</div>
-          </div>
-          <div class="row-item">
-            <div class="label">Phí vận chuyển</div>
-            <div class="val" th:text="${#numbers.formatDecimal(ship,0,'COMMA',0,'POINT')} + 'đ'">0đ</div>
-          </div>
-           {/* */}
-           <div class="row-item summary-discount-row" th:if="${discount.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
-              <div class="label">Giảm giá <span th:if="${order.discountCode != null}" th:text="'(' + ${order.discountCode.code} + ')'"></span></div>
-              <div class="val" th:text="${#numbers.formatDecimal(discount.negate(), 0, 'COMMA', 0, 'POINT')} + 'đ'">-0đ</div>
-           </div>
-          <div class="divider-dashed"></div>
-          <div class="row-item">
-            <div class="label fw-bold">Tổng cộng</div>
-            <div class="val total" th:text="${#numbers.formatDecimal(totalFinal,0,'COMMA',0,'POINT')} + 'đ'">0đ</div> {/* */}
-          </div>
+        <div th:with="totalFinal = ${order.totalAmount != null ? order.totalAmount : T(java.math.BigDecimal).ZERO}">
+          <div th:with="ship = ${order.shippingFee != null ? order.shippingFee : T(java.math.BigDecimal).ZERO}">
+            <div th:with="discount = ${order.discountAmount != null ? order.discountAmount : T(java.math.BigDecimal).ZERO}">
+              <div th:with="sub = ${totalFinal.add(discount).subtract(ship)}">
+                <div class="row-item">
+                  <div class="label">Tạm tính</div>
+                  <div class="val" th:text="${#numbers.formatDecimal(sub,0,'COMMA',0,'POINT')} + 'đ'">0đ</div>
+                </div>
+                <div class="row-item">
+                  <div class="label">Phí vận chuyển</div>
+                  <div class="val" th:text="${#numbers.formatDecimal(ship,0,'COMMA',0,'POINT')} + 'đ'">0đ</div>
+                </div>
+                <div class="row-item summary-discount-row" th:if="${discount.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
+                   <div class="label">Giảm giá <span th:if="${order.discountCode != null}" th:text="'(' + ${order.discountCode.code} + ')'"></span></div>
+                   <div class="val" th:text="${#numbers.formatDecimal(discount.negate(), 0, 'COMMA', 0, 'POINT')} + 'đ'">-0đ</div>
+                </div>
+                <div class="divider-dashed"></div>
+                <div class="row-item">
+                  <div class="label fw-bold">Tổng cộng</div>
+                  <div class="val total" th:text="${#numbers.formatDecimal(totalFinal,0,'COMMA',0,'POINT')} + 'đ'">0đ</div>
+                </div>
 
-          <div th:if="${pendingVnpayPayment}" class="mt-3 text-center alert alert-warning p-2">
-              <small>Đơn hàng này đang chờ thanh toán qua VNPAY.</small>
-              <div th:if="${vnpayPaymentUrl}" class="mt-2 d-grid">
-                  <a th:href="${vnpayPaymentUrl}" class="btn btn-warning fw-bold btn-sm">
-                      <i class="bi bi-credit-card-2-front"></i> Thanh toán ngay qua VNPAY
+                <div th:if="${pendingVnpayPayment}" class="mt-3 text-center alert alert-warning p-2">
+                    <small>Đơn hàng này đang chờ thanh toán qua VNPAY.</small>
+                    <div th:if="${vnpayPaymentUrl}" class="mt-2 d-grid">
+                        <a th:href="${vnpayPaymentUrl}" class="btn btn-warning fw-bold btn-sm">
+                            <i class="bi bi-credit-card-2-front"></i> Thanh toán ngay qua VNPAY
+                        </a>
+                    </div>
+                    <div th:if="${vnpayError}" class="mt-2 text-danger small" th:text="${vnpayError}">
+                        Lỗi tạo link thanh toán.
+                    </div>
+                </div>
+                <div class="d-grid gap-2 mt-3">
+                  <a class="btn btn-outline-secondary" th:href="@{/}">
+                    <i class="bi bi-bag"></i> Tiếp tục mua sắm
                   </a>
+                  <a class="btn btn-primary" th:href="@{/orders}">
+                    <i class="bi bi-clock-history"></i> Xem lịch sử đặt hàng
+                  </a>
+                  <button class="btn btn-ghost" onclick="window.print()">
+                    <i class="bi bi-printer"></i> In hoá đơn
+                  </button>
+                </div>
               </div>
-              <div th:if="${vnpayError}" class="mt-2 text-danger small" th:text="${vnpayError}">
-                  Lỗi tạo link thanh toán.
-              </div>
-          </div>
-          <div class="d-grid gap-2 mt-3">
-            <a class="btn btn-outline-secondary" th:href="@{/}">
-              <i class="bi bi-bag"></i> Tiếp tục mua sắm
-            </a>
-            <a class="btn btn-primary" th:href="@{/orders}">
-              <i class="bi bi-clock-history"></i> Xem lịch sử đặt hàng
-            </a>
-            <button class="btn btn-ghost" onclick="window.print()">
-              <i class="bi bi-printer"></i> In hoá đơn
-            </button>
+            </div>
           </div>
         </div>
+
+      </div>
+    </div>
+
+      </div>
+    </div>
 
       </div>
     </div>

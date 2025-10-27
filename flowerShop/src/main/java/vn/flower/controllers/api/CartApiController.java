@@ -86,7 +86,8 @@ public class CartApiController {
              // If exception is 401 (Unauthorized), return an empty cart view
              if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
                  // *** UPDATED CONSTRUCTOR CALL ***
-                 return ResponseEntity.ok(new CartView(null, List.of(), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, null));
+                 // Now includes all 7 arguments: orderId, lines, subtotal, shipping, discount, total, appliedDiscountCode
+                 return ResponseEntity.ok(new CartView(null, List.of(), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, null)); // Corrected constructor
              }
              // Re-throw other ResponseStatusExceptions
              throw e;
@@ -95,10 +96,12 @@ public class CartApiController {
             System.err.println("Error fetching cart: " + e.getMessage()); // Log the error
             // Return a 500 error with an empty cart or an error message
             // *** UPDATED CONSTRUCTOR CALL ***
+            // Now includes all 7 arguments: orderId, lines, subtotal, shipping, discount, total, appliedDiscountCode
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                 .body(new CartView(null, List.of(), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, null));
+                                 .body(new CartView(null, List.of(), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, null)); // Corrected constructor
         }
     }
+
 
     // Thêm sản phẩm vào giỏ
     @PostMapping("/items")

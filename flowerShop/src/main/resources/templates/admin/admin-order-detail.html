@@ -2,186 +2,131 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Quản lý Mã giảm giá - Florio Admin</title>
+    <title>Chi tiết Đơn hàng - Florio Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    
+    <style>
+        /* (Copy style từ các trang admin khác nếu cần) */
+        body { background-color: #fffafc; font-family: "Segoe UI", sans-serif; }
+        .sidebar { /* ... styles ... */ }
+        main { margin-left: 270px; padding: 30px; }
+        .card { border-radius: 15px; border: none; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); }
+        h3 { color: #c2185b; font-weight: 700; }
+        .summary-discount-row { color: #198754; font-weight: 500; }
+         /* Thêm lại style sidebar và logout button nếu cần */
+        .sidebar { position: fixed; top: 0; left: 0; height: 100vh; width: 250px; background: linear-gradient(180deg, #ffb6c1 0%, #ffe5ec 100%); color: #4a4a4a; padding-top: 1rem; box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); }
+        .sidebar h5 { font-weight: bold; color: #c2185b; }
+        .sidebar a { color: #5a5a5a; text-decoration: none; display: block; padding: 10px 20px; border-radius: 8px; margin: 3px 10px; transition: all 0.3s ease; font-weight: 500; }
+        .sidebar a:hover, .sidebar a.active { background: #fff; color: #c2185b; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); transform: translateX(3px); }
+        .sidebar i { color: #c2185b; }
+        .logout-form { position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%); text-align: center; width: 80%;}
+
+    </style>
 </head>
 <body>
 
-    <div th:replace="~{admin/fragments/sidebar :: sidebar(page='discounts')}"></div>
+    <div th:replace="~{admin/fragments/sidebar :: sidebar(page='orders')}"></div>
 
     <main>
-        <h3 class="mb-4"><i class="bi bi-tag-fill me-2"></i>Quản lý Mã giảm giá</h3>
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h3><i class="bi bi-receipt-cutoff me-2"></i>Chi tiết Đơn hàng <span th:text="'#' + ${order.id}"></span></h3>
+            <a th:href="@{/admin/orders}" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
+            </a>
+        </div>
 
-        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
-        <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-        <button class="btn btn-primary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#discountFormCollapse" aria-expanded="false" aria-controls="discountFormCollapse">
-            <i class="bi bi-plus-circle me-1"></i> <span th:text="${isEdit} ? 'Chỉnh sửa mã' : 'Thêm mã mới'"></span>
-        </button>
-
-        <div class="collapse" id="discountFormCollapse" th:classappend="${showForm} ? 'show' : ''">
-            <div class="card p-4 form-section mb-4">
-                <h5 th:text="${isEdit} ? 'Chỉnh sửa mã giảm giá' : 'Tạo mã giảm giá mới'"></h5>
-                <hr>
-                <form th:action="@{/admin/discounts/save}" th:object="${newDiscountCode}" method="post">
-                    <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                    <input type="hidden" th:field="*{id}" />
-
-                    <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
-                         <p th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="card mb-4">
+                    <div class="card-header bg-light"><h5 class="mb-0 fs-6 fw-bold text-secondary">Thông tin Khách hàng & Giao hàng</h5></div>
+                    <div class="card-body">
+                        <p><strong>Khách hàng:</strong> <span th:text="${order.account?.fullName ?: order.recipientName}"></span> (<span th:text="${order.account?.email ?: 'N/A'}"></span>)</p>
+                        <p><strong>Người nhận:</strong> <span th:text="${order.recipientName}"></span></p>
+                        <p><strong>Điện thoại:</strong> <span th:text="${order.recipientPhone}"></span></p>
+                        <p><strong>Địa chỉ:</strong> <span th:text="${order.shippingAddress}"></span></p>
+                        <p th:if="${order.note}"><strong>Ghi chú:</strong> <span th:text="${order.note}"></span></p>
+                        <p><strong>Ngày đặt:</strong> <span th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}"></span></p>
+                        <p th:if="${order.completedDate}"><strong>Ngày hoàn tất:</strong> <span th:text="${#temporals.format(order.completedDate, 'dd/MM/yyyy HH:mm')}"></span></p>
+                    </div>
+                </div>
+                 <div class="card">
+                     <div class="card-header bg-light"><h5 class="mb-0 fs-6 fw-bold text-secondary">Cập nhật trạng thái</h5></div>
+                     <div class="card-body">
+                         <form th:action="@{/admin/orders/update-status}" method="post">
+                             <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                             <input type="hidden" name="orderId" th:value="${order.id}">
+                             <div class="input-group">
+                                 <select name="status" class="form-select">
+                                     <option value="Đang xử lý" th:selected="${order.status == 'Đang xử lý'}">Đang xử lý</option>
+                                     <option value="Đang giao" th:selected="${order.status == 'Đang giao'}">Đang giao</option>
+                                     <option value="Hoàn tất" th:selected="${order.status == 'Hoàn tất'}">Hoàn tất</option>
+                                     <option value="Đã hủy" th:selected="${order.status == 'Đã hủy'}">Đã hủy</option>
+                                     <option value="Chờ thanh toán" th:selected="${order.status == 'Chờ thanh toán'}" disabled>Chờ thanh toán (VNPAY)</option>
+                                     <option th:if="${order.status == 'Yêu cầu trả hàng'}" value="Yêu cầu trả hàng" selected disabled>Yêu cầu trả hàng</option>
+                                     <option th:if="${order.status == 'Đã trả hàng'}" value="Đã trả hàng" selected disabled>Đã trả hàng</option>
+                                     <option th:if="${order.status == 'Đã từ chối trả hàng'}" value="Đã từ chối trả hàng" selected disabled>Đã từ chối trả hàng</option>
+                                 </select>
+                                 <button type="submit" class="btn btn-primary"
+                                         th:disabled="${#lists.contains({'Yêu cầu trả hàng', 'Đã trả hàng', 'Đã từ chối trả hàng'}, order.status)}">
+                                     Cập nhật
+                                 </button>
+                             </div>
+                              <small class="form-text text-muted" th:if="${#lists.contains({'Yêu cầu trả hàng', 'Đã trả hàng', 'Đã từ chối trả hàng'}, order.status)}">
+                                 Đơn hàng đang/đã xử lý trả hàng, không thể cập nhật trạng thái tại đây.
+                             </small>
+                         </form>
                      </div>
+                 </div>
+            </div>
 
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label for="code" class="form-label">Mã Code (*)</label>
-                            <input type="text" class="form-control text-uppercase" id="code" th:field="*{code}" required placeholder="VD: SALE2025" th:readonly="${isEdit}">
-                            <div class="form-text">Viết liền, không dấu. Sẽ tự động viết hoa.</div>
-                            <span th:if="${#fields.hasErrors('code')}" th:errors="*{code}" class="text-danger small"></span>
-                        </div>
-                         <div class="col-md-6">
-                            <label for="description" class="form-label">Mô tả ngắn</label>
-                            <input type="text" class="form-control" id="description" th:field="*{description}" placeholder="VD: Giảm giá mừng năm mới">
-                         </div>
-
-                         <div class="col-md-6">
-                             <label for="discountPercent" class="form-label">Giảm theo %</label>
-                             <input type="number" step="0.01" min="0" max="100" class="form-control" id="discountPercent" th:field="*{discountPercent}" placeholder="VD: 15.5 (cho 15.5%)">
-                             <div class="form-text">Để trống nếu giảm số tiền cố định.</div>
-                             <span th:if="${#fields.hasErrors('discountPercent')}" th:errors="*{discountPercent}" class="text-danger small"></span>
-                         </div>
-                         <div class="col-md-6">
-                             <label for="discountAmount" class="form-label">Giảm số tiền cố định (VNĐ)</label>
-                             <input type="number" step="1000" min="0" class="form-control" id="discountAmount" th:field="*{discountAmount}" placeholder="VD: 50000">
-                             <div class="form-text">Để trống nếu giảm theo %.</div>
-                             <span th:if="${#fields.hasErrors('discountAmount')}" th:errors="*{discountAmount}" class="text-danger small"></span>
-                         </div>
-
-                         <div class="col-md-6">
-                            <label for="minOrderAmount" class="form-label">Giá trị đơn tối thiểu (VNĐ)</label>
-                            <input type="number" step="1000" min="0" class="form-control" id="minOrderAmount" th:field="*{minOrderAmount}" placeholder="Để trống nếu không yêu cầu">
-                         </div>
-                         <div class="col-md-6">
-                            <label for="maxDiscountAmount" class="form-label">Giảm tối đa (VNĐ)</label>
-                            <input type="number" step="1000" min="0" class="form-control" id="maxDiscountAmount" th:field="*{maxDiscountAmount}" placeholder="Áp dụng khi giảm theo %">
-                         </div>
-
-                         <div class="col-md-6">
-                            <label for="startDate" class="form-label">Ngày bắt đầu (*)</label>
-                            <input type="datetime-local" class="form-control" id="startDate" th:field="*{startDate}" required>
-                            <span th:if="${#fields.hasErrors('startDate')}" th:errors="*{startDate}" class="text-danger small"></span>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="endDate" class="form-label">Ngày kết thúc (*)</label>
-                            <input type="datetime-local" class="form-control" id="endDate" th:field="*{endDate}" required>
-                            <span th:if="${#fields.hasErrors('endDate')}" th:errors="*{endDate}" class="text-danger small"></span>
-                        </div>
-
-                         <div class="col-md-6">
-                            <label for="maxUsage" class="form-label">Số lượt sử dụng tối đa</label>
-                            <input type="number" min="0" class="form-control" id="maxUsage" th:field="*{maxUsage}" placeholder="Để trống nếu không giới hạn">
-                         </div>
-                          <div class="col-md-6 d-flex align-items-end">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" role="switch" id="isActive" th:field="*{active}">
-                                <label class="form-check-label" for="isActive">Kích hoạt mã</label>
+            <div class="col-lg-6">
+                <div class="card">
+                     <div class="card-header bg-light"><h5 class="mb-0 fs-6 fw-bold text-secondary">Chi tiết Sản phẩm</h5></div>
+                    <div class="card-body">
+                        <table class="table table-sm align-middle">
+                            <thead>
+                                <tr><th>Sản phẩm</th><th class="text-center">SL</th><th class="text-end">Đơn giá</th><th class="text-end">Thành tiền</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="d : ${order.details}">
+                                    <td th:text="${d.product?.productName ?: 'N/A'}"></td>
+                                    <td class="text-center" th:text="${d.quantity}"></td>
+                                    <td class="text-end" th:text="${#numbers.formatDecimal(d.price, 0, 'COMMA', 0, 'POINT')} + 'đ'"></td>
+                                    <td class="text-end fw-semibold" th:text="${#numbers.formatDecimal(d.price.multiply(T(java.math.BigDecimal).valueOf(d.quantity.longValue())), 0, 'COMMA', 0, 'POINT')} + 'đ'"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <hr>
+                         <div th:with="
+                               totalFinal = ${order.totalAmount ?: T(java.math.BigDecimal).ZERO},
+                               ship  = ${order.shippingFee ?: T(java.math.BigDecimal).ZERO},
+                               discount = ${order.discountAmount ?: T(java.math.BigDecimal).ZERO},
+                               sub   = ${totalFinal.add(discount).subtract(ship)}">
+                            <div class="d-flex justify-content-between mb-1"><span>Tạm tính:</span> <span th:text="${#numbers.formatDecimal(sub, 0, 'COMMA', 0, 'POINT')} + 'đ'"></span></div>
+                            <div class="d-flex justify-content-between mb-1"><span>Phí vận chuyển (<span class="text-primary" th:text="${order.shippingMethod}"></span>):</span> <span th:text="${#numbers.formatDecimal(ship, 0, 'COMMA', 0, 'POINT')} + 'đ'"></span></div>
+                            <div class="d-flex justify-content-between mb-1 summary-discount-row" th:if="${discount.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
+                                <span>Giảm giá <span th:if="${order.discountCode}" th:text="'(' + ${order.discountCode.code} + ')'"></span>:</span>
+                                <span th:text="${#numbers.formatDecimal(discount.negate(), 0, 'COMMA', 0, 'POINT')} + 'đ'"></span>
                             </div>
-                         </div>
+                            <div class="d-flex justify-content-between fw-bold mt-2 pt-2 border-top"><span>Tổng cộng:</span> <span class="text-danger fs-5" th:text="${#numbers.formatDecimal(totalFinal, 0, 'COMMA', 0, 'POINT')} + 'đ'"></span></div>
+                             <div class="mt-2 text-end">
+                                 <span class="badge bg-secondary" th:text="${order.paymentMethod}"></span>
+                                 <span th:if="${#strings.equalsIgnoreCase(order.paymentMethod, 'VNPAY') and order.status != 'Chờ thanh toán' and order.status != 'Đã hủy'}"
+                                       class="badge bg-success text-white ms-1">Đã thanh toán</span>
+                                  <span th:if="${#strings.equalsIgnoreCase(order.paymentMethod, 'VNPAY') and order.status == 'Chờ thanh toán'}"
+                                        class="badge bg-warning text-dark ms-1">Chưa thanh toán</span>
+                             </div>
+                        </div>
                     </div>
-
-                    <div class="mt-4">
-                        <button type="submit" class="btn btn-success">
-                            <i class="bi bi-save me-1"></i> <span th:text="${isEdit} ? 'Lưu thay đổi' : 'Tạo mã'"></span>
-                        </button>
-                        <a th:href="@{/admin/discounts}" class="btn btn-secondary ms-2">Hủy</a>
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
 
-
-        <div class="card p-0 mt-4">
-            <div class="card-body p-0">
-                <table class="table table-bordered bg-white align-middle m-0">
-                    <thead class="text-center table-light">
-                        <tr>
-                            <th>Code</th>
-                            <th>Mô tả</th>
-                            <th>Giảm giá</th>
-                            <th>Điều kiện</th>
-                            <th>Thời hạn</th>
-                            <th>Lượt dùng</th>
-                            <th>Trạng thái</th>
-                            <th>Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                         <tr th:if="${#lists.isEmpty(discountCodes)}">
-                             <td colspan="8" class="text-center text-muted p-4">Chưa có mã giảm giá nào.</td>
-                         </tr>
-                         <tr th:each="dc : ${discountCodes}">
-                            <td class="fw-bold" th:text="${dc.code}"></td>
-                            <td th:text="${dc.description}"></td>
-                            <td>
-                                 <span th:if="${dc.discountPercent != null}" th:text="${#numbers.formatDecimal(dc.discountPercent, 1, 1)} + '%'"></span>
-                                 <span th:if="${dc.discountAmount != null}" th:text="${#numbers.formatDecimal(dc.discountAmount, 0, 'COMMA', 0, 'POINT')} + 'đ'"></span>
-                                 <small class="d-block text-muted" th:if="${dc.maxDiscountAmount != null}" th:text="'(Tối đa ' + ${#numbers.formatDecimal(dc.maxDiscountAmount, 0, 'COMMA', 0, 'POINT')} + 'đ)'"></small>
-                            </td>
-                            <td>
-                                <small th:if="${dc.minOrderAmount != null}" th:text="'Đơn tối thiểu ' + ${#numbers.formatDecimal(dc.minOrderAmount, 0, 'COMMA', 0, 'POINT')} + 'đ'"></small>
-                                <small th:unless="${dc.minOrderAmount != null}">Không yêu cầu</small>
-                            </td>
-                             <td>
-                                 <small th:text="'Từ: ' + ${#temporals.format(dc.startDate, 'dd/MM/yy HH:mm')}"></small><br>
-                                 <small th:text="'Đến: ' + ${#temporals.format(dc.endDate, 'dd/MM/yy HH:mm')}"></small>
-                             </td>
-                             <td class="text-center">
-                                 <span th:text="${dc.currentUsage}"></span> / <span th:text="${dc.maxUsage != null ? dc.maxUsage : '∞'}"></span>
-                             </td>
-                            <td class="text-center">
-                                <span th:if="${dc.isActive}" class="badge bg-success">Hoạt động</span>
-                                <span th:unless="${dc.isActive}" class="badge bg-secondary">Không hoạt động</span>
-                            </td>
-                            <td class="text-center">
-                                <a th:href="@{/admin/discounts/edit/{id}(id=${dc.id})}" class="btn btn-sm btn-outline-primary me-1" title="Sửa"><i class="bi bi-pencil"></i></a>
-                                 <a th:href="@{/admin/discounts/delete/{id}(id=${dc.id})}" class="btn btn-sm btn-outline-danger" title="Xóa" onclick="return confirm('Bạn có chắc muốn xóa mã này?')"><i class="bi bi-trash"></i></a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-     <script>
-        // Tự động viết hoa khi nhập code
-        const codeInput = document.getElementById('code');
-         if(codeInput) {
-             codeInput.addEventListener('input', function() {
-                this.value = this.value.toUpperCase().replace(/\s+/g, ''); // Viết hoa và xóa khoảng trắng
-            });
-         }
-         // Giữ form mở nếu có lỗi validation khi submit
-        document.addEventListener('DOMContentLoaded', (event) => {
-            const formHasErrors = document.querySelector('#discountFormCollapse .text-danger');
-            // Kiểm tra xem có phải đang sửa không (dựa vào biến isEdit từ model)
-            const isEditMode = [[${isEdit ?: false}]]; // Mặc định là false nếu isEdit không tồn tại
-            if (formHasErrors || isEditMode) { // Mở form nếu có lỗi HOẶC đang ở chế độ sửa
-                 const collapseElement = document.getElementById('discountFormCollapse');
-                 if (collapseElement && !collapseElement.classList.contains('show')) {
-                     new bootstrap.Collapse(collapseElement, { toggle: true });
-                 }
-            }
-        });
-
-        // Xử lý khi sửa: đảm bảo checkbox 'isActive' đúng trạng thái (đã dùng th:field nên không cần JS nữa)
-        // const isActiveCheckbox = document.getElementById('isActive');
-        // if (isActiveCheckbox && [[${isEdit}]]) {
-        //     // Thymeleaf đã xử lý th:field
-        // }
-
-    </script>
 </body>
 </html>

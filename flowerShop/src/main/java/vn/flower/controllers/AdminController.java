@@ -39,6 +39,8 @@ import vn.flower.entities.DiscountCode; // Thêm import
 import vn.flower.services.DiscountCodeService; // Thêm import
 import org.springframework.validation.BindingResult; // Thêm import
 import jakarta.validation.Valid; // Thêm import
+import org.springframework.transaction.annotation.Transactional; 
+import org.hibernate.Hibernate;// Thêm import
 // import vn.flower.entities.OrderReturnRequest.ReturnStatus; // Không cần nếu không dùng trực tiếp
 
 @Controller
@@ -347,15 +349,24 @@ public class AdminController {
 		return "admin/admin-orders";
 	}
 
-    @GetMapping("/orders/{id}")
-	public String viewOrderDetail(@PathVariable("id") Long id, Model model) {
-		Order order = orderRepository.findById(id).orElse(null);
-        if (order == null) {
-             return "redirect:/admin/orders?error=notfound";
+	@GetMapping("/orders/{id}")
+    @Transactional(readOnly = true) // <--- KIỂM TRA LẠI ANNOTATION NÀY
+    public String viewOrderDetail(@PathVariable("id") Long id, Model model) {
+        Order order = orderRepository.findById(id)
+            // Nên dùng Exception rõ ràng hơn hoặc .orElse(null) và kiểm tra null sau đó
+            .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng #" + id));
+
+        // --- KIỂM TRA LẠI ĐOẠN KHỞI TẠO NÀY ---
+        if (order != null && order.getDiscountCode() != null) {
+            Hibernate.initialize(order.getDiscountCode());
+            // HOẶC thử dùng cách này thay cho Hibernate.initialize:
+            // String code = order.getDiscountCode().getCode(); // Chỉ cần gọi getter là đủ
         }
-		model.addAttribute("order", order);
-		return "admin/admin-order-detail";
-	}
+        // ------------------------------------
+
+        model.addAttribute("order", order);
+        return "admin/admin-order-detail";
+    }
 
     @PostMapping("/orders/update-status")
 	public String updateOrderStatus(@RequestParam("orderId") Long orderId,
