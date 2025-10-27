@@ -35,6 +35,10 @@ import vn.flower.services.CustomerService;
 import java.time.LocalDateTime;
 import vn.flower.entities.OrderReturnRequest;
 import vn.flower.services.OrderReturnService;
+import vn.flower.entities.DiscountCode; // Thêm import
+import vn.flower.services.DiscountCodeService; // Thêm import
+import org.springframework.validation.BindingResult; // Thêm import
+import jakarta.validation.Valid; // Thêm import
 // import vn.flower.entities.OrderReturnRequest.ReturnStatus; // Không cần nếu không dùng trực tiếp
 
 @Controller
@@ -42,6 +46,9 @@ import vn.flower.services.OrderReturnService;
 public class AdminController {
 
 	// --- Các @Autowired ---
+	@Autowired
+    private DiscountCodeService discountCodeService; // Thêm service
+	
 	@Autowired
 	private CategoryService categoryService;
 
@@ -113,6 +120,77 @@ public class AdminController {
 
 		return "admin/admin-dashboard";
 	}
+	
+	@GetMapping("/discounts")
+    public String listDiscounts(Model model) {
+        model.addAttribute("discountCodes", discountCodeService.getAllDiscountCodes());
+        model.addAttribute("newDiscountCode", new DiscountCode()); // Cho form thêm mới
+        return "admin/admin-discounts"; // Trang view mới
+    }
+
+    @PostMapping("/discounts/save")
+    public String saveDiscount(@Valid @ModelAttribute("newDiscountCode") DiscountCode discountCode,
+                               BindingResult result, Model model, RedirectAttributes ra) {
+        if (result.hasErrors()) {
+            // Nếu có lỗi validation, trả lại form với lỗi
+            model.addAttribute("discountCodes", discountCodeService.getAllDiscountCodes());
+             model.addAttribute("org.springframework.validation.BindingResult.newDiscountCode", result);
+             model.addAttribute("showForm", true); // Để hiển thị lại form
+            return "admin/admin-discounts";
+        }
+         // Kiểm tra logic giảm giá (chỉ % hoặc chỉ amount)
+        if (discountCode.getDiscountPercent() != null && discountCode.getDiscountAmount() != null) {
+            result.rejectValue("discountPercent", "error.discountCode", "Chỉ nhập giảm giá theo % HOẶC số tiền cố định.");
+        }
+         if (discountCode.getDiscountPercent() == null && discountCode.getDiscountAmount() == null) {
+             result.rejectValue("discountPercent", "error.discountCode", "Phải nhập giảm giá theo % HOẶC số tiền cố định.");
+        }
+        // Kiểm tra ngày
+         if (discountCode.getStartDate() != null && discountCode.getEndDate() != null && discountCode.getStartDate().isAfter(discountCode.getEndDate())) {
+             result.rejectValue("startDate", "error.discountCode", "Ngày bắt đầu phải trước ngày kết thúc.");
+        }
+
+        if (result.hasErrors()) {
+             model.addAttribute("discountCodes", discountCodeService.getAllDiscountCodes());
+             model.addAttribute("org.springframework.validation.BindingResult.newDiscountCode", result);
+              model.addAttribute("showForm", true);
+            return "admin/admin-discounts";
+        }
+
+        try {
+            // Chuẩn hóa code về viết hoa
+            discountCode.setCode(discountCode.getCode().toUpperCase().trim());
+            discountCodeService.save(discountCode);
+            ra.addFlashAttribute("successMessage", "Đã lưu mã giảm giá thành công!");
+        } catch (Exception e) { // Bắt lỗi trùng code (DataIntegrityViolationException) hoặc lỗi khác
+            ra.addFlashAttribute("errorMessage", "Lỗi lưu mã giảm giá: " + (e.getMessage().contains("UNIQUE constraint") ? "Mã code đã tồn tại." : e.getMessage()));
+        }
+        return "redirect:/admin/discounts";
+    }
+
+
+    @GetMapping("/discounts/edit/{id}")
+    public String editDiscountForm(@PathVariable Integer id, Model model) {
+        DiscountCode dc = discountCodeService.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Invalid discount code Id:" + id));
+        model.addAttribute("discountCodes", discountCodeService.getAllDiscountCodes()); // Vẫn cần list để hiển thị
+        model.addAttribute("newDiscountCode", dc); // Dùng lại object newDiscountCode
+        model.addAttribute("isEdit", true); // Đánh dấu là đang sửa
+        model.addAttribute("showForm", true); // Hiển thị form
+        return "admin/admin-discounts";
+    }
+
+    @GetMapping("/discounts/delete/{id}")
+    public String deleteDiscount(@PathVariable Integer id, RedirectAttributes ra) {
+        try {
+             discountCodeService.deleteById(id);
+             ra.addFlashAttribute("successMessage", "Đã xóa mã giảm giá!");
+        } catch (Exception e) {
+             ra.addFlashAttribute("errorMessage", "Lỗi xóa mã giảm giá: " + e.getMessage());
+        }
+
+        return "redirect:/admin/discounts";
+    }
 
 	// --- San pham (giữ nguyên) ---
 	@GetMapping("/products")

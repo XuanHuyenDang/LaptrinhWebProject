@@ -1,4 +1,4 @@
-package vn.flower.Config;
+package vn.flower.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;

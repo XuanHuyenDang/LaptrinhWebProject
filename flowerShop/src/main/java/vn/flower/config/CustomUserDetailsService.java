@@ -1,4 +1,4 @@
-package vn.flower.Config;
+package vn.flower.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;

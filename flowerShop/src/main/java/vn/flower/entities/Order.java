@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.math.BigDecimal;
 
 import vn.flower.api.dto.ShippingMethod;
 
@@ -61,6 +62,13 @@ public class Order {
   // === THÊM LIÊN KẾT MỚI ===
   @OneToOne(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   private OrderReturnRequest returnRequest;
+  
+  @ManyToOne(fetch = FetchType.LAZY) // Chỉ tải khi cần
+  @JoinColumn(name = "DiscountCodeId")
+  private DiscountCode discountCode;
+  
+  @Column(name = "DiscountAmount", precision = 18, scale = 2)
+  private BigDecimal discountAmount = BigDecimal.ZERO; // Khởi tạo giá trị
   // =======================
 
   public ShippingMethod getShippingMethod() { return shippingMethod; }
@@ -98,4 +106,8 @@ public class Order {
   public void setStatus(String status){ this.status = status; }
   public List<OrderDetail> getDetails(){ return details; }
   public void setDetails(List<OrderDetail> details){ this.details = details; }
+  public DiscountCode getDiscountCode() { return discountCode; }
+  public void setDiscountCode(DiscountCode discountCode) { this.discountCode = discountCode; }
+  public BigDecimal getDiscountAmount() { return discountAmount == null ? BigDecimal.ZERO : discountAmount; } // Trả về 0 nếu null
+  public void setDiscountAmount(BigDecimal discountAmount) { this.discountAmount = (discountAmount == null ? BigDecimal.ZERO : discountAmount); }
 }

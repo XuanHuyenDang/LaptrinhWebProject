@@ -1,4 +1,4 @@
-package vn.flower.Config;
+package vn.flower.config;
 
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;

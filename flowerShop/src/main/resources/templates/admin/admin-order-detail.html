@@ -1,241 +1,187 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chi tiết đơn hàng - Florio Admin</title>
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-	rel="stylesheet">
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-	rel="stylesheet">
-<style>
-body {
-	background-color: #fffafc;
-	font-family: "Segoe UI", sans-serif;
-}
-
-/* Sidebar */
-.sidebar {
-	position: fixed;
-	top: 0;
-	left: 0;
-	height: 100vh;
-	width: 250px;
-	background: linear-gradient(180deg, #ffb6c1 0%, #ffe5ec 100%);
-	color: #4a4a4a;
-	padding-top: 1rem;
-	box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.sidebar h5 {
-	font-weight: bold;
-	color: #c2185b;
-}
-
-.sidebar a {
-	color: #5a5a5a;
-	text-decoration: none;
-	display: block;
-	padding: 10px 20px;
-	border-radius: 8px;
-	margin: 3px 10px;
-	transition: all 0.3s ease;
-	font-weight: 500;
-}
-
-.sidebar a:hover, .sidebar a.active {
-	background: #fff;
-	color: #c2185b;
-	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-	transform: translateX(3px);
-}
-
-.sidebar i {
-	color: #c2185b;
-}
-
-main {
-	margin-left: 270px;
-	padding: 30px;
-}
-
-.card {
-	border-radius: 15px;
-	border: none;
-	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-}
-
-h3, h5 {
-	color: #c2185b;
-	font-weight: 700;
-}
-
-.info-group p {
-	margin-bottom: 0.8rem;
-	font-size: 1rem;
-}
-
-.info-group p strong {
-	display: inline-block;
-	width: 150px;
-	color: #555;
-}
-</style>
+    <meta charset="UTF-8">
+    <title>Quản lý Mã giảm giá - Florio Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    
 </head>
 <body>
 
-	<div th:replace="~{admin/fragments/sidebar :: sidebar(page='orders')}"></div> 
+    <div th:replace="~{admin/fragments/sidebar :: sidebar(page='discounts')}"></div>
+
     <main>
-		<div class="d-flex align-items-center justify-content-between mb-4">
-			<h3>
-				<i class="bi bi-receipt-cutoff me-2"></i>Chi tiết đơn hàng <span
-					th:text="'#' + ${order.id}"></span>
-			</h3>
-			<a href="/admin/orders" class="btn btn-sm btn-outline-secondary">
-				<i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
-			</a>
-		</div>
-		<div th:if="${success}" class="alert alert-success"
-			th:text="${success}"></div>
-		<div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+        <h3 class="mb-4"><i class="bi bi-tag-fill me-2"></i>Quản lý Mã giảm giá</h3>
 
-        <div th:if="${(order.status == 'Yêu cầu trả hàng' or 
-                       order.status == 'Đã trả hàng' or 
-                       order.status == 'Đã từ chối trả hàng') 
-                       and order.returnRequest != null}" 
-             class="alert alert-warning">
-            <i class="bi bi-exclamation-triangle-fill"></i> 
-            Đơn hàng này có liên quan đến yêu cầu trả hàng.
-            <a th:href="@{/admin/returns/{id}(id=${order.returnRequest.id})}" class="alert-link">Xem chi tiết yêu cầu.</a>
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+        <button class="btn btn-primary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#discountFormCollapse" aria-expanded="false" aria-controls="discountFormCollapse">
+            <i class="bi bi-plus-circle me-1"></i> <span th:text="${isEdit} ? 'Chỉnh sửa mã' : 'Thêm mã mới'"></span>
+        </button>
+
+        <div class="collapse" id="discountFormCollapse" th:classappend="${showForm} ? 'show' : ''">
+            <div class="card p-4 form-section mb-4">
+                <h5 th:text="${isEdit} ? 'Chỉnh sửa mã giảm giá' : 'Tạo mã giảm giá mới'"></h5>
+                <hr>
+                <form th:action="@{/admin/discounts/save}" th:object="${newDiscountCode}" method="post">
+                    <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <input type="hidden" th:field="*{id}" />
+
+                    <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
+                         <p th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+                     </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="code" class="form-label">Mã Code (*)</label>
+                            <input type="text" class="form-control text-uppercase" id="code" th:field="*{code}" required placeholder="VD: SALE2025" th:readonly="${isEdit}">
+                            <div class="form-text">Viết liền, không dấu. Sẽ tự động viết hoa.</div>
+                            <span th:if="${#fields.hasErrors('code')}" th:errors="*{code}" class="text-danger small"></span>
+                        </div>
+                         <div class="col-md-6">
+                            <label for="description" class="form-label">Mô tả ngắn</label>
+                            <input type="text" class="form-control" id="description" th:field="*{description}" placeholder="VD: Giảm giá mừng năm mới">
+                         </div>
+
+                         <div class="col-md-6">
+                             <label for="discountPercent" class="form-label">Giảm theo %</label>
+                             <input type="number" step="0.01" min="0" max="100" class="form-control" id="discountPercent" th:field="*{discountPercent}" placeholder="VD: 15.5 (cho 15.5%)">
+                             <div class="form-text">Để trống nếu giảm số tiền cố định.</div>
+                             <span th:if="${#fields.hasErrors('discountPercent')}" th:errors="*{discountPercent}" class="text-danger small"></span>
+                         </div>
+                         <div class="col-md-6">
+                             <label for="discountAmount" class="form-label">Giảm số tiền cố định (VNĐ)</label>
+                             <input type="number" step="1000" min="0" class="form-control" id="discountAmount" th:field="*{discountAmount}" placeholder="VD: 50000">
+                             <div class="form-text">Để trống nếu giảm theo %.</div>
+                             <span th:if="${#fields.hasErrors('discountAmount')}" th:errors="*{discountAmount}" class="text-danger small"></span>
+                         </div>
+
+                         <div class="col-md-6">
+                            <label for="minOrderAmount" class="form-label">Giá trị đơn tối thiểu (VNĐ)</label>
+                            <input type="number" step="1000" min="0" class="form-control" id="minOrderAmount" th:field="*{minOrderAmount}" placeholder="Để trống nếu không yêu cầu">
+                         </div>
+                         <div class="col-md-6">
+                            <label for="maxDiscountAmount" class="form-label">Giảm tối đa (VNĐ)</label>
+                            <input type="number" step="1000" min="0" class="form-control" id="maxDiscountAmount" th:field="*{maxDiscountAmount}" placeholder="Áp dụng khi giảm theo %">
+                         </div>
+
+                         <div class="col-md-6">
+                            <label for="startDate" class="form-label">Ngày bắt đầu (*)</label>
+                            <input type="datetime-local" class="form-control" id="startDate" th:field="*{startDate}" required>
+                            <span th:if="${#fields.hasErrors('startDate')}" th:errors="*{startDate}" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="endDate" class="form-label">Ngày kết thúc (*)</label>
+                            <input type="datetime-local" class="form-control" id="endDate" th:field="*{endDate}" required>
+                            <span th:if="${#fields.hasErrors('endDate')}" th:errors="*{endDate}" class="text-danger small"></span>
+                        </div>
+
+                         <div class="col-md-6">
+                            <label for="maxUsage" class="form-label">Số lượt sử dụng tối đa</label>
+                            <input type="number" min="0" class="form-control" id="maxUsage" th:field="*{maxUsage}" placeholder="Để trống nếu không giới hạn">
+                         </div>
+                          <div class="col-md-6 d-flex align-items-end">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="isActive" th:field="*{active}">
+                                <label class="form-check-label" for="isActive">Kích hoạt mã</label>
+                            </div>
+                         </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-save me-1"></i> <span th:text="${isEdit} ? 'Lưu thay đổi' : 'Tạo mã'"></span>
+                        </button>
+                        <a th:href="@{/admin/discounts}" class="btn btn-secondary ms-2">Hủy</a>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="row g-4">
-			<div class="col-lg-5">
-				<div class="card mb-4">
-					<div class="card-header bg-light">
-						<h5 class="mb-0 fs-6 fw-bold text-secondary">
-							<i class="bi bi-person-circle me-2"></i>Thông tin khách hàng
-						</h5>
-					</div>
-					<div class="card-body info-group">
-						<p>
-							<strong>Khách hàng:</strong> <span
-								th:text="${order.recipientName}"></span>
-						</p>
-						<p>
-							<strong>Số điện thoại:</strong> <span
-								th:text="${order.recipientPhone}"></span>
-						</p>
-						<p>
-							<strong>Địa chỉ giao:</strong> <span
-								th:text="${order.shippingAddress}"></span>
-						</p>
-						<p>
-							<strong>Ghi chú:</strong> <span
-								th:text="${order.note != null ? order.note : 'Không có'}"></span>
-						</p>
 
-					</div>
-				</div>
 
-				<div class="card">
-					<div class="card-header bg-light">
-						<h5 class="mb-0 fs-6 fw-bold text-secondary">
-							<i class="bi bi-file-earmark-text me-2"></i>Thông tin đơn hàng
-						</h5>
-					</div>
-					<div class="card-body info-group">
-						<p>
-							<strong>Mã đơn:</strong> <span th:text="'#' + ${order.id}"></span>
-						</p>
-						<p>
-							<strong>Ngày đặt:</strong> <span
-								th:text="${#temporals.format(order.orderDate,'dd/MM/yyyy HH:mm')}"></span>
-						</p>
-                        <p th:if="${order.completedDate != null}">
-							<strong>Ngày hoàn tất:</strong> <span
-								th:text="${#temporals.format(order.completedDate,'dd/MM/yyyy HH:mm')}"></span>
-						</p>
-						<p>
-							<strong>Thanh toán:</strong> <span
-								th:text="${order.paymentMethod}"></span>
-						</p>
-						<p>
-							<strong>Trạng thái:</strong>
-                            
-                            <form th:if="${order.returnRequest == null}"
-                            th:action="@{/admin/orders/update-status}" method="post"
-							class="d-inline">
-							<input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <div class="card p-0 mt-4">
+            <div class="card-body p-0">
+                <table class="table table-bordered bg-white align-middle m-0">
+                    <thead class="text-center table-light">
+                        <tr>
+                            <th>Code</th>
+                            <th>Mô tả</th>
+                            <th>Giảm giá</th>
+                            <th>Điều kiện</th>
+                            <th>Thời hạn</th>
+                            <th>Lượt dùng</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                         <tr th:if="${#lists.isEmpty(discountCodes)}">
+                             <td colspan="8" class="text-center text-muted p-4">Chưa có mã giảm giá nào.</td>
+                         </tr>
+                         <tr th:each="dc : ${discountCodes}">
+                            <td class="fw-bold" th:text="${dc.code}"></td>
+                            <td th:text="${dc.description}"></td>
+                            <td>
+                                 <span th:if="${dc.discountPercent != null}" th:text="${#numbers.formatDecimal(dc.discountPercent, 1, 1)} + '%'"></span>
+                                 <span th:if="${dc.discountAmount != null}" th:text="${#numbers.formatDecimal(dc.discountAmount, 0, 'COMMA', 0, 'POINT')} + 'đ'"></span>
+                                 <small class="d-block text-muted" th:if="${dc.maxDiscountAmount != null}" th:text="'(Tối đa ' + ${#numbers.formatDecimal(dc.maxDiscountAmount, 0, 'COMMA', 0, 'POINT')} + 'đ)'"></small>
+                            </td>
+                            <td>
+                                <small th:if="${dc.minOrderAmount != null}" th:text="'Đơn tối thiểu ' + ${#numbers.formatDecimal(dc.minOrderAmount, 0, 'COMMA', 0, 'POINT')} + 'đ'"></small>
+                                <small th:unless="${dc.minOrderAmount != null}">Không yêu cầu</small>
+                            </td>
+                             <td>
+                                 <small th:text="'Từ: ' + ${#temporals.format(dc.startDate, 'dd/MM/yy HH:mm')}"></small><br>
+                                 <small th:text="'Đến: ' + ${#temporals.format(dc.endDate, 'dd/MM/yy HH:mm')}"></small>
+                             </td>
+                             <td class="text-center">
+                                 <span th:text="${dc.currentUsage}"></span> / <span th:text="${dc.maxUsage != null ? dc.maxUsage : '∞'}"></span>
+                             </td>
+                            <td class="text-center">
+                                <span th:if="${dc.isActive}" class="badge bg-success">Hoạt động</span>
+                                <span th:unless="${dc.isActive}" class="badge bg-secondary">Không hoạt động</span>
+                            </td>
+                            <td class="text-center">
+                                <a th:href="@{/admin/discounts/edit/{id}(id=${dc.id})}" class="btn btn-sm btn-outline-primary me-1" title="Sửa"><i class="bi bi-pencil"></i></a>
+                                 <a th:href="@{/admin/discounts/delete/{id}(id=${dc.id})}" class="btn btn-sm btn-outline-danger" title="Xóa" onclick="return confirm('Bạn có chắc muốn xóa mã này?')"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
 
-							<input type="hidden" name="orderId" th:value="${order.id}" /> 
-                            <select name="status"
-								class="form-select form-select-sm d-inline-block w-auto me-2">
-								<option value="Đang xử lý"
-									th:selected="${order.status=='Đang xử lý'}">Đang xử lý</option>
-								<option value="Đang giao"
-									th:selected="${order.status=='Đang giao'}">Đang giao</option>
-								<option value="Hoàn tất"
-									th:selected="${order.status=='Hoàn tất'}">Hoàn tất</option>
-								<option value="Đã hủy" th:selected="${order.status=='Đã hủy'}">Đã
-									hủy</option>
-							</select>
-							<button type="submit" class="btn btn-sm btn-primary">
-								<i class="bi bi-check-circle me-1"></i> Cập nhật trạng thái
-							</button>
-						</form>
-                        
-                        <span th:if="${order.returnRequest != null}" 
-                              class="badge bg-warning text-dark" 
-                              th:text="${order.status}"></span>
-						</p>
-					</div>
-				</div>
-			</div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+     <script>
+        // Tự động viết hoa khi nhập code
+        const codeInput = document.getElementById('code');
+         if(codeInput) {
+             codeInput.addEventListener('input', function() {
+                this.value = this.value.toUpperCase().replace(/\s+/g, ''); // Viết hoa và xóa khoảng trắng
+            });
+         }
+         // Giữ form mở nếu có lỗi validation khi submit
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const formHasErrors = document.querySelector('#discountFormCollapse .text-danger');
+            // Kiểm tra xem có phải đang sửa không (dựa vào biến isEdit từ model)
+            const isEditMode = [[${isEdit ?: false}]]; // Mặc định là false nếu isEdit không tồn tại
+            if (formHasErrors || isEditMode) { // Mở form nếu có lỗi HOẶC đang ở chế độ sửa
+                 const collapseElement = document.getElementById('discountFormCollapse');
+                 if (collapseElement && !collapseElement.classList.contains('show')) {
+                     new bootstrap.Collapse(collapseElement, { toggle: true });
+                 }
+            }
+        });
 
-			<div class="col-lg-7">
-				<div class="card">
-					<div class="card-header bg-light">
-						<h5 class="mb-0 fs-6 fw-bold text-secondary">
-							<i class="bi bi-basket2 me-2"></i>Chi tiết sản phẩm
-						</h5>
-					</div>
-					<div class="card-body p-0">
-						<table class="table table-bordered align-middle m-0">
-							<thead class="text-center table-light">
-								<tr>
-									<th>Sản phẩm</th>
-									<th>Số lượng</th>
-									<th>Đơn giá</th>
-									<th>Thành tiền</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr th:each="detail : ${order.details}">
-									<td class="ps-3" th:text="${detail.product != null ? detail.product.productName : 'Sản phẩm không tồn tại'}"></td>
-									<td class="text-center" th:text="${detail.quantity}"></td>
-									<td class="text-center"
-										th:text="${#numbers.formatDecimal(detail.price, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
-									<td class="text-center"
-										th:text="${#numbers.formatDecimal(detail.price.multiply(T(java.math.BigDecimal).valueOf(detail.quantity.longValue())), 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
+        // Xử lý khi sửa: đảm bảo checkbox 'isActive' đúng trạng thái (đã dùng th:field nên không cần JS nữa)
+        // const isActiveCheckbox = document.getElementById('isActive');
+        // if (isActiveCheckbox && [[${isEdit}]]) {
+        //     // Thymeleaf đã xử lý th:field
+        // }
 
-								</tr>
-							</tbody>
-							<tfoot>
-								<tr class="table-light fw-bold">
-									<td colspan="3" class="text-end pe-3">Tổng cộng:</td>
-									<td class="text-center"
-										th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
-								</tr>
-							</tfoot>
-						</table>
-					</div>
-				</div>
-			</div>
-		</div>
-
-	</main>
-
+    </script>
 </body>
 </html>

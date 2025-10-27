@@ -10,17 +10,15 @@
   <style>
     body { background: #f8f9fa; }
     .section-title { font-weight: 600; }
-    .btn-spinner {
-      display: inline-flex; align-items:center; gap:.5rem;
-    }
+    .btn-spinner { display: inline-flex; align-items:center; gap:.5rem; }
     .btn-spinner .spinner-border { width:1rem; height:1rem; }
     .badge-legend { font-size:.85rem; opacity:.9; }
-    /* Thêm style để label của VNPAY dễ nhìn hơn */
-    label[for="payVNPAY"] img {
-        height: 20px; /* Điều chỉnh kích thước logo VNPAY nếu cần */
-        vertical-align: middle;
-        margin-left: 5px;
-    }
+    label[for="payVNPAY"] img { height: 20px; vertical-align: middle; margin-left: 5px; }
+    /* Style cho phần giảm giá */
+    .discount-section { margin-top: 1rem; }
+    #discount-info .applied-code { font-weight: bold; color: #198754; }
+    #discount-info .remove-discount { font-size: 0.8em; cursor: pointer; color: #dc3545; }
+    .summary-discount-row { color: #198754; font-weight: 500;} /* Màu xanh cho dòng giảm giá */
   </style>
 </head>
 <body class="bg-light">
@@ -54,52 +52,52 @@
 
   <div class="row g-4">
     <div class="col-lg-6">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h5 class="section-title mb-3"><i class="bi bi-truck"></i> Thông tin giao hàng</h5>
+       <div class="card shadow-sm">
+         <div class="card-body">
+           <h5 class="section-title mb-3"><i class="bi bi-truck"></i> Thông tin giao hàng</h5>
 
-          <div class="mb-3">
-            <label class="form-label">Họ và tên *</label>
-            <input id="name" type="text" class="form-control" required th:value="${account?.fullName}">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Số điện thoại *</label>
-            <input id="phone" type="text" class="form-control" required th:value="${account?.phoneNumber}">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Địa chỉ giao hàng *</label>
-            <input id="address" type="text" class="form-control" required th:value="${account?.address}">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Ghi chú</label>
-            <textarea id="note" rows="2" class="form-control" placeholder="Ví dụ: Giao giờ hành chính, gọi trước..."></textarea>
-          </div>
+           <div class="mb-3">
+             <label class="form-label">Họ và tên *</label>
+             <input id="name" type="text" class="form-control" required th:value="${account?.fullName}">
+           </div>
+           <div class="mb-3">
+             <label class="form-label">Số điện thoại *</label>
+             <input id="phone" type="text" class="form-control" required th:value="${account?.phoneNumber}">
+           </div>
+           <div class="mb-3">
+             <label class="form-label">Địa chỉ giao hàng *</label>
+             <input id="address" type="text" class="form-control" required th:value="${account?.address}">
+           </div>
+           <div class="mb-3">
+             <label class="form-label">Ghi chú</label>
+             <textarea id="note" rows="2" class="form-control" placeholder="Ví dụ: Giao giờ hành chính, gọi trước..."></textarea>
+           </div>
 
-          <h6 class="mb-2">Hình thức thanh toán *</h6>
-          <div class="form-check">
-            <input class="form-check-input payment-method" type="radio" name="pay" id="payCOD" value="COD" checked>
-            <label class="form-check-label" for="payCOD">💵 Thanh toán khi nhận hàng (COD)</label>
-          </div>
-          <div class="form-check">
-             <input class="form-check-input payment-method" type="radio" name="pay" id="payVNPAY" value="VNPAY">
-             <label class="form-check-label" for="payVNPAY">
-                💳 Thanh toán qua VNPAY
-                <img src="https://sandbox.vnpayment.vn/apis/assets/images/logo-vnpay-sm.png" alt="VNPAY Logo">
-             </label>
-          </div>
-          <div class="form-check mb-3">
-            <input class="form-check-input payment-method" type="radio" name="pay" id="payBANK" value="BANK">
-            <label class="form-check-label" for="payBANK">🏦 Chuyển khoản ngân hàng (Thủ công)</label>
-          </div>
+           <h6 class="mb-2">Hình thức thanh toán *</h6>
+           <div class="form-check">
+             <input class="form-check-input payment-method" type="radio" name="pay" id="payCOD" value="COD" checked>
+             <label class="form-check-label" for="payCOD">💵 Thanh toán khi nhận hàng (COD)</label>
+           </div>
+           <div class="form-check">
+              <input class="form-check-input payment-method" type="radio" name="pay" id="payVNPAY" value="VNPAY">
+              <label class="form-check-label" for="payVNPAY">
+                 💳 Thanh toán qua VNPAY
+                 <img src="https://sandbox.vnpayment.vn/apis/assets/images/logo-vnpay-sm.png" alt="VNPAY Logo">
+              </label>
+           </div>
+           <div class="form-check mb-3">
+             <input class="form-check-input payment-method" type="radio" name="pay" id="payBANK" value="BANK">
+             <label class="form-check-label" for="payBANK">🏦 Chuyển khoản ngân hàng (Thủ công)</label>
+           </div>
 
-          <div id="bankInfo" class="alert alert-secondary small d-none">
-            <strong>Ngân hàng:</strong> Vietcombank<br>
-            <strong>Số TK:</strong> 0123456789 (Florio Flower Shop)<br>
-            <strong>Nội dung:</strong> [Tên KH] - [SĐT] - Thanh toán đơn hàng #[Mã đơn hàng]
-            <br><small class="text-danger">Lưu ý: Đơn hàng chỉ được xử lý sau khi shop xác nhận đã nhận được chuyển khoản.</small>
-          </div>
-        </div>
-      </div>
+           <div id="bankInfo" class="alert alert-secondary small d-none">
+             <strong>Ngân hàng:</strong> Vietcombank<br>
+             <strong>Số TK:</strong> 0123456789 (Florio Flower Shop)<br>
+             <strong>Nội dung:</strong> [Tên KH] - [SĐT] - Thanh toán đơn hàng #[Mã đơn hàng]
+             <br><small class="text-danger">Lưu ý: Đơn hàng chỉ được xử lý sau khi shop xác nhận đã nhận được chuyển khoản.</small>
+           </div>
+         </div>
+       </div>
     </div>
 
     <div class="col-lg-6">
@@ -108,9 +106,8 @@
           <h5 class="section-title mb-3"><i class="bi bi-receipt"></i> Tóm tắt đơn hàng</h5>
 
           <div id="checkout-error" class="alert alert-danger d-none"></div>
-
-          <div class="table-responsive">
-            <table class="table table-sm align-middle">
+          <div id="discount-success" class="alert alert-success d-none"></div> <div class="table-responsive">
+             <table class="table table-sm align-middle">
               <thead class="table-light">
                 <tr>
                   <th>Sản phẩm</th>
@@ -130,31 +127,46 @@
             </table>
           </div>
 
-          <div class="mb-3">
+           <div class="discount-section">
+               <label for="discountCodeInput" class="form-label">Mã giảm giá</label>
+               <div class="input-group">
+                   <input type="text" class="form-control text-uppercase" id="discountCodeInput" placeholder="Nhập mã giảm giá">
+                   <button class="btn btn-outline-secondary" type="button" id="btnApplyDiscount">Áp dụng</button>
+               </div>
+               <div id="discount-info" class="mt-2 small" th:classappend="${cart == null or cart.appliedDiscountCode == null} ? 'd-none'">
+                   Đã áp dụng mã: <span class="applied-code" th:text="${cart?.appliedDiscountCode?.code}"></span>
+                   <span class="remove-discount ms-2" id="btnRemoveDiscount" title="Xóa mã">[Xóa]</span>
+               </div>
+               <div id="discount-error" class="text-danger small mt-1 d-none"></div>
+           </div>
+           <div class="mb-3 mt-3">
             <h6 class="mb-2">Phương thức giao hàng *</h6>
-            <div class="form-check">
-              <input class="form-check-input ship-method" type="radio" name="ship" id="shipSaving" value="SAVING">
-              <label class="form-check-label" for="shipSaving">
-                <span class="badge text-bg-success badge-legend">SAVING</span> – Giao tiết kiệm (<span class="ship-cost" data-method="SAVING">20,000</span>đ)
-              </label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input ship-method" type="radio" name="ship" id="shipFast" value="FAST" checked>
-              <label class="form-check-label" for="shipFast">
-                <span class="badge text-bg-primary badge-legend">FAST</span> – Giao nhanh (<span class="ship-cost" data-method="FAST">30,000</span>đ, miễn phí từ 500k)
-              </label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input ship-method" type="radio" name="ship" id="shipExpress" value="EXPRESS">
-              <label class="form-check-label" for="shipExpress">
-                <span class="badge text-bg-danger badge-legend">EXPRESS</span> – Hỏa tốc (<span class="ship-cost" data-method="EXPRESS">60,000</span>đ)
-              </label>
-            </div>
+             <div class="form-check">
+               <input class="form-check-input ship-method" type="radio" name="ship" id="shipSaving" value="SAVING">
+               <label class="form-check-label" for="shipSaving">
+                 <span class="badge text-bg-success badge-legend">SAVING</span> – Giao tiết kiệm (<span class="ship-cost" data-method="SAVING">20,000</span>đ)
+               </label>
+             </div>
+             <div class="form-check">
+               <input class="form-check-input ship-method" type="radio" name="ship" id="shipFast" value="FAST" checked>
+               <label class="form-check-label" for="shipFast">
+                 <span class="badge text-bg-primary badge-legend">FAST</span> – Giao nhanh (<span class="ship-cost" data-method="FAST">30,000</span>đ, miễn phí từ 500k)
+               </label>
+             </div>
+             <div class="form-check">
+               <input class="form-check-input ship-method" type="radio" name="ship" id="shipExpress" value="EXPRESS">
+               <label class="form-check-label" for="shipExpress">
+                 <span class="badge text-bg-danger badge-legend">EXPRESS</span> – Hỏa tốc (<span class="ship-cost" data-method="EXPRESS">60,000</span>đ)
+               </label>
+             </div>
           </div>
 
           <ul class="list-group mb-3">
             <li class="list-group-item d-flex justify-content-between">
               <span>Tạm tính</span><strong id="sum-subtotal">0đ</strong>
+            </li>
+            <li class="list-group-item d-flex justify-content-between summary-discount-row d-none" id="sum-discount-row">
+                 <span>Giảm giá</span><strong id="sum-discount">0đ</strong>
             </li>
             <li class="list-group-item d-flex justify-content-between">
               <span>Phí vận chuyển</span><strong id="sum-ship">0đ</strong>
@@ -200,100 +212,151 @@
           let errorData = null;
           let errorMsg = `HTTP ${res.status} – ${res.statusText || 'Yêu cầu thất bại'}`;
           try {
-             // Thử đọc lỗi dưới dạng text trước
              const textError = await res.text();
-             errorMsg = textError || errorMsg; // Ưu tiên text lỗi nếu có
-             // Thử parse JSON nếu content type là json
+             // Try to parse JSON first for better error messages
              if (ct.includes('json')) {
-                errorData = JSON.parse(textError); // Parse lại từ text đã đọc
-                if(errorData && errorData.message) errorMsg = errorData.message;
+                 try {
+                    errorData = JSON.parse(textError);
+                    if(errorData && errorData.message) errorMsg = errorData.message;
+                    else if (errorData && typeof errorData === 'string') errorMsg = errorData; // Handle plain string error response
+                    else errorMsg = textError || errorMsg; // Fallback to text if JSON parse works but no message field
+                 } catch (jsonParseErr) {
+                    errorMsg = textError || errorMsg; // Fallback to text if JSON parsing fails
+                 }
+             } else {
+                 errorMsg = textError || errorMsg; // Use text error if not JSON
              }
-          } catch(parseErr) { /* Bỏ qua lỗi parse */ }
+          } catch(readErr) { /* Ignore read errors if response has no body */ }
 
-          // Xử lý lỗi xác thực (401 Unauthorized, 403 Forbidden) -> Chuyển hướng đăng nhập
           if (res.status === 401 || res.status === 403) {
               window.location.href = LOGIN_URL + '?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
-              throw new Error('Yêu cầu xác thực.'); // Ném lỗi để dừng hàm gọi
+              throw new Error('Yêu cầu xác thực.');
           }
-          // Các lỗi khác
-          throw new Error(errorMsg);
+          throw new Error(errorMsg); // Use the potentially improved error message
         }
 
-        // Chỉ parse JSON nếu có và response OK
         if(ct.includes('json')) {
             return res.json();
         }
-        // Trả về null nếu không phải JSON (ví dụ: response rỗng khi xóa thành công)
         return null;
     } catch (networkErr) {
-        // Xử lý lỗi mạng
         console.error("Lỗi mạng:", networkErr);
+        // Rethrow original error if it's not a generic network error, otherwise provide a standard message
+        if (networkErr.message && networkErr.message !== 'Failed to fetch') {
+             throw networkErr;
+        }
         throw new Error("Lỗi kết nối mạng. Vui lòng kiểm tra lại.");
     }
   }
 
-  // Tính phí ship dựa trên phương thức và tổng tiền hàng (ĐỒNG BỘ VỚI BACKEND)
+  // Tính phí ship dựa trên phương thức và tổng tiền hàng
   function shipFee(method, subtotal){
-    const sub = subtotal || 0;
-    if (sub <= 0) return 0; // Không có hàng thì không tính ship
+    const sub = Number(subtotal) || 0; // Ensure subtotal is a number
+    if (sub <= 0) return 0;
 
     const feeMap = {
         SAVING: 20000,
         EXPRESS: 60000,
-        FAST: (sub >= 500000) ? 0 : 30000 // FAST: Miễn phí từ 500k, còn lại 30k
+        FAST: (sub >= 500000) ? 0 : 30000
     };
-    return feeMap[method] ?? feeMap['FAST']; // Mặc định là FAST nếu method không hợp lệ
+    return feeMap[method] ?? feeMap['FAST'];
   }
 
   // ---- State ----
-  let SHIP_METHOD = 'FAST'; // Mặc định khi tải trang
+  let SHIP_METHOD = document.querySelector('input[name="ship"]:checked')?.value || 'FAST'; // Get initial checked value
   const checkoutErrorDiv = document.getElementById('checkout-error');
+  // Discount related elements
+  const discountErrorDiv = document.getElementById('discount-error');
+  const discountSuccessDiv = document.getElementById('discount-success');
+  const discountInfoDiv = document.getElementById('discount-info');
+  const discountCodeInput = document.getElementById('discountCodeInput');
+  const btnApplyDiscount = document.getElementById('btnApplyDiscount');
+  const btnRemoveDiscount = document.getElementById('btnRemoveDiscount');
+
 
   // ---- Render UI ----
   // Render các dòng sản phẩm trong giỏ hàng
   function renderCartLines(cart){
     const tbody = document.getElementById('cart-lines');
-    tbody.innerHTML = ''; // Xóa nội dung cũ
+    tbody.innerHTML = ''; // Clear previous content
     if (!cart || !cart.lines || cart.lines.length === 0) {
-        // Xử lý trường hợp giỏ hàng rỗng (có thể ẩn bảng và hiện thông báo)
         console.warn("Giỏ hàng rỗng hoặc không hợp lệ để render.");
-        // Redirect về trang sản phẩm nếu không phải luồng Buy Now và giỏ rỗng
         if (!IS_BUY_NOW) {
              alert('Giỏ hàng của bạn đang trống.');
              window.location.href = PRODUCTS_URL;
         }
+        // Disable checkout button if cart is empty
+        if(btnCheckout) btnCheckout.classList.add('disabled');
         return;
     }
+     // Enable checkout button if cart has items
+    if(btnCheckout) btnCheckout.classList.remove('disabled');
+
     (cart.lines).forEach(l=>{
       const tr = document.createElement('tr');
+      // Ensure values are defined before formatting/displaying
+      const productName = l.productName || 'N/A';
+      const quantity = l.quantity || 0;
+      const price = l.price || 0;
+      const lineTotal = l.lineTotal || 0;
+
       tr.innerHTML = `
-        <td>${l.productName || 'N/A'}</td>
-        <td class="text-center">${l.quantity || 0}</td>
-        <td class="text-end">${fmtVND(l.price)}</td>
-        <td class="text-end">${fmtVND(l.lineTotal)}</td>
+        <td>${productName}</td>
+        <td class="text-center">${quantity}</td>
+        <td class="text-end">${fmtVND(price)}</td>
+        <td class="text-end fw-semibold">${fmtVND(lineTotal)}</td>
       `;
       tbody.appendChild(tr);
     });
   }
 
-  // Cập nhật phần Tóm tắt đơn hàng (subtotal, shipping, total)
+  // Cập nhật phần Tóm tắt đơn hàng (bao gồm discount)
   function updateSummary(){
     const subtotal = CART?.subtotal || 0;
     const fee = shipFee(SHIP_METHOD, subtotal);
-    const total = subtotal + fee;
+    const discount = CART?.discount || 0;
+    const total = Math.max(0, Number(subtotal) + Number(fee) - Number(discount)); // Ensure numeric calculation
 
     document.getElementById('sum-subtotal').textContent = fmtVND(subtotal);
     document.getElementById('sum-ship').textContent     = fmtVND(fee);
+    document.getElementById('sum-discount').textContent = fmtVND(discount * -1); // Show as negative
     document.getElementById('sum-total').textContent    = fmtVND(total);
 
-    // Cập nhật giá hiển thị trên label của radio button (nếu cần)
+    // Show/hide discount row
+    document.getElementById('sum-discount-row').classList.toggle('d-none', !(discount > 0));
+
+    // Update shipping cost labels (optional)
     document.querySelectorAll('.ship-cost').forEach(span => {
         const method = span.dataset.method;
-        const currentFee = shipFee(method, subtotal);
-        // Cập nhật text, ví dụ: " (0đ)" hoặc " (30,000đ)"
-        // Bạn có thể tùy chỉnh hiển thị này
+        if(method) { // Check if method exists
+             const currentFee = shipFee(method, subtotal);
+             // Update the text content if needed, e.g., span.closest('label').textContent = ... fmtVND(currentFee) ...
+        }
     });
   }
+
+   // Hiển thị/ẩn thông tin mã đã áp dụng
+   function updateDiscountInfo() {
+       const appliedCode = CART?.appliedDiscountCode;
+       if (appliedCode && appliedCode.code) { // Check if code exists
+           discountInfoDiv.querySelector('.applied-code').textContent = appliedCode.code;
+           discountInfoDiv.classList.remove('d-none');
+           discountCodeInput.value = appliedCode.code;
+           discountCodeInput.readOnly = true;
+           btnApplyDiscount.disabled = true;
+           discountErrorDiv.classList.add('d-none');
+           discountSuccessDiv.classList.add('d-none');
+       } else {
+           discountInfoDiv.classList.add('d-none');
+           // Only clear input if it wasn't readonly (meaning no code was applied)
+           if (!discountCodeInput.readOnly) {
+               discountCodeInput.value = '';
+           }
+           discountCodeInput.readOnly = false;
+           btnApplyDiscount.disabled = false;
+       }
+   }
+
 
   // ---- Event Listeners ----
   // Hiện/ẩn thông tin bank khi chọn phương thức thanh toán
@@ -309,53 +372,122 @@
     radio.addEventListener('change', (e) => {
       if(e.target.checked){
         SHIP_METHOD = e.target.value;
-        updateSummary(); // Tính lại tổng tiền khi đổi phương thức ship
+        updateSummary(); // Recalculate totals
       }
     });
+  });
+
+   // Nút Áp dụng mã giảm giá
+  btnApplyDiscount?.addEventListener('click', async () => { // Added null check
+      const code = discountCodeInput.value.trim().toUpperCase();
+      if (!code) {
+           discountErrorDiv.textContent = 'Vui lòng nhập mã giảm giá.';
+           discountErrorDiv.classList.remove('d-none');
+          return;
+      }
+
+      discountErrorDiv.classList.add('d-none');
+      discountSuccessDiv.classList.add('d-none');
+      btnApplyDiscount.disabled = true; // Disable temporarily
+
+      try {
+          // **Important:** Ensure the API endpoint matches your CartApiController
+          const updatedCart = await fetchJson(`${API_BASE}/apply-discount`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', ...csrfHeaders() },
+              body: JSON.stringify({ code: code })
+          });
+          CART = updatedCart; // Update global CART object
+          updateSummary();
+          updateDiscountInfo();
+           discountSuccessDiv.textContent = `Đã áp dụng mã "${code}" thành công!`;
+           discountSuccessDiv.classList.remove('d-none');
+      } catch (err) {
+          console.error("Lỗi áp dụng mã:", err);
+          discountErrorDiv.textContent = err.message || 'Áp dụng mã thất bại.';
+          discountErrorDiv.classList.remove('d-none');
+          updateDiscountInfo(); // Reset UI if error
+      } finally {
+          // Re-enable button only if no code is currently applied
+          if (!CART?.appliedDiscountCode) {
+               btnApplyDiscount.disabled = false;
+          }
+      }
+  });
+
+    // Nút Xóa mã giảm giá
+  btnRemoveDiscount?.addEventListener('click', async () => { // Added null check
+       btnRemoveDiscount.style.pointerEvents = 'none'; // Disable temporarily
+       discountErrorDiv.classList.add('d-none');
+       discountSuccessDiv.classList.add('d-none');
+
+        try {
+          // **Important:** Ensure the API endpoint matches your CartApiController
+          const updatedCart = await fetchJson(`${API_BASE}/remove-discount`, {
+              method: 'POST', // Or DELETE depending on your API design
+              headers: { ...csrfHeaders() }
+          });
+          CART = updatedCart; // Update global CART object
+          updateSummary();
+          updateDiscountInfo(); // This will hide the applied code info and enable input/apply button
+      } catch (err) {
+          console.error("Lỗi xóa mã:", err);
+           discountErrorDiv.textContent = err.message || 'Xóa mã thất bại.';
+           discountErrorDiv.classList.remove('d-none');
+      } finally {
+          btnRemoveDiscount.style.pointerEvents = 'auto'; // Re-enable button
+      }
   });
 
   // Nút xác nhận đặt hàng
   const btnCheckout = document.getElementById('btnCheckout');
   function setBusy(on){
+    if (!btnCheckout) return; // Add null check for safety
     btnCheckout.disabled = on;
-    btnCheckout.querySelector('.spinner-border').classList.toggle('d-none', on);
-    btnCheckout.querySelector('.lbl').classList.toggle('d-none', on);
-    // Ẩn thông báo lỗi cũ khi bắt đầu xử lý
+    btnCheckout.querySelector('.spinner-border')?.classList.toggle('d-none', !on); // Use optional chaining
+    btnCheckout.querySelector('.lbl')?.classList.toggle('d-none', on); // Use optional chaining
     if(on && checkoutErrorDiv) checkoutErrorDiv.classList.add('d-none');
   }
 
   // Xử lý click nút "Xác nhận đặt hàng"
-  btnCheckout.addEventListener('click', async ()=>{
+  btnCheckout?.addEventListener('click', async ()=>{ // Added null check
     // 1. Lấy thông tin từ form
-    const name = document.getElementById('name').value.trim();
-    const phone= document.getElementById('phone').value.trim();
-    const addr = document.getElementById('address').value.trim();
-    const note = document.getElementById('note').value.trim();
+    const nameInput = document.getElementById('name');
+    const phoneInput = document.getElementById('phone');
+    const addressInput = document.getElementById('address');
+    const noteInput = document.getElementById('note');
+
+    // Add null checks for form elements
+    const name = nameInput?.value.trim() || '';
+    const phone = phoneInput?.value.trim() || '';
+    const addr = addressInput?.value.trim() || '';
+    const note = noteInput?.value.trim() || '';
     const payMethod = document.querySelector('input[name="pay"]:checked')?.value || 'COD';
-    const shipMethod = document.querySelector('input[name="ship"]:checked')?.value || 'FAST'; // Lấy ship method đã chọn
+    // SHIP_METHOD is already updated by its event listener
 
     // 2. Validate thông tin cơ bản
     if(!name || !phone || !addr){
       alert('Vui lòng điền đầy đủ Họ tên, Số điện thoại và Địa chỉ giao hàng.');
       return;
     }
-    // (Thêm validate số điện thoại, email nếu cần)
+    // (Add phone number, email validation if needed)
 
     // 3. Chuẩn bị request body
     const checkoutRequestData = {
       recipientName: name,
       recipientPhone: phone,
       shippingAddress: addr,
-      note: note || null, // Gửi null nếu ghi chú rỗng
+      note: note || null,
       paymentMethod: payMethod,
-      shippingMethod: shipMethod // Gửi phương thức ship đã chọn
+      shippingMethod: SHIP_METHOD // Use the state variable
+      // discountCode: CART?.appliedDiscountCode?.code || null // Include discount code if applied
+      // --> Add discountCode field to CheckoutRequest record if supporting it for Buy Now via POST
     };
 
     let apiUrl = '';
     let requestBody;
 
     if (IS_BUY_NOW) {
-        // Luồng Mua Ngay
         apiUrl = `${API_BASE}/checkout/buy-now`;
         requestBody = JSON.stringify({
           checkout: checkoutRequestData,
@@ -363,77 +495,78 @@
           quantity: BUY_NOW_QTY
         });
     } else {
-        // Luồng Giỏ hàng
         apiUrl = `${API_BASE}/checkout`;
         requestBody = JSON.stringify(checkoutRequestData);
     }
 
     // 4. Gọi API
     try{
-      setBusy(true); // Hiển thị spinner
+      setBusy(true);
 
       const response = await fetchJson(apiUrl, {
         method:'POST',
-        headers: { 'Content-Type':'application/json', ...csrfHeaders() }, // Gửi kèm CSRF
+        headers: { 'Content-Type':'application/json', ...csrfHeaders() },
         body: requestBody
       });
 
       // 5. Xử lý kết quả trả về (CheckoutResponse)
-      if (response) {
+      if (response && response.orderId) { // Check if response and orderId exist
           if (response.paymentMethod === 'VNPAY' && response.paymentUrl) {
-              // Chuyển hướng sang VNPAY
-              window.location.href = response.paymentUrl;
+              window.location.href = response.paymentUrl; // Redirect to VNPAY
           } else {
-              // COD, BANK hoặc VNPAY lỗi không có URL -> Chuyển đến trang thành công
+              // COD, BANK, or VNPAY error without URL -> Redirect to success page
               window.location.href = ORDER_SUCCESS_URL_BASE + response.orderId;
           }
       } else {
-          // Trường hợp API không trả về response hợp lệ (fetchJson đã xử lý 401/403)
-          throw new Error("Đặt hàng không thành công. Không nhận được thông tin đơn hàng.");
+          // Handle cases where API response might be invalid or missing orderId
+          console.error("Invalid checkout response:", response);
+          throw new Error("Đặt hàng không thành công. Phản hồi từ máy chủ không hợp lệ.");
       }
 
     } catch(err) {
-      // Hiển thị lỗi cho người dùng
       console.error("Lỗi checkout:", err);
       if(checkoutErrorDiv) {
+          // Display the specific error message from fetchJson
           checkoutErrorDiv.textContent = err.message || 'Đặt hàng thất bại. Vui lòng thử lại.';
           checkoutErrorDiv.classList.remove('d-none');
       } else {
           alert(err.message || 'Đặt hàng thất bại. Vui lòng thử lại.');
       }
     } finally {
-      setBusy(false); // Ẩn spinner
+      setBusy(false);
     }
   });
 
   // ---- Initialization ----
-  // Hàm khởi tạo khi trang tải xong
   (async function init(){
     try{
-      // Nếu không phải "Mua ngay", fetch giỏ hàng thật từ API
-      // Nếu là "Mua ngay", CART đã được set từ Thymeleaf
+      // If not "Buy Now", fetch the real cart via API
+      // If "Buy Now", CART is already set via Thymeleaf
       if (!IS_BUY_NOW) {
-          // Chỉ fetch giỏ hàng nếu CART ban đầu là null hoặc rỗng (tránh fetch lại không cần thiết)
+          // Only fetch if CART is initially null or empty (avoid unnecessary refetch)
           if (!CART || !CART.lines || CART.lines.length === 0) {
               CART = await fetchJson(API_BASE, { headers: csrfHeaders() });
           }
       }
+      // Check if CART is still null/invalid after potential fetch
+      if (!CART || !CART.lines) {
+           throw new Error("Không thể tải thông tin giỏ hàng.");
+      }
 
-      // Render lại giỏ hàng (thật hoặc ảo) và cập nhật tổng tiền
+      // Render cart (real or virtual) and update summary
       renderCartLines(CART);
-      updateSummary(); // Cập nhật tổng tiền dựa trên CART và SHIP_METHOD mặc định
+      updateSummary();
+      updateDiscountInfo(); // Show applied discount code if exists on page load
 
     } catch(err) {
-        // Lỗi này chủ yếu xảy ra khi fetch giỏ hàng thật bị lỗi (401/403 đã bị xử lý)
         console.error("Lỗi tải giỏ hàng:", err);
-        // Có thể hiển thị thông báo lỗi trên UI thay vì alert
         if(checkoutErrorDiv) {
             checkoutErrorDiv.textContent = err.message || 'Không tải được thông tin giỏ hàng.';
             checkoutErrorDiv.classList.remove('d-none');
         } else {
              alert(err.message || 'Không tải được thông tin giỏ hàng.');
         }
-        // Vô hiệu hóa nút checkout nếu không tải được giỏ hàng
+        // Disable checkout button if cart loading fails
         if(btnCheckout) btnCheckout.classList.add('disabled');
     }
   })();

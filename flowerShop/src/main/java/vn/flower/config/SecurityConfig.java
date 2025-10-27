@@ -1,4 +1,4 @@
-package vn.flower.Config;
+package vn.flower.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -32,66 +32,54 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 	  http
-	    // Bật CSRF (mặc định là bật, không cần gọi .csrf() nếu dùng cấu hình mặc định)
-	    // Nếu cần tùy chỉnh (ví dụ dùng cookie):
-	    // .csrf(csrf -> csrf
-	    //    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-	    // )
+	    // Bật CSRF (mặc định là bật)
+	    // .csrf(csrf -> csrf...) // Tùy chỉnh nếu cần
 	    .authorizeHttpRequests(auth -> auth
-	      // Public: trang chủ, tài nguyên tĩnh, slider, hình ảnh sản phẩm
+	      // Public paths
 	      .requestMatchers("/", "/index",
-	          "/assets/**", "/css/**", "/js/**", "/images/**", "/slider/**", "/uploads/**").permitAll() // Thêm /uploads/**
-	      // Public: xem sản phẩm và danh sách sản phẩm
-	      .requestMatchers("/products", "/products/{id:[0-9]+}").permitAll()
-	      // Public: trang giới thiệu
-	      .requestMatchers("/about").permitAll()
-	      // Public: đăng ký, đăng nhập, xác thực OTP
-	      .requestMatchers("/auth/**", "/register", "/login").permitAll()
+	          "/assets/**", "/css/**", "/js/**", "/images/**", "/slider/**", "/uploads/**").permitAll() // Cho phép truy cập tài nguyên tĩnh và uploads
+	      .requestMatchers("/products", "/products/{id:[0-9]+}").permitAll() // Xem sản phẩm
+	      .requestMatchers("/about").permitAll() // Trang giới thiệu
+	      .requestMatchers("/auth/**", "/register", "/login").permitAll() // Đăng ký/Đăng nhập
+	      .requestMatchers("/payment/vnpay-return", "/payment/vnpay-ipn").permitAll() // VNPAY callbacks
+	      .requestMatchers("/ws/**").permitAll() // WebSocket endpoint
 
-	      // === CHO PHÉP VNPAY CALLBACK ===
-	      .requestMatchers("/payment/vnpay-return", "/payment/vnpay-ipn").permitAll()
-	      // ==============================
+	      // Authenticated APIs
+	      .requestMatchers("/api/cart/**", "/api/wishlist/**", "/api/chat/**").authenticated()
 
-	      // API công khai (nếu có, ví dụ xem sản phẩm) - Hiện tại chưa có
-	      // .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
-
-	      // API cần đăng nhập (giỏ hàng, wishlist, chat)
-	      .requestMatchers("/api/cart/**", "/api/wishlist/**", "/api/chat/**").authenticated() // Yêu cầu đăng nhập
-
-	      // WebSocket endpoint
-	      .requestMatchers("/ws/**").permitAll() // Cho phép kết nối WebSocket ban đầu
-
-	      // Các trang cần đăng nhập (thông tin tài khoản, lịch sử đơn hàng, checkout, chat page)
+	      // Authenticated Pages
 	      .requestMatchers("/account/**", "/orders/**", "/checkout", "/cart", "/wishlist", "/chat").authenticated()
-	      // TODO: Xem lại "/orders/return/**" cần đăng nhập không? -> Có, nên để trong authenticated()
+	      // Trang yêu cầu trả hàng cũng cần đăng nhập
+	      .requestMatchers("/orders/return/**").authenticated()
 
-	      // Admin: yêu cầu quyền ADMIN
+	      // Admin Area - Yêu cầu quyền ADMIN cho tất cả các đường dẫn /admin/**
+          // Rule này đã bao gồm cả /admin/discounts/**
 	      .requestMatchers("/admin/**").hasRole("ADMIN")
 
-	      // Các request còn lại yêu cầu phải đăng nhập
+	      // All other requests require authentication
 	      .anyRequest().authenticated()
 	    )
 	    .formLogin(form -> form
 	      .loginPage("/auth/login")
-	      .loginProcessingUrl("/auth/login") // URL xử lý POST login (Spring Security tự xử lý)
-	      .usernameParameter("email")        // Tên input email trên form
-	      .passwordParameter("password")     // Tên input password trên form
-	      .successHandler(customSuccessHandler) // Xử lý chuyển hướng sau khi login thành công
-	      .failureUrl("/auth/login?error=true") // URL khi login thất bại
-	      .permitAll() // Cho phép mọi người truy cập trang login
+	      .loginProcessingUrl("/auth/login")
+	      .usernameParameter("email")
+	      .passwordParameter("password")
+	      .successHandler(customSuccessHandler)
+	      .failureUrl("/auth/login?error=true")
+	      .permitAll()
 	    )
 	    .logout(logout -> logout
-	      .logoutUrl("/auth/logout") // URL xử lý POST logout (Spring Security tự xử lý)
-	      .logoutSuccessUrl("/?logout=true") // URL chuyển hướng sau khi logout thành công
-	      .invalidateHttpSession(true) // Hủy session
-	      .deleteCookies("JSESSIONID") // Xóa cookie session (nếu dùng session)
-	      .permitAll() // Cho phép mọi người thực hiện logout
+	      .logoutUrl("/auth/logout")
+	      .logoutSuccessUrl("/?logout=true")
+	      .invalidateHttpSession(true)
+	      .deleteCookies("JSESSIONID")
+	      .permitAll()
 	    )
 	    .sessionManagement(session -> session
 	      .sessionCreationPolicy(
-	        org.springframework.security.config.http.SessionCreationPolicy.IF_REQUIRED // Chính sách quản lý session
+	        org.springframework.security.config.http.SessionCreationPolicy.IF_REQUIRED
 	      )
-	      // .maximumSessions(1).expiredUrl("/login?expired=true"); // Ví dụ: giới hạn 1 session / user
+	      // .maximumSessions(1).expiredUrl("/login?expired=true");
 	    )
 	    .authenticationProvider(authenticationProvider()); // Sử dụng provider đã cấu hình
 
