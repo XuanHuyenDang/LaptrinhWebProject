@@ -1,0 +1,157 @@
+/* Thêm font-family chung cho trang */
+body {
+    background-color: #f8f9fa; /* Nền xám nhạt */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Font phổ biến, dễ đọc */
+    color: #333; /* Màu chữ chính */
+    line-height: 1.6; /* Tăng khoảng cách dòng */
+}
+
+.account-container {
+    max-width: 800px; /* Giới hạn độ rộng */
+    margin-top: 2rem; /* Thêm khoảng cách trên */
+    margin-bottom: 2rem; /* Thêm khoảng cách dưới */
+}
+
+.account-title {
+    color: #d81b60; /* Màu hồng Florio */
+    font-weight: 700; /* Đậm hơn */
+    margin-bottom: 1.5rem; /* Tăng khoảng cách dưới */
+    /* Bỏ border bottom để trông thoáng hơn */
+}
+
+.account-card {
+    border: 1px solid #e9ecef; /* Viền xám nhạt */
+    border-radius: 12px; /* Bo góc mềm mại hơn */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Bóng đổ nhẹ nhàng */
+    background-color: #ffffff; /* Nền trắng */
+}
+
+.account-card .card-body {
+    padding: 1.5rem 2rem; /* Điều chỉnh padding */
+}
+
+.account-card .card-title {
+    color: #495057; /* Màu xám đậm hơn */
+    font-weight: 600;
+    /* Bỏ border bottom ở đây, dùng ở chỗ khác */
+    padding-bottom: 0;
+    margin-bottom: 0 !important; /* Reset margin */
+}
+
+.form-label {
+    font-weight: 600; /* Nhãn đậm hơn */
+    color: #495057;
+    margin-bottom: 0.5rem; /* Khoảng cách dưới nhãn */
+}
+
+/* Cải thiện input */
+.form-control {
+    border-radius: 6px; /* Bo góc nhẹ */
+    border: 1px solid #ced4da;
+    padding: 0.6rem 0.9rem; /* Tăng padding */
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus {
+    border-color: #f8bbd0; /* Viền hồng nhạt khi focus */
+    box-shadow: 0 0 0 0.2rem rgba(216, 27, 96, 0.15); /* Bóng đổ hồng nhạt khi focus */
+}
+
+/* Input ở chế độ readonly */
+.form-control:read-only:not([disabled]) { /* Áp dụng cho readonly, trừ email bị disabled */
+    background-color: #f8f9fa; /* Nền xám nhạt hơn */
+    border-color: #e9ecef; /* Viền nhạt hơn */
+    box-shadow: none; /* Bỏ shadow */
+    cursor: default; /* Con trỏ bình thường */
+}
+
+
+.form-control:disabled,
+.form-control[readonly]:disabled { /* Style riêng cho trường disabled (email) */
+    background-color: #eef2f7; /* Màu nền rõ hơn */
+    opacity: 0.7; /* Hơi mờ đi */
+    cursor: not-allowed; /* Con trỏ không cho phép */
+    border-color: #ced4da;
+}
+
+.form-text.text-muted {
+    font-size: 0.85em; /* Chữ nhỏ hơn */
+}
+
+/* Nút Sửa thông tin (Thêm mới) */
+.account-edit-btn {
+     padding: 0.3rem 0.8rem;
+     font-size: 0.9rem;
+}
+
+/* Nút Lưu thay đổi */
+.account-btn-save {
+    background-color: #d81b60;
+    border-color: #d81b60;
+    padding: 0.3rem 1rem; /* Giảm padding để đồng bộ */
+    font-size: 0.9rem; /* Đồng bộ font size */
+    font-weight: 500;
+    border-radius: 6px; /* Bo góc vuông hơn */
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+    color: white;
+}
+.account-btn-save:hover {
+    background-color: #ad1457;
+    border-color: #ad1457;
+    transform: translateY(-1px);
+    color: white;
+}
+.account-btn-save:active {
+     transform: translateY(0);
+}
+
+/* Nút Hủy (Thêm mới) */
+#btnCancelEdit {
+    padding: 0.3rem 1rem;
+    font-size: 0.9rem;
+    border-radius: 6px;
+}
+
+/* Các link bên dưới */
+.account-links {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem; /* Tăng khoảng cách */
+    padding-top: 1.5rem; /* Tăng khoảng cách */
+    border-top: 1px solid #eee; /* Đường kẻ mờ */
+}
+
+.account-link-btn {
+    border: 1px solid #ced4da;
+    color: #495057;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 6px; /* Bo góc vuông hơn */
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.account-link-btn:hover {
+    background-color: #f1f3f5;
+    color: #212529;
+    border-color: #adb5bd;
+}
+.account-link-btn i {
+    margin-right: 0.4rem;
+}
+
+/* Cải thiện Alert */
+.alert {
+    display: flex;
+    align-items: center;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem; /* Thêm khoảng cách dưới */
+}
+.alert i {
+    font-size: 1.3rem;
+    margin-right: 0.75rem;
+}
+.alert .btn-close {
+    margin-left: auto;
+}

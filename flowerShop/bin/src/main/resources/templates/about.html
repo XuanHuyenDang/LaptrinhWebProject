@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Giới thiệu - Florio Flower Shop</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/assets/css/header.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/footer.css}">
+
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #fff8f9;
+      color: #333;
+    }
+
+    /* Bỏ header style vì đã dùng fragment */
+    /* header { ... } */
+
+    /* Giới thiệu */
+    .intro-section {
+      padding: 80px 0;
+      background-color: #fff;
+    }
+    .intro-section img {
+      border-radius: 12px;
+      width: 100%;
+      height: auto;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .intro-section h2 {
+      color: #d946ef;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    /* Giá trị cốt lõi */
+    .values {
+      background-color: #ffe4ef;
+      padding: 80px 0;
+    }
+    .values h2 {
+      color: #c2185b;
+      font-weight: 700;
+      margin-bottom: 50px;
+    }
+    .values i {
+      font-size: 45px;
+      color: #d946ef;
+      margin-bottom: 15px;
+      transition: 0.3s;
+    }
+    .values i:hover {
+      transform: scale(1.2);
+    }
+
+    /* Đội ngũ */
+    .team {
+      background-color: #fff;
+      padding: 80px 0;
+    }
+    .team h2 {
+      color: #c2185b;
+      font-weight: 700;
+      margin-bottom: 50px;
+    }
+    .team-member {
+      transition: all 0.3s ease;
+      background-color: #fff;
+      border-radius: 12px;
+      padding: 25px 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .team-member:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+    }
+    .team-member img {
+      border: 4px solid #f9a8d4;
+      border-radius: 50%;
+      margin-bottom: 15px;
+      transition: 0.3s;
+    }
+    .team-member img:hover {
+      border-color: #ec4899;
+      transform: scale(1.05);
+    }
+    .team-member h5 {
+      font-weight: 600;
+      color: #c2185b;
+    }
+    .team-member p {
+      color: #555;
+      font-size: 0.95rem;
+    }
+
+    /* Bỏ footer style vì đã dùng fragment */
+    /* .footer { ... } */
+  </style>
+</head>
+<body>
+
+ <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+
+  <section class="intro-section container mt-4"> <div class="row align-items-center">
+      <div class="col-md-6 mb-4 mb-md-0">
+        <img src="https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=800&q=80" alt="Florio Flower Shop">
+      </div>
+      <div class="col-md-6">
+        <h2>Về chúng tôi</h2>
+        <p>
+          <strong>Florio Flower Shop</strong> được thành lập với sứ mệnh mang đến những bó hoa tinh tế, sang trọng và đầy cảm xúc.
+          Chúng tôi tin rằng mỗi bông hoa đều chứa đựng một câu chuyện – một thông điệp yêu thương được gửi gắm đến người nhận.
+        </p>
+        <p>
+          Với đội ngũ nghệ nhân cắm hoa chuyên nghiệp và đam mê sáng tạo, Florio luôn nỗ lực không ngừng để mang đến những
+          sản phẩm hoa tươi nghệ thuật, phù hợp cho mọi dịp đặc biệt: sinh nhật, cưới hỏi, khai trương, chúc mừng, và cả những
+          khoảnh khắc riêng tư đáng nhớ.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="values text-center">
+    <div class="container">
+      <h2>Giá trị cốt lõi của Florio</h2>
+      <div class="row">
+        <div class="col-md-4">
+          <i class="fas fa-heart"></i>
+          <h5 class="fw-bold">Tận tâm & Yêu thương</h5>
+          <p>Mỗi bó hoa là một lời nhắn gửi yêu thương được gói trọn bằng sự tận tâm và chân thành.</p>
+        </div>
+        <div class="col-md-4">
+          <i class="fas fa-palette"></i>
+          <h5 class="fw-bold">Sáng tạo nghệ thuật</h5>
+          <p>Florio luôn đổi mới, mang đến những phong cách cắm hoa độc đáo và tinh tế cho từng khách hàng.</p>
+        </div>
+        <div class="col-md-4">
+          <i class="fas fa-leaf"></i>
+          <h5 class="fw-bold">Tươi mới mỗi ngày</h5>
+          <p>Chúng tôi cam kết chỉ sử dụng hoa tươi chất lượng cao, được nhập mới mỗi sáng để đảm bảo hương sắc tự nhiên nhất.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="team">
+    <div class="container text-center">
+      <h2>Đội ngũ của chúng tôi</h2>
+      <div class="row g-4">
+        <div class="col-md-3">
+          <div class="team-member">
+            <img src="https://randomuser.me/api/portraits/women/68.jpg" width="120" height="120" alt="Hồng">
+            <h5>Nguyễn Thị Hồng</h5>
+            <p>Nhà thiết kế hoa chính</p>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="team-member">
+            <img src="https://randomuser.me/api/portraits/men/51.jpg" width="120" height="120" alt="Minh">
+            <h5>Trần Quang Minh</h5>
+            <p>Giám đốc điều hành</p>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="team-member">
+            <img src="https://randomuser.me/api/portraits/women/24.jpg" width="120" height="120" alt="Hương">
+            <h5>Lê Thanh Hương</h5>
+            <p>Chuyên viên tư vấn khách hàng</p>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="team-member">
+            <img src="https://randomuser.me/api/portraits/men/33.jpg" width="120" height="120" alt="Phúc">
+            <h5>Ngô Nhật Phúc</h5>
+            <p>Trưởng bộ phận marketing</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+   <div th:replace="~{fragments/footer :: footer}"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

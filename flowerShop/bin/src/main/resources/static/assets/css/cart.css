@@ -1,0 +1,23 @@
+body {
+      background-color: #fafafa;
+      font-family: "Segoe UI", sans-serif;
+    }
+    .cart-table img {
+      width: 70px;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    .cart-summary {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .btn-custom {
+      border-radius: 20px;
+      font-size: 0.9rem;
+    }
+    .text-danger {
+      cursor: pointer;
+    }

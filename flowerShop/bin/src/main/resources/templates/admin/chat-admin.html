@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Chat - Florio Flower Shop</title>
+    
+    <th:block th:if="${_csrf}">
+      <meta name="_csrf" th:content="${_csrf.token}">
+      <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    </th:block>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        body { background-color: #fffafc; /* Match admin theme */ font-family: "Segoe UI", sans-serif; }
+        
+        /* Admin Sidebar Styles */
+        .sidebar { position: fixed; top: 0; left: 0; height: 100vh; width: 250px; background: linear-gradient(180deg, #ffb6c1 0%, #ffe5ec 100%); color: #4a4a4a; padding-top: 1rem; box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); }
+        .sidebar h5 { font-weight: bold; color: #c2185b; }
+        .sidebar a { color: #5a5a5a; text-decoration: none; display: block; padding: 10px 20px; border-radius: 8px; margin: 3px 10px; transition: all 0.3s ease; font-weight: 500; }
+        .sidebar a:hover, .sidebar a.active { background: #fff; color: #c2185b; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); transform: translateX(3px); }
+        .sidebar i { color: #c2185b; }
+        .logout-form { position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%); text-align: center; width: 80%;}
+
+        /* Main content area shifted for sidebar */
+        main.chat-main { 
+            margin-left: 260px; /* Space for the sidebar */
+            padding: 15px; 
+            height: 100vh; /* Full viewport height */
+            display: flex; 
+            flex-direction: column;
+        }
+
+        /* Chat Layout */
+        .chat-layout {
+            flex-grow: 1; background: white; border-radius: 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            display: flex; overflow: hidden; 
+            border: 1px solid #eee; min-height: 500px;
+        }
+        /* Styles for user-list, chat-window, messages etc. */
+        .user-list-sidebar { width: 280px; border-right: 1px solid #e9ecef; display: flex; flex-direction: column; background: #fafbfc; }
+        .user-list-header { padding: 1rem 1.25rem; border-bottom: 1px solid #e9ecef; }
+        .user-list-header h5 { color: #c2185b; font-weight: 600; }
+        #user-list-ui { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex-grow: 1; }
+        .user-item { padding: 0.8rem 1.25rem; cursor: pointer; border-bottom: 1px solid #e9ecef; font-weight: 500; color: #343a40; position: relative; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .user-item:hover { background-color: #f1f3f5; }
+        .user-item.active { background-color: #c2185b; color: white; font-weight: bold; }
+        .user-item.unread::after { content: ''; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); width: 10px; height: 10px; background-color: #0d6efd; border-radius: 50%; }
+        .user-item.active.unread::after { background-color: white; }
+        .chat-window { flex-grow: 1; display: flex; flex-direction: column; }
+        .chat-header { padding: 1rem 1.5rem; border-bottom: 1px solid #e9ecef; display: flex; align-items: center; background: #f8f9fa;}
+        .chat-header h5 { color: #c2185b; font-weight: 600; margin-bottom: 0; }
+        .chat-messages { flex-grow: 1; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; }
+        .chat-message { padding: 0.6rem 1rem; border-radius: 1.2rem; max-width: 75%; line-height: 1.5; word-wrap: break-word; }
+        .chat-message.sender { background-color: #c2185b; color: white; align-self: flex-end; border-bottom-right-radius: 0.3rem; }
+        .chat-message.receiver { background-color: #e9ecef; color: #212529; align-self: flex-start; border-bottom-left-radius: 0.3rem; }
+        .chat-message.system { align-self: center; font-size: 0.8rem; color: #6c757d; }
+        .message-sender { font-weight: bold; font-size: 0.8rem; margin-bottom: 0.2rem; }
+        .chat-input { padding: 1rem 1.5rem; border-top: 1px solid #e9ecef; background: #f8f9fa;}
+    </style>
+</head>
+<body>
+
+<div th:replace="~{admin/fragments/sidebar :: sidebar(page='chat')}"></div> 
+
+<main class="chat-main">
+    <div id="chat-page-admin">
+        <div class="chat-layout">
+            <div class="user-list-sidebar">
+                <div class="user-list-header">
+                    <h5 class="mb-0">Khách hàng</h5>
+                </div>
+                <ul id="user-list-ui"></ul>
+            </div>
+            <div class="chat-window">
+                <div class="chat-header">
+                    <h5 id="chat-window-header" class="mb-0 text-muted">Vui lòng chọn một khách hàng</h5>
+                </div>
+                <div class="chat-messages" id="messageArea"></div>
+                <div class="chat-input" id="message-form-container" style="display: none;">
+                    <form id="messageForm" name="messageForm">
+                        <div class="input-group">
+                            <input type="text" id="message" placeholder="Nhập tin nhắn..." class="form-control" autocomplete="off" required>
+                            <button class="btn btn-primary" type="submit">Gửi</button> </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script th:inline="javascript" sec:authorize="hasRole('ADMIN')">
+    'use strict';
+    // === ADMIN SCRIPT (Giữ nguyên như trước) ===
+    const USER_EMAIL = /*[[${#authentication.name}]]*/ null;
+    const IS_ADMIN = true; // Hardcoded for this template
+    const ADMIN_USERNAME = 'admin@flowershop.com'; 
+    const API_BASE_URL = /*[[@{/api/chat}]]*/ '/api/chat';
+    const csrfHeaderName = document.querySelector('meta[name="_csrf_header"]')?.content;
+    const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+    const FETCH_HEADERS = { 'Content-Type': 'application/json' };
+    if (csrfHeaderName && csrfToken) { FETCH_HEADERS[csrfHeaderName] = csrfToken; }
+
+    let stompClient = null;
+    let currentActiveUser = null; 
+    let chatHistories = new Map(); 
+
+    const messageArea = document.querySelector('#messageArea');
+    const messageForm = document.querySelector('#messageForm');
+    const messageInput = document.querySelector('#message');
+    const userListUI = document.getElementById('user-list-ui');
+    const chatWindowHeader = document.getElementById('chat-window-header');
+    const messageFormContainer = document.getElementById('message-form-container');
+    
+    // ... (Toàn bộ các hàm JavaScript connect, onConnected, onError, loadChatHistory, loadAdminUserList, sendMessage, onMessageReceived, renderUserList, switchActiveChat, appendMessage giữ nguyên như phiên bản trước dành cho Admin) ...
+    function connect() { 
+        if (!USER_EMAIL) return;
+        const socket = new SockJS('/ws'); 
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, onConnected, onError);
+    }
+
+    async function onConnected() { 
+        stompClient.subscribe('/user/queue/private', onMessageReceived);
+        await loadAdminUserList(); // Load user list on connect
+        appendMessage(null, 'Hệ thống', 'Vui lòng chọn khách hàng để bắt đầu chat.', 'system');
+    }
+
+     function onError(error) { 
+        console.error("Lỗi WebSocket:", error);
+        appendMessage(null, 'Hệ thống', 'Mất kết nối. Vui lòng tải lại trang.', 'system');
+     }
+
+    async function loadChatHistory(partnerEmail) { 
+        if (!partnerEmail) { 
+             messageArea.innerHTML = ''; 
+             appendMessage(null, 'Hệ thống', 'Vui lòng chọn một khách hàng để xem lịch sử.', 'system');
+             return; 
+        }
+        const url = `${API_BASE_URL}/history/${partnerEmail}`; 
+        try {
+            const response = await fetch(url, { headers: FETCH_HEADERS });
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Lỗi tải lịch sử (${response.status}): ${errorText || response.statusText}`);
+            }
+            const history = await response.json(); 
+            chatHistories.set(partnerEmail, history); 
+            messageArea.innerHTML = ''; 
+            history.forEach(msg => {
+                appendMessage(msg.sender, msg.sender, msg.content, null);
+            });
+            messageArea.scrollTop = messageArea.scrollHeight; 
+        } catch (err) {
+            console.error(err);
+            messageArea.innerHTML = ''; 
+            appendMessage(null, 'Hệ thống', `Lỗi: ${err.message}`, 'system');
+        }
+    }
+
+    async function loadAdminUserList() { 
+        try {
+            const response = await fetch(`${API_BASE_URL}/users`, { headers: FETCH_HEADERS });
+            if (!response.ok) throw new Error('Lỗi tải danh sách user');
+            
+            const userEmails = await response.json(); 
+            const currentEmails = new Set(chatHistories.keys());
+            userEmails.forEach(email => {
+                if (!chatHistories.has(email)) {
+                    chatHistories.set(email, []); 
+                }
+                currentEmails.delete(email); 
+            });
+            currentEmails.forEach(email => chatHistories.delete(email));
+            renderUserList(); 
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    function sendMessage(event) { 
+        event.preventDefault();
+        const messageContent = messageInput.value.trim();
+        if (messageContent && stompClient) {
+            let recipientEmail = currentActiveUser; 
+            if (!recipientEmail) { 
+                alert('Vui lòng chọn một khách hàng để gửi tin nhắn.');
+                return;
+            }
+            const chatMessage = {
+                sender: USER_EMAIL, recipient: recipientEmail,
+                content: messageContent, type: 'CHAT'
+            };
+            stompClient.send("/app/chat.private", {}, JSON.stringify(chatMessage));
+            messageInput.value = '';
+        }
+    }
+
+    function onMessageReceived(payload) { 
+        const message = JSON.parse(payload.body); 
+        let partnerEmail = (message.sender === USER_EMAIL) ? message.recipient : message.sender;
+        if (!partnerEmail) return;
+        let isNewUser = false;
+        if (!chatHistories.has(partnerEmail)) {
+            chatHistories.set(partnerEmail, []);
+            isNewUser = true;
+        }
+        let history = chatHistories.get(partnerEmail);
+        history.push(message); 
+        if (isNewUser) {
+            renderUserList(); 
+        }
+        if (partnerEmail === currentActiveUser) {
+             appendMessage(message.sender, message.sender, message.content, null);
+        } else if (message.sender !== USER_EMAIL) { 
+             const userItem = userListUI.querySelector(`.user-item[data-user="${partnerEmail}"]`);
+             if (userItem) {
+                 userItem.classList.add('unread');
+             }
+        }
+    }
+    
+    messageForm.addEventListener('submit', sendMessage, true);
+
+    function renderUserList() { 
+        const fragment = document.createDocumentFragment(); 
+        const sortedEmails = Array.from(chatHistories.keys()).sort(); 
+        const unreadUsers = new Set();
+        userListUI.querySelectorAll('.user-item.unread').forEach(item => {
+            unreadUsers.add(item.getAttribute('data-user'));
+        });
+        sortedEmails.forEach(email => {
+            const li = document.createElement('li');
+            li.className = 'user-item';
+            if (email === currentActiveUser) {
+                li.classList.add('active');
+            } else if (unreadUsers.has(email)) { 
+                 li.classList.add('unread');
+            }
+            li.textContent = email;
+            li.setAttribute('data-user', email);
+            li.addEventListener('click', () => switchActiveChat(email)); 
+            fragment.appendChild(li);
+        });
+        userListUI.innerHTML = ''; 
+        userListUI.appendChild(fragment); 
+    }
+
+    async function switchActiveChat(email) { 
+        if (currentActiveUser === email) return; 
+        const oldActiveUser = currentActiveUser;
+        currentActiveUser = email;
+        chatWindowHeader.textContent = `Chat với: ${email}`;
+        messageFormContainer.style.display = 'block'; 
+         const oldActiveItem = userListUI.querySelector(`.user-item.active`); 
+         if(oldActiveItem) oldActiveItem.classList.remove('active');
+        const newActiveItem = userListUI.querySelector(`.user-item[data-user="${email}"]`);
+        if(newActiveItem) {
+            newActiveItem.classList.add('active');
+            newActiveItem.classList.remove('unread'); 
+        }
+        await loadChatHistory(email); 
+    }
+
+    function appendMessage(senderEmail, senderDisplay, content, type) { 
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('chat-message');
+        if(type === 'system') {
+            messageElement.classList.add('system');
+            messageElement.textContent = content;
+        } else {
+            if (senderEmail === USER_EMAIL) messageElement.classList.add('sender');
+            else messageElement.classList.add('receiver');
+            const senderElement = document.createElement('div');
+            senderElement.classList.add('message-sender');
+            let displayName = (senderEmail === ADMIN_USERNAME) ? 'Admin' : senderEmail; 
+            if (senderEmail === USER_EMAIL) displayName = 'Bạn';
+            senderElement.textContent = displayName;
+            const contentElement = document.createElement('div');
+            contentElement.textContent = content; 
+            messageElement.appendChild(senderElement);
+            messageElement.appendChild(contentElement);
+        }
+        messageArea.appendChild(messageElement);
+        const isScrolledToBottom = messageArea.scrollHeight - messageArea.clientHeight <= messageArea.scrollTop + 5; 
+        if (type==='system' || senderEmail === USER_EMAIL || isScrolledToBottom) {
+             messageArea.scrollTop = messageArea.scrollHeight;
+        }
+    }
+    
+    connect(); 
+
+</script>
+
+</body>
+</html>

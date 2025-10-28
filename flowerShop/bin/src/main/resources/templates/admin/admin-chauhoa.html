@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Quản lý Chậu hoa</title>
+  <style>
+    body { font-family: Arial; background: #f9f9f9; margin: 0; }
+    header { background: #00796b; color: white; padding: 15px; text-align: center; }
+    .container {
+      width: 1000px; margin: 30px auto; background: white;
+      padding: 20px; border-radius: 8px; box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; text-align: center; padding: 10px; }
+    th { background: #e0f2f1; color: #004d40; }
+    .btn { padding: 6px 10px; border-radius: 5px; text-decoration: none; color: white; }
+    .btn-add { background: #00796b; }
+    .btn-edit { background: #0288d1; }
+    .btn-delete { background: #c62828; }
+    .btn-back { background: #455a64; display: inline-block; margin-bottom: 15px; }
+  </style>
+</head>
+<body>
+  <header><h2>🌿 Quản lý sản phẩm - Chậu hoa</h2></header>
+  <div class="container">
+    <a href="admin-categories.html" class="btn btn-back">← Quay lại Danh mục</a>
+    <a href="admin-add-product.html" class="btn btn-add">+ Thêm sản phẩm</a>
+
+    <table>
+      <tr>
+        <th>ID</th><th>Tên sản phẩm</th><th>Giá</th><th>Khuyến mãi</th><th>Trạng thái</th><th>Thao tác</th>
+      </tr>
+      <tr>
+        <td>1</td><td>Chậu lan tím</td><td>400.000đ</td><td>-</td><td>Còn hàng</td>
+        <td><a href="#" class="btn btn-edit">Sửa</a> <a href="#" class="btn btn-delete">Xóa</a></td>
+      </tr>
+      <tr>
+        <td>2</td><td>Chậu hoa cúc vàng</td><td>280.000đ</td><td>Giảm 15%</td><td>Còn hàng</td>
+        <td><a href="#" class="btn btn-edit">Sửa</a> <a href="#" class="btn btn-delete">Xóa</a></td>
+      </tr>
+    </table>
+  </div>
+</body>
+</html>

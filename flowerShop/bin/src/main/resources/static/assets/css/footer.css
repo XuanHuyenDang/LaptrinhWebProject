@@ -1,0 +1,26 @@
+body {
+      background-color: #f8f9fa;
+    }
+
+    footer a {
+      transition: color 0.2s ease-in-out;
+    }
+
+    footer a:hover {
+      color: #ff7f7f !important;
+      text-decoration: underline;
+    }
+
+    footer {
+      background: #212529;
+      color: #f8f9fa;
+    }
+
+    footer h5 {
+      letter-spacing: 0.5px;
+    }
+
+    footer img {
+      max-height: 120px;
+      object-fit: cover;
+    }

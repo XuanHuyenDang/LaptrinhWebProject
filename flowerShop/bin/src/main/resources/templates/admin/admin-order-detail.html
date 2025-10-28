@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chi tiết Đơn hàng - Florio Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        /* (Copy style từ các trang admin khác nếu cần) */
+        body { background-color: #fffafc; font-family: "Segoe UI", sans-serif; }
+        .sidebar { /* ... styles ... */ }
+        main { margin-left: 270px; padding: 30px; }
+        .card { border-radius: 15px; border: none; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); }
+        h3 { color: #c2185b; font-weight: 700; }
+        .summary-discount-row { color: #198754; font-weight: 500; }
+         /* Thêm lại style sidebar và logout button nếu cần */
+        .sidebar { position: fixed; top: 0; left: 0; height: 100vh; width: 250px; background: linear-gradient(180deg, #ffb6c1 0%, #ffe5ec 100%); color: #4a4a4a; padding-top: 1rem; box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); }
+        .sidebar h5 { font-weight: bold; color: #c2185b; }
+        .sidebar a { color: #5a5a5a; text-decoration: none; display: block; padding: 10px 20px; border-radius: 8px; margin: 3px 10px; transition: all 0.3s ease; font-weight: 500; }
+        .sidebar a:hover, .sidebar a.active { background: #fff; color: #c2185b; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); transform: translateX(3px); }
+        .sidebar i { color: #c2185b; }
+        .logout-form { position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%); text-align: center; width: 80%;}
+
+    </style>
+</head>
+<body>
+
+    <div th:replace="~{admin/fragments/sidebar :: sidebar(page='orders')}"></div>
+
+    <main>
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h3><i class="bi bi-receipt-cutoff me-2"></i>Chi tiết Đơn hàng <span th:text="'#' + ${order.id}"></span></h3>
+            <a th:href="@{/admin/orders}" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
+            </a>
+        </div>
+
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="card mb-4">
+                    <div class="card-header bg-light"><h5 class="mb-0 fs-6 fw-bold text-secondary">Thông tin Khách hàng & Giao hàng</h5></div>
+                    <div class="card-body">
+                        <p><strong>Khách hàng:</strong> <span th:text="${order.account?.fullName ?: order.recipientName}"></span> (<span th:text="${order.account?.email ?: 'N/A'}"></span>)</p>
+                        <p><strong>Người nhận:</strong> <span th:text="${order.recipientName}"></span></p>
+                        <p><strong>Điện thoại:</strong> <span th:text="${order.recipientPhone}"></span></p>
+                        <p><strong>Địa chỉ:</strong> <span th:text="${order.shippingAddress}"></span></p>
+                        <p th:if="${order.note}"><strong>Ghi chú:</strong> <span th:text="${order.note}"></span></p>
+                        <p><strong>Ngày đặt:</strong> <span th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}"></span></p>
+                        <p th:if="${order.completedDate}"><strong>Ngày hoàn tất:</strong> <span th:text="${#temporals.format(order.completedDate, 'dd/MM/yyyy HH:mm')}"></span></p>
+                    </div>
+                </div>
+                 <div class="card">
+                     <div class="card-header bg-light"><h5 class="mb-0 fs-6 fw-bold text-secondary">Cập nhật trạng thái</h5></div>
+                     <div class="card-body">
+                         <form th:action="@{/admin/orders/update-status}" method="post">
+                             <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                             <input type="hidden" name="orderId" th:value="${order.id}">
+                             <div class="input-group">
+                                 <select name="status" class="form-select">
+                                     <option value="Đang xử lý" th:selected="${order.status == 'Đang xử lý'}">Đang xử lý</option>
+                                     <option value="Đang giao" th:selected="${order.status == 'Đang giao'}">Đang giao</option>
+                                     <option value="Hoàn tất" th:selected="${order.status == 'Hoàn tất'}">Hoàn tất</option>
+                                     <option value="Đã hủy" th:selected="${order.status == 'Đã hủy'}">Đã hủy</option>
+                                     <option value="Chờ thanh toán" th:selected="${order.status == 'Chờ thanh toán'}" disabled>Chờ thanh toán (VNPAY)</option>
+                                     <option th:if="${order.status == 'Yêu cầu trả hàng'}" value="Yêu cầu trả hàng" selected disabled>Yêu cầu trả hàng</option>
+                                     <option th:if="${order.status == 'Đã trả hàng'}" value="Đã trả hàng" selected disabled>Đã trả hàng</option>
+                                     <option th:if="${order.status == 'Đã từ chối trả hàng'}" value="Đã từ chối trả hàng" selected disabled>Đã từ chối trả hàng</option>
+                                 </select>
+                                 <button type="submit" class="btn btn-primary"
+                                         th:disabled="${#lists.contains({'Yêu cầu trả hàng', 'Đã trả hàng', 'Đã từ chối trả hàng'}, order.status)}">
+                                     Cập nhật
+                                 </button>
+                             </div>
+                              <small class="form-text text-muted" th:if="${#lists.contains({'Yêu cầu trả hàng', 'Đã trả hàng', 'Đã từ chối trả hàng'}, order.status)}">
+                                 Đơn hàng đang/đã xử lý trả hàng, không thể cập nhật trạng thái tại đây.
+                             </small>
+                         </form>
+                     </div>
+                 </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card">
+                     <div class="card-header bg-light"><h5 class="mb-0 fs-6 fw-bold text-secondary">Chi tiết Sản phẩm</h5></div>
+                    <div class="card-body">
+                        <table class="table table-sm align-middle">
+                            <thead>
+                                <tr><th>Sản phẩm</th><th class="text-center">SL</th><th class="text-end">Đơn giá</th><th class="text-end">Thành tiền</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="d : ${order.details}">
+                                    <td th:text="${d.product?.productName ?: 'N/A'}"></td>
+                                    <td class="text-center" th:text="${d.quantity}"></td>
+                                    <td class="text-end" th:text="${#numbers.formatDecimal(d.price, 0, 'COMMA', 0, 'POINT')} + 'đ'"></td>
+                                    <td class="text-end fw-semibold" th:text="${#numbers.formatDecimal(d.price.multiply(T(java.math.BigDecimal).valueOf(d.quantity.longValue())), 0, 'COMMA', 0, 'POINT')} + 'đ'"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <hr>
+                         <div th:with="
+                               totalFinal = ${order.totalAmount ?: T(java.math.BigDecimal).ZERO},
+                               ship  = ${order.shippingFee ?: T(java.math.BigDecimal).ZERO},
+                               discount = ${order.discountAmount ?: T(java.math.BigDecimal).ZERO},
+                               sub   = ${totalFinal.add(discount).subtract(ship)}">
+                            <div class="d-flex justify-content-between mb-1"><span>Tạm tính:</span> <span th:text="${#numbers.formatDecimal(sub, 0, 'COMMA', 0, 'POINT')} + 'đ'"></span></div>
+                            <div class="d-flex justify-content-between mb-1"><span>Phí vận chuyển (<span class="text-primary" th:text="${order.shippingMethod}"></span>):</span> <span th:text="${#numbers.formatDecimal(ship, 0, 'COMMA', 0, 'POINT')} + 'đ'"></span></div>
+                            <div class="d-flex justify-content-between mb-1 summary-discount-row" th:if="${discount.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
+                                <span>Giảm giá <span th:if="${order.discountCode}" th:text="'(' + ${order.discountCode.code} + ')'"></span>:</span>
+                                <span th:text="${#numbers.formatDecimal(discount.negate(), 0, 'COMMA', 0, 'POINT')} + 'đ'"></span>
+                            </div>
+                            <div class="d-flex justify-content-between fw-bold mt-2 pt-2 border-top"><span>Tổng cộng:</span> <span class="text-danger fs-5" th:text="${#numbers.formatDecimal(totalFinal, 0, 'COMMA', 0, 'POINT')} + 'đ'"></span></div>
+                             <div class="mt-2 text-end">
+                                 <span class="badge bg-secondary" th:text="${order.paymentMethod}"></span>
+                                 <span th:if="${#strings.equalsIgnoreCase(order.paymentMethod, 'VNPAY') and order.status != 'Chờ thanh toán' and order.status != 'Đã hủy'}"
+                                       class="badge bg-success text-white ms-1">Đã thanh toán</span>
+                                  <span th:if="${#strings.equalsIgnoreCase(order.paymentMethod, 'VNPAY') and order.status == 'Chờ thanh toán'}"
+                                        class="badge bg-warning text-dark ms-1">Chưa thanh toán</span>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

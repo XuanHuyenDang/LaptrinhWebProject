@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quản lý Danh mục sản phẩm - Florio Admin</title>
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+	rel="stylesheet">
+<style>
+body {
+	background-color: #fffafc;
+	font-family: "Segoe UI", sans-serif;
+}
+
+/* Sidebar */
+.sidebar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: 100vh;
+	width: 250px;
+	background: linear-gradient(180deg, #ffb6c1 0%, #ffe5ec 100%);
+	color: #4a4a4a;
+	padding-top: 1rem;
+	box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar h5 {
+	font-weight: bold;
+	color: #c2185b;
+}
+
+.sidebar a {
+	color: #5a5a5a;
+	text-decoration: none;
+	display: block;
+	padding: 10px 20px;
+	border-radius: 8px;
+	margin: 3px 10px;
+	transition: all 0.3s ease;
+	font-weight: 500;
+}
+
+.sidebar a:hover, .sidebar a.active {
+	background: #fff;
+	color: #c2185b;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+	transform: translateX(3px);
+}
+
+.sidebar i {
+	color: #c2185b;
+}
+
+/* Main */
+main {
+	margin-left: 270px;
+	padding: 30px;
+}
+
+h3 {
+	color: #c2185b;
+	font-weight: 700;
+}
+
+/* Form & Table */
+.form-control {
+	border-radius: 8px;
+	border: 1px solid #ccc;
+}
+
+.btn-florio {
+	background-color: #c2185b;
+	color: white;
+	border-radius: 8px;
+	padding: 8px 16px;
+	border: none;
+	transition: 0.3s;
+}
+
+.btn-florio:hover {
+	background-color: #e91e63;
+}
+
+table {
+	margin-top: 20px;
+	border-radius: 10px;
+	overflow: hidden;
+	background-color: white;
+}
+
+th {
+	background-color: #ffeef3;
+	color: #c2185b;
+	text-align: center;
+}
+
+td {
+	text-align: center;
+	vertical-align: middle;
+}
+
+tr:hover {
+	background-color: #fff0f5;
+}
+
+.btn-action {
+	border: none;
+	border-radius: 6px;
+	padding: 5px 10px;
+	color: white;
+	font-size: 14px;
+}
+
+.btn-edit {
+	background-color: #0288d1;
+}
+
+.btn-delete {
+	background-color: #d32f2f;
+}
+
+.btn-view {
+	background-color: #6a1b9a;
+}
+
+.btn-edit:hover {
+	background-color: #03a9f4;
+}
+
+.btn-delete:hover {
+	background-color: #ef5350;
+}
+
+.btn-view:hover {
+	background-color: #8e24aa;
+}
+
+td.description {
+	max-width: 250px; /* Giới hạn độ rộng */
+	white-space: normal; /* Cho phép xuống dòng */
+	word-wrap: break-word; /* Ngắt từ dài */
+	text-align: left; /* Căn trái cho dễ đọc */
+}
+
+.logout-form {
+	position: absolute;
+	bottom: 90px; /* Cố định ở gần cuối sidebar */
+	left: 45%;
+	transform: translateX(-50%); /* Căn giữa theo chiều ngang */
+	text-align: center;
+}
+</style>
+</head>
+<body>
+
+	<div th:replace="~{admin/fragments/sidebar :: sidebar(page='categories')}"></div> <main>
+		<h3>
+			<i class="bi bi-list-ul me-2"></i>Quản lý Danh mục sản phẩm
+		</h3>
+
+		<div class="card shadow-sm p-4 mt-3">
+			<form th:action="@{/admin/categories/save}" th:object="${category}"
+				method="post">
+				<input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+				<input type="hidden" th:field="*{id}" />
+
+				<div class="mb-3">
+					<label class="form-label">Tên danh mục</label> <input type="text"
+						th:field="*{categoryName}" class="form-control" required />
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label">Mô tả danh mục</label>
+					<textarea th:field="*{categoryDescription}" class="form-control"></textarea>
+				</div>
+
+				<button type="submit" class="btn-florio">Lưu danh mục</button>
+			</form>
+
+
+			<table class="table table-bordered mt-4">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Tên danh mục</th>
+						<th>Mô tả</th>
+						<th>Quản lý sản phẩm</th>
+						<th>Thao tác</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="cat : ${categories}">
+						<td th:text="${cat.id}"></td>
+						<td th:text="${cat.categoryName}"></td>
+						<td class="description" th:text="${cat.categoryDescription}"></td>
+						<td><a th:href="@{'/admin/products?category=' + ${cat.id}}"
+							class="btn-action btn-view"> Xem </a></td>
+						<td><a th:href="@{'/admin/categories/edit/' + ${cat.id}}"
+							class="btn-action btn-edit me-1">Sửa</a>
+                            <a th:href="@{'/admin/categories/delete/' + ${cat.id}}"
+							   class="btn-action btn-delete"
+                               onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục này không?');">Xóa</a>
+                        </td>
+					</tr>
+				</tbody>
+
+			</table>
+		</div>
+	</main>
+
+</body>
+</html>

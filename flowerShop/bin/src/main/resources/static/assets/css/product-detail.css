@@ -1,0 +1,111 @@
+body {
+    background-color: #fff8f9;
+    font-family: "Segoe UI", sans-serif;
+}
+.product-image img {
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+.product-info h3 {
+    color: #d81b60;
+    font-weight: bold;
+}
+.price {
+    font-size: 1.3rem;
+    color: #d81b60;
+    font-weight: 600;
+}
+.old-price {
+    text-decoration: line-through;
+    color: gray;
+    font-size: 0.95rem;
+}
+.btn-pink {
+    background-color: #d81b60;
+    border: none;
+}
+.btn-pink:hover {
+    background-color: #ad1457;
+}
+.section-title {
+    border-left: 5px solid #ff7eb3;
+    padding-left: 10px;
+    margin: 40px 0 20px;
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: #ff4081;
+}
+.related-products .card {
+    border: none;
+    transition: transform 0.2s;
+}
+.related-products .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* === CSS CHO ĐÁNH GIÁ === */
+.rating-summary .stars i {
+    color: #fbc02d; /* Màu sao vàng */
+    font-size: 1.3rem;
+    margin-right: 2px;
+}
+.rating-summary .stars .bi-star {
+    color: #e0e0e0; /* Màu sao rỗng */
+}
+
+.review-form .star-rating {
+    display: inline-block;
+    direction: rtl; /* Đảo ngược để chọn từ phải sang trái */
+}
+.review-form .star-rating input[type=radio] {
+    display: none; /* Ẩn radio button gốc */
+}
+.review-form .star-rating label {
+    color: #e0e0e0; /* Màu sao chưa chọn */
+    font-size: 1.8rem;
+    cursor: pointer;
+    padding: 0 2px;
+    transition: color 0.2s;
+}
+/* Khi radio được check hoặc label được hover (và các label bên phải nó) */
+.review-form .star-rating input[type=radio]:checked ~ label,
+.review-form .star-rating label:hover,
+.review-form .star-rating label:hover ~ label {
+    color: #fbc02d; /* Đổi thành màu vàng */
+}
+
+.review-list .review-item {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 1rem; /* Thêm padding cho đẹp */
+}
+.review-list .review-stars {
+    color: #fbc02d; /* Màu sao vàng trong list */
+    letter-spacing: 1px;
+    font-size: 1.1rem;
+}
+.review-list .review-stars-empty {
+    color: #e0e0e0; /* Màu sao rỗng trong list */
+}
+.review-list .review-meta {
+    font-size: 0.85rem;
+    color: #777; /* Màu chữ meta (ngày tháng) */
+}
+
+.btn-delete-review {
+    background: none;
+    border: none;
+    padding: 0 5px;
+    font-size: 0.8rem;
+    color: #dc3545; /* Màu đỏ cho nút xóa */
+    cursor: pointer;
+    vertical-align: middle; /* Căn giữa nút xóa với text */
+}
+.btn-delete-review:hover {
+    text-decoration: underline;
+}
+
+/* === HẾT CSS ĐÁNH GIÁ === */
