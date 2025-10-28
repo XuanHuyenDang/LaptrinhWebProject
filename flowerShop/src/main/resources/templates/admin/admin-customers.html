@@ -107,7 +107,7 @@ thead {
 }
 .logout-form {
   position: absolute;
-  bottom: 90px;        /* Cố định ở gần cuối sidebar */
+  bottom: 40px;        /* Cố định ở gần cuối sidebar */
   left: 45%;
   transform: translateX(-50%); /* Căn giữa theo chiều ngang */
   text-align: center;
@@ -117,7 +117,7 @@ thead {
 
 <body>
 	<!-- Sidebar -->
-	<div th:replace="~{admin/fragments/sidebar :: sidebar(page='dashboard')}"></div>
+	<div th:replace="~{admin/fragments/sidebar :: sidebar(page='customers')}"></div>
 
 	<!-- Main -->
 	<main>
