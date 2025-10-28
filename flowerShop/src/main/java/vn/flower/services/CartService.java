@@ -442,14 +442,18 @@ public class CartService {
         }
 
         var viewLines = lines.stream()
-            .filter(l -> l != null && l.getProduct() != null)
-            .map(l -> new CartLine(
-                l.getProduct().getId(),
-                l.getProduct().getProductName(),
-                l.getQuantity(),
-                l.getPrice(),
-                l.getPrice().multiply(BigDecimal.valueOf(l.getQuantity()))
-            )).collect(Collectors.toList());
+                .filter(l -> l != null && l.getProduct() != null)
+                .map(l -> {
+                    Product p = l.getProduct(); // Lấy product
+                    return new CartLine(
+                        p.getId(),
+                        p.getProductName(),
+                        l.getQuantity(),
+                        l.getPrice(),
+                        l.getPrice().multiply(BigDecimal.valueOf(l.getQuantity())),
+                        p.getImageUrl() // <-- LẤY imageUrl TỪ PRODUCT
+                    );
+                }).collect(Collectors.toList());
 
         // Trả về CartView với DTO
         return new CartView(orderId, viewLines, subtotal, shipping, discount, total, dcDto);

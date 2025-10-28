@@ -40,20 +40,40 @@
       } catch {
         /* ignore */
       }
+      // Handle 401/403 specifically for redirection
+      if (res.status === 401 || res.status === 403) {
+           throw new Error("Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại."); // More specific error
+      }
       throw new Error(`HTTP ${res.status} – ${detail || "Yêu cầu thất bại"}`);
     }
 
+    // Check if the response is actually JSON *before* trying to parse
     if (!ct.includes("application/json")) {
-      // Thường là bị redirect về trang đăng nhập
-      throw new Error("Phiên đăng nhập đã hết hạn hoặc máy chủ trả về phản hồi không hợp lệ.");
+         // This might happen if the server redirects to a login page (HTML) due to session expiry
+         console.warn("Received non-JSON response, potentially a redirect.");
+         throw new Error("Phiên đăng nhập đã hết hạn hoặc máy chủ trả về phản hồi không hợp lệ.");
     }
 
-    return res.json();
+
+    try {
+        return await res.json();
+    } catch (parseError) {
+        console.error("Failed to parse JSON response:", parseError);
+        throw new Error("Lỗi xử lý dữ liệu từ máy chủ."); // More generic error for parsing issues
+    }
   }
 
+  // *** Updated function to get the correct image URL ***
   function getImageUrl(line) {
-    return `https://picsum.photos/seed/p${line.productId}/100/100`;
+    // Check if line.imageUrl exists and is not empty
+    if (line.imageUrl && line.imageUrl.trim() !== '') {
+        // Construct the path relative to the /assets/ directory
+        return `/assets/${line.imageUrl}`;
+    }
+    // Fallback to a placeholder image if imageUrl is missing or empty
+    return '/assets/images/placeholder.png'; // Make sure this placeholder exists
   }
+  // ******************************************************
 
   function showError(msg) {
     const el = document.getElementById("cart-error");
@@ -61,7 +81,7 @@
     el.textContent = msg;
     el.classList.remove("d-none");
     setTimeout(() => el.classList.add("d-none"), 3500);
-    // log cho dev
+    // log for dev
     console.error("[Cart]", msg);
   }
 
@@ -104,7 +124,7 @@
   }
 
   async function apiRemove(productId) {
-    // Ưu tiên DELETE, nếu server không hỗ trợ thì fallback sang PUT quantity = 0
+    // Prefer DELETE, fallback to PUT quantity = 0 if server doesn't support or fails
     try {
       return await fetchJson(`${API_BASE}/items/${productId}`, {
         method: "DELETE",
@@ -112,10 +132,14 @@
       });
     } catch (e) {
       console.warn("DELETE failed, fallback to PUT 0. Reason:", e.message);
+      // Ensure quantity is 0 for removal via PUT
+       if (e.message.includes("401") || e.message.includes("403") || e.message.includes("hết hạn")) {
+           throw e; // Re-throw auth errors to be handled by the caller
+       }
       return fetchJson(`${API_BASE}/items/${productId}`, {
         method: "PUT",
         headers: buildJsonHeaders(),
-        body: JSON.stringify({ quantity: 0 }),
+        body: JSON.stringify({ quantity: 0 }), // Explicitly set quantity to 0
       });
     }
   }
@@ -124,63 +148,77 @@
   // Render
   // =========================
   function renderSummary(cart) {
-    elSubtotal.textContent = fmtVND(cart.subtotal);
-    elShipping.textContent = fmtVND(cart.shipping);
-    elTotal.textContent = fmtVND(cart.total);
+    elSubtotal.textContent = fmtVND(cart?.subtotal); // Use optional chaining
+    elShipping.textContent = fmtVND(cart?.shipping); // Use optional chaining
+    elTotal.textContent = fmtVND(cart?.total); // Use optional chaining
 
-    if ((cart.lines?.length || 0) > 0) {
-      elCheckout.classList.remove("disabled");
-      elCheckout.removeAttribute("aria-disabled");
+    // Enable/disable checkout button based on cart lines
+    if (cart?.lines?.length > 0) { // Check if lines array exists and has items
+      elCheckout?.classList.remove("disabled"); // Check if element exists
+      elCheckout?.removeAttribute("aria-disabled");
     } else {
-      elCheckout.classList.add("disabled");
-      elCheckout.setAttribute("aria-disabled", "true");
+      elCheckout?.classList.add("disabled"); // Check if element exists
+      elCheckout?.setAttribute("aria-disabled", "true");
     }
   }
 
+
   function renderEmpty() {
-    elTableWrap.classList.add("d-none");
-    elEmpty.classList.remove("d-none");
-    renderSummary({ subtotal: 0, shipping: 0, total: 0, lines: [] });
+    elTableWrap?.classList.add("d-none"); // Check if element exists
+    elEmpty?.classList.remove("d-none"); // Check if element exists
+    renderSummary({ subtotal: 0, shipping: 0, total: 0, lines: [] }); // Render zero summary
   }
+
 
   function rowTemplate(line) {
     const row = document.createElement("tr");
     row.dataset.pid = line.productId;
+    // Use the updated getImageUrl function here
+    // Added onerror handler for image loading errors
     row.innerHTML = `
       <td>
         <div class="d-flex align-items-center">
-          <img src="${getImageUrl(line)}" alt="${line.productName}">
-          <div class="ms-3">
+          <img src="${getImageUrl(line)}"
+               alt="${line.productName}"
+               class="me-3 rounded"
+               style="width: 70px; height: 70px; object-fit: cover;"
+               onerror="this.onerror=null; this.src='/assets/images/placeholder.png';">
+          <div>
             <h6 class="mb-1">${line.productName}</h6>
             <small class="text-muted">Mã: ${line.productId}</small>
           </div>
         </div>
       </td>
-      <td class="text-end">${fmtVND(line.price)}</td>
-      <td class="text-center">
-        <input type="number" min="0" value="${line.quantity}" class="form-control form-control-sm w-75 mx-auto qty-input">
+      <td class="text-end align-middle">${fmtVND(line.price)}</td>
+      <td class="text-center align-middle">
+        <input type="number" min="0" value="${line.quantity}" class="form-control form-control-sm mx-auto qty-input" style="width: 80px;">
       </td>
-      <td class="text-end line-total">${fmtVND(line.lineTotal)}</td>
-      <td class="text-danger text-center">
-        <button type="button" class="btn btn-link p-0 text-danger delete-item" title="Xóa">🗑️</button>
+      <td class="text-end align-middle line-total">${fmtVND(line.lineTotal)}</td>
+      <td class="text-center align-middle">
+        <button type="button" class="btn btn-sm btn-outline-danger delete-item" title="Xóa">
+          <i class="bi bi-trash3"></i>
+        </button>
       </td>`;
     return row;
   }
 
   function renderTable(cart) {
-    elTbody.innerHTML = "";
-    (cart.lines || []).forEach((l) => elTbody.appendChild(rowTemplate(l)));
-    elTableWrap.classList.remove("d-none");
-    elEmpty.classList.add("d-none");
+    if (!elTbody) return; // Add check for safety
+    elTbody.innerHTML = ""; // Clear previous content
+    (cart.lines || []).forEach((l) => elTbody.appendChild(rowTemplate(l))); // Create and append rows
+    elTableWrap?.classList.remove("d-none"); // Show table
+    elEmpty?.classList.add("d-none"); // Hide empty message
   }
 
+
   function hydrate(cart) {
-    CART = cart;
-    if (!cart || !cart.lines || cart.lines.length === 0) {
-      renderEmpty();
-    } else {
+    CART = cart; // Update global state
+    // Check if cart is valid and has lines
+    if (cart && cart.lines && cart.lines.length > 0) {
       renderTable(cart);
       renderSummary(cart);
+    } else {
+      renderEmpty(); // Render empty state if no lines or invalid cart
     }
   }
 
@@ -188,7 +226,7 @@
   // Events (delegation)
   // =========================
   if (elTbody) {
-    // Xóa sản phẩm
+    // Remove item
     elTbody.addEventListener("click", async (e) => {
       const btn = e.target.closest(".delete-item");
       if (!btn) return;
@@ -197,19 +235,26 @@
       const pid = Number(row?.dataset.pid);
       if (!pid) return;
 
+      if (!confirm(`Bạn có chắc muốn xóa sản phẩm #${pid} khỏi giỏ hàng?`)) {
+        return;
+      }
+
+      const originalIcon = btn.innerHTML; // Store original icon
       try {
         btn.disabled = true;
-        btn.textContent = "...";
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>`; // Show spinner
         CART = await apiRemove(pid);
-        hydrate(CART);
+        hydrate(CART); // Re-render the cart
       } catch (err) {
-        showError(err.message || "Xóa sản phẩm thất bại");
-        btn.disabled = false;
-        btn.textContent = "🗑️";
+         showError(err.message || "Xóa sản phẩm thất bại");
+         btn.disabled = false;
+         btn.innerHTML = originalIcon; // Restore icon on error
+         // Optional: Reload cart fully on error if state might be inconsistent
+         // loadCart();
       }
     });
 
-    // Cập nhật số lượng (debounced)
+    // Update quantity (debounced)
     elTbody.addEventListener(
       "input",
       debounce(async (e) => {
@@ -218,41 +263,63 @@
 
         const row = input.closest("tr");
         const pid = Number(row?.dataset.pid);
-        const newQty = Number(input.value || 0);
-        if (!pid) return;
+        // Ensure newQty is at least 0. If less than 0, treat as 0 (remove item)
+        const newQty = Math.max(0, Number(input.value || 0));
+        if (isNaN(pid)) return; // Check if pid is a valid number
+
+        // Find the corresponding line total element
+        const lineTotalEl = row.querySelector(".line-total");
 
         try {
-          row.querySelector(
-            ".line-total"
-          ).innerHTML = `<span class="spinner-border spinner-sm text-success" role="status" aria-hidden="true"></span>`;
+          // Show spinner in the line total cell while updating
+          if (lineTotalEl) {
+              lineTotalEl.innerHTML = `<span class="spinner-border spinner-border-sm text-success" role="status" aria-hidden="true"></span>`;
+          }
+          input.disabled = true; // Disable input during update
+
           CART = await apiUpdateQty(pid, newQty);
-          hydrate(CART);
+          hydrate(CART); // Re-render the cart with updated data
         } catch (err) {
           showError(err.message || "Cập nhật số lượng thất bại");
-          // Đồng bộ lại từ server nếu có lỗi
-          try {
-            hydrate(await apiGetCart());
-          } catch {
-            /* ignore */
-          }
+          // Re-fetch the cart from the server to ensure UI consistency after error
+          loadCart(); // Call loadCart to refresh from server
+        } finally {
+            // Re-enable input regardless of success/failure if it still exists
+            const currentInput = elTbody.querySelector(`tr[data-pid="${pid}"] .qty-input`);
+            if (currentInput) {
+                currentInput.disabled = false;
+            }
         }
-      }, 500)
+      }, 500) // Debounce time of 500ms
     );
   }
 
   // =========================
-  // Init
+  // Init Function
   // =========================
-  (async function init() {
-    try {
-      elLoading?.classList.remove("d-none");
-      const cart = await apiGetCart();
-      hydrate(cart);
-    } catch (err) {
-      showError(err.message || "Không tải được giỏ hàng. Vui lòng thử lại.");
-      renderEmpty();
-    } finally {
-      elLoading?.classList.add("d-none");
-    }
-  })();
+  async function loadCart() {
+      try {
+          elLoading?.classList.remove("d-none"); // Show loading indicator
+          elEmpty?.classList.add("d-none"); // Hide empty message
+          elTableWrap?.classList.add("d-none"); // Hide table initially
+          const cart = await apiGetCart(); // Fetch cart data
+          hydrate(cart); // Render the fetched cart data
+      } catch (err) {
+          // If the error is auth-related, redirect or show specific message
+          if (err.message.includes("hết hạn") || err.message.includes("401") || err.message.includes("403")) {
+              showError("Phiên đăng nhập không hợp lệ. Đang chuyển hướng...");
+              // Optional: Redirect to login page after a delay
+              // setTimeout(() => window.location.href = '/auth/login', 2000);
+          } else {
+               showError(err.message || "Không tải được giỏ hàng. Vui lòng thử lại.");
+          }
+          renderEmpty(); // Show empty state on error
+      } finally {
+          elLoading?.classList.add("d-none"); // Hide loading indicator
+      }
+  }
+
+  // Initial load when the script runs
+  loadCart();
+
 })();

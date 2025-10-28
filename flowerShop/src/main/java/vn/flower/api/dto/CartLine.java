@@ -7,5 +7,6 @@ public record CartLine(
     String productName,
     Integer quantity,
     BigDecimal price,
-    BigDecimal lineTotal
+    BigDecimal lineTotal,
+    String imageUrl
 ) {}

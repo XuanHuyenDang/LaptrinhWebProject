@@ -88,7 +88,8 @@ public class CheckoutController {
             BigDecimal price = p.getSalePrice() != null ? p.getSalePrice() : p.getPrice();
             BigDecimal lineTotal = price.multiply(BigDecimal.valueOf(qty));
 
-            CartLine line = new CartLine(p.getId(), p.getProductName(), qty, price, lineTotal);
+            // *** Sửa đổi CartLine để bao gồm imageUrl ***
+            CartLine line = new CartLine(p.getId(), p.getProductName(), qty, price, lineTotal, p.getImageUrl()); // Thêm imageUrl
 
             // Calculate shipping and total for Buy Now using CartService helper
             BigDecimal shipping = cartService.shippingFeeFor(ShippingMethod.FAST, lineTotal); // Assuming default FAST
