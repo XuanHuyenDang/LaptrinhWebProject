@@ -56,7 +56,7 @@ Trang web được xây dựng theo **mô hình MVC** trên nền **Spring Boot 
 - Quản lý chương trình khuyến mãi và mã giảm giá  
 - Trả lời tin nhắn khách hàng qua chat  
 - Xem thống kê doanh thu, sản phẩm bán chạy  
-- Bảo mật hệ thống với **Spring Security & JWT**
+- Bảo mật hệ thống với **Spring Security**
 
 ### 💕 Dành cho **Khách hàng (User)**
 - Đăng ký tài khoản với **xác thực OTP qua email**  
@@ -122,7 +122,7 @@ Florio/
  │   │   │   ├── models/           → Entity, DTO, JPA mapping
  │   │   │   ├── repositories/     → Giao tiếp CSDL (Spring Data JPA)
  │   │   │   ├── services/         → Xử lý nghiệp vụ, logic hệ thống
- │   │   │   └── config/           → Cấu hình bảo mật, WebSocket, JWT
+ │   │   │   └── config/           → Cấu hình bảo mật, WebSocket
  │   │   ├── resources/
  │   │   │   ├── templates/        → Giao diện Thymeleaf (.html)
  │   │   │   ├── static/           → CSS, JS, images
