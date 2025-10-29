@@ -43,7 +43,7 @@ Trang web được xây dựng theo **mô hình MVC** trên nền **Spring Boot 
 - Hệ thống bao gồm 2 vai trò chính: **Admin** và **User**.  
 - Cung cấp đầy đủ chức năng thương mại điện tử cơ bản.  
 - Hoạt động trong môi trường thử nghiệm (localhost).  
-- Chưa tích hợp cổng thanh toán thực tế (VNPay, Momo).  
+- Tích hợp cổng thanh toán thực tế (VNPay, Momo).  
 
 ---
 
@@ -76,7 +76,7 @@ Trang web được xây dựng theo **mô hình MVC** trên nền **Spring Boot 
 |-------------|------------|
 | **Backend** | Spring Boot 3, Spring MVC, Spring Data JPA |
 | **Frontend** | Thymeleaf, Bootstrap 5, HTML5, CSS3, JS |
-| **Bảo mật** | Spring Security, JSON Web Token (JWT) |
+| **Bảo mật** | Spring Security |
 | **Realtime** | WebSocket |
 | **Database** | Microsoft SQL Server |
 | **Build Tool** | Maven |
@@ -151,7 +151,7 @@ Florio/
    git clone https://github.com/XuanHuyenDang/LaptrinhWebProject.git
    cd flowerShop
    ```
-2. Tạo database trong SQL Server:  
+2. Tạo database trong SQL Server
 3. Cấu hình file `application.properties` (Mẫu):
    ```
    spring.datasource.url=jdbc:sqlserver://localhost:1433;databaseName=Florio
@@ -183,7 +183,6 @@ Các form được kiểm tra đầu vào kỹ lưỡng và có thông báo lỗ
 
 ## 🔔 Chức năng Realtime & Bảo mật
 - **WebSocket:** hỗ trợ chat trực tuyến giữa khách hàng và admin.  
-- **JWT:** xác thực và phân quyền người dùng qua token.  
 - **Spring Security:** chặn truy cập trái phép, mã hóa mật khẩu, bảo vệ endpoint.  
 - **OTP Email Service:** xác nhận tài khoản qua mã OTP gửi tới email người dùng.  
 
@@ -213,11 +212,10 @@ Các form được kiểm tra đầu vào kỹ lưỡng và có thông báo lỗ
 - Hệ thống bảo mật, dữ liệu thống nhất  
 
 ### Nhược điểm
-- Chưa tích hợp thanh toán thật (VNPay/Momo)  
 - Chưa có mobile app  
 
 ### Hướng phát triển
-- Tích hợp **cổng thanh toán điện tử & API vận chuyển**  
+- Tích hợp **Dịch vụ vận chuyển**  
 - Xây dựng **ứng dụng di động Florio App (Flutter/React Native)**  
 - Cải tiến **Dashboard thống kê bằng Chart.js hoặc Power BI**  
 - Triển khai website thực tế trên **AWS / Azure / VPS Việt Nam**  
