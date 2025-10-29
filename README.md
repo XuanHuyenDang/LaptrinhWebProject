@@ -25,7 +25,7 @@
 Người dùng có thể duyệt sản phẩm, thêm vào giỏ hàng, đặt hoa, thanh toán, chat với cửa hàng và theo dõi đơn hàng của mình.  
 Hệ thống hỗ trợ quản trị viên trong việc quản lý sản phẩm, danh mục, khách hàng, khuyến mãi và thống kê doanh thu.
 
-Trang web được xây dựng theo **mô hình MVC** trên nền **Spring Boot 3**, kết hợp **Thymeleaf**, **Bootstrap 5**, **SQL Server** và **Spring Security + JWT** để đảm bảo an toàn và hiệu năng cao.
+Trang web được xây dựng theo **mô hình MVC** trên nền **Spring Boot 3**, kết hợp **Thymeleaf**, **Bootstrap 5**, **SQL Server** và **Spring Security** để đảm bảo an toàn và hiệu năng cao.
 
 ---
 
